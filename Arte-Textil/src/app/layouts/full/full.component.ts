@@ -1,45 +1,29 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+// componentes
+import { HeaderComponent } from '../../components/header/header.component';
+import { LeftSidebarComponent } from '../../components/left-sidebar/left-sidebar.component';
 
 @Component({
-  selector: 'app-full-layout',
-  templateUrl: './full.component.html',
-  styleUrls: ['./full.component.scss'],
-  imports: [RouterOutlet]
+    selector: 'app-full',
+    standalone: true,
+    templateUrl: './full.component.html',
+    styleUrls: ['./full.component.scss'],
+
+    imports: [
+        HeaderComponent,
+        LeftSidebarComponent,
+        RouterOutlet
+    ]
 })
-export class FullComponent implements OnInit {
-  color = 'blue';
-  showSettings = false;
-  showMinisidebar = false;
-  showDarktheme = false;
-  showRtl = false;
+export class FullComponent {
 
-  public innerWidth: any;
+    constructor() { }
 
-  constructor(public router: Router) { }
+    sidebarClosed = true;
 
-  ngOnInit() {
-    if (this.router.url === '/') {
-      this.router.navigate(['/dashboard/dashboard1']);
+    toggleSidebar() {
+        this.sidebarClosed = !this.sidebarClosed;
     }
-    this.handleLayout();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.handleLayout();
-  }
-
-  toggleSidebar() {
-    this.showMinisidebar = !this.showMinisidebar;
-  }
-
-  handleLayout() {
-    this.innerWidth = window.innerWidth;
-    if (this.innerWidth < 1170) {
-      this.showMinisidebar = true;
-    } else {
-      this.showMinisidebar = false;
-    }
-  }
 }

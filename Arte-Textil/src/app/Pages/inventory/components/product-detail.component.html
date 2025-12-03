@@ -1,0 +1,73 @@
+<div class="modal fade show d-block modal-backdrop-custom" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Detalles del producto</h5>
+                <button type="button" class="btn-close" (click)="onClose()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row gy-3">
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Código:</label>
+                        <p>{{ selectedProduct.code }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Nombre:</label>
+                        <p>{{ selectedProduct.name }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Cantidad disponible:</label>
+                        <p>{{ selectedProduct.qty }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Ubicación:</label>
+                        <p>{{ selectedProduct.location }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Último movimiento:</label>
+                        <p>{{ selectedProduct.lastMovement }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Fecha movimiento:</label>
+                        <p>{{ selectedProduct.date }}</p>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Entradas totales:</label>
+                        <p>{{ selectedProduct.details.entradas }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Salidas totales:</label>
+                        <p>{{ selectedProduct.details.salidas }}</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="fw-semibold">Observaciones:</label>
+                        <p>{{ selectedProduct.details.observaciones }}</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="onClose()">Cerrar</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>

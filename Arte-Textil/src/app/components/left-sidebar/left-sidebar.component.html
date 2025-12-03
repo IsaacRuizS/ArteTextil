@@ -1,0 +1,14 @@
+<div class="sidebar" [class.sidebar-closed]="isClosed">
+
+    <ul class="nav flex-column mt-3">
+
+        @for (item of menu; track item.label) {
+            <li class="nav-item">
+                <a class="nav-link">
+                    {{ item.label }}
+                </a>
+            </li>
+        }
+    </ul>
+
+</div>

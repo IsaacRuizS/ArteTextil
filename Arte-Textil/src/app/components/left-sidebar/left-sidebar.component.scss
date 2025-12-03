@@ -1,0 +1,26 @@
+.sidebar {
+    width: 240px;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    background: #1f2937;
+    padding: 1rem;
+    overflow-y: auto;
+    transition: transform 0.25s ease;
+}
+
+.sidebar.sidebar-closed {
+    transform: translateX(-100%);
+}
+
+.nav-link {
+    color: #d1d5db;
+    padding: 10px 15px;
+    border-radius: 4px;
+
+    &:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+}

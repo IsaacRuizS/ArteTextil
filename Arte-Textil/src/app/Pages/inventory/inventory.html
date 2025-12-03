@@ -1,0 +1,69 @@
+<div class="inventory-wrapper">
+
+    <h2 class="mb-4 fw-bold">Inventario General</h2>
+
+    <!-- FILTRO -->
+    <div class="filter-box mb-4">
+        <label class="form-label fw-semibold">Filtrar por estado</label>
+        <select class="form-select" [(ngModel)]="selectedStatus">
+            @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- LISTADO DE INVENTARIO -->
+    <div class="inventory-table table-responsive">
+
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Ubicación</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @for (p of products; track p.code) {
+                @if (selectedStatus === 'Todos' || p.status === selectedStatus) {
+
+                <tr>
+                    <td>{{ p.code }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.qty }}</td>
+                    <td>{{ p.location }}</td>
+                    <td>{{ p.date }}</td>
+                    <td>
+                        <span class="badge" [class.bg-success]="p.status === 'Disponible'"
+                            [class.bg-danger]="p.status === 'Agotado'" [class.bg-warning]="p.status === 'Dañado'">
+                            {{ p.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" (click)="selectProduct(p)">
+                            Ver detalles
+                        </button>
+                    </td>
+                </tr>
+
+                }
+                }
+
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Modal -->
+    @if (selectedProduct) {
+        <app-product-detail [selectedProduct]="selectedProduct" (onCloseEmmit)="selectedProduct = null"></app-product-detail>
+    }
+
+
+</div>

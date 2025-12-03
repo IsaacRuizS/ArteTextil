@@ -31,14 +31,13 @@ File: scss
 
 .page-wrapper {
   background: $bodycolor;
-  padding-bottom: 60px;
   height: calc(100vh - 64px); 
   position: relative;
     overflow: auto;
 }
 
 .container-fluid {
-  padding: 0 30px 25px 30px;
+  padding: 20px;
 }
 
 
