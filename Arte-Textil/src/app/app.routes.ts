@@ -30,7 +30,14 @@ export const routes: Routes = [
                 path: 'promotions',
                 loadComponent: () => import('./Pages/promotion/promotion.component').then(m => m.PromotionComponent)
             },
-
+            {
+                path: 'analytics',
+                loadComponent: () => import('./Pages/analytics/analytics.component').then(m => m.AnalyticsComponent)
+            },
+            {
+                path: 'customer-analytics',
+                loadComponent: () => import('./Pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
+            },
         ]
     },
     {

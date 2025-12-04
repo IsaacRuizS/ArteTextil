@@ -1,0 +1,31 @@
+.kpi-card {
+    border-radius: 12px;
+    transition: 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+}
+
+@media (min-width: 600px) {
+    .kpi-card {
+        width: 355px !important;
+        height: 120px !important;
+    }
+}
+
+.chart-card {
+    border-radius: 12px;
+}
+
+.chart-placeholder {
+    height: 220px;
+    background: repeating-linear-gradient(
+        45deg,
+        #f0f0f0,
+        #f0f0f0 10px,
+        #e6e6e6 10px,
+        #e6e6e6 20px
+    );
+    border-radius: 10px;
+}

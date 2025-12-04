@@ -1,0 +1,179 @@
+<div class="dashboard-wrapper container-fluid py-4">
+
+    <!-- TÍTULO -->
+    <h2 class="fw-bold mb-4">Dashboard de Cotizaciones y Predicciones</h2>
+
+    <!-- FILTROS -->
+    <div class="filter-box card shadow-sm p-3 mb-4">
+
+        <h5 class="fw-semibold mb-3">Filtros</h5>
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Fecha inicio</label>
+                <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Fecha fin</label>
+                <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Producto</label>
+                <select class="form-select" [(ngModel)]="filtros.producto">
+                    <option value="">Todos</option>
+                    @for (p of productos; track p) {
+                    <option [value]="p">{{ p }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Categoría</label>
+                <select class="form-select" [(ngModel)]="filtros.categoria">
+                    <option value="">Todas</option>
+                    @for (c of categorias; track c) {
+                    <option [value]="c">{{ c }}</option>
+                    }
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Tipo de análisis</label>
+                <select class="form-select" [(ngModel)]="filtros.tipo">
+                    <option value="tendencias">Tendencias</option>
+                    <option value="productos">Productos más cotizados</option>
+                    <option value="prediccion">Predicción demanda</option>
+                </select>
+            </div>
+
+            <div class="col-md-9 d-flex align-items-end justify-content-end gap-2 mt-1">
+                <button class="btn btn-primary">
+                    <i class="mdi mdi-magnify me-1"></i> Aplicar filtros
+                </button>
+
+                <button class="btn btn-secondary">
+                    <i class="mdi mdi-broom me-1"></i> Limpiar
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- TARJETAS RESUMEN -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <h6 class="text-muted">Cotizaciones del período</h6>
+                <h3 class="fw-bold">124</h3>
+                <small class="text-success"><i class="mdi mdi-arrow-up"></i> 12%</small>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <h6 class="text-muted">Producto más cotizado</h6>
+                <h4 class="fw-bold">Camisa Azul</h4>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <h6 class="text-muted">Demanda proyectada</h6>
+                <h3 class="fw-bold">+32%</h3>
+                <small class="text-primary">Próximo trimestre</small>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card kpi-card shadow-sm p-3">
+                <h6 class="text-muted">Tendencia general</h6>
+                <h4 class="fw-bold text-success"><i class="mdi mdi-trending-up"></i> Positiva</h4>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- GRÁFICOS MOCK -->
+    <!-- GRÁFICOS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-6">
+            <div class="card chart-card shadow-sm p-3">
+                <h6 class="fw-semibold">Tendencia de cotizaciones</h6>
+                <canvas #lineChartCanvas></canvas>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card chart-card shadow-sm p-3">
+                <h6 class="fw-semibold">Productos más cotizados</h6>
+                <canvas #barChartCanvas></canvas>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="card chart-card shadow-sm p-3">
+                <h6 class="fw-semibold">Predicción de demanda</h6>
+                <canvas #predictionChartCanvas></canvas>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- TABLA DE COTIZACIONES -->
+    <div class="card shadow-sm p-4 mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-semibold">Listado de cotizaciones</h5>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm">
+                    <i class="mdi mdi-file-pdf"></i> PDF
+                </button>
+                <button class="btn btn-outline-success btn-sm">
+                    <i class="mdi mdi-file-excel"></i> Excel
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="mdi mdi-image"></i> Imagen
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (c of cotizaciones; track c.fecha) {
+                    <tr>
+                        <td>{{ c.fecha }}</td>
+                        <td>{{ c.producto }}</td>
+                        <td>{{ c.qty }}</td>
+                        <td>{{ c.total  | customCurrency:'₡' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>

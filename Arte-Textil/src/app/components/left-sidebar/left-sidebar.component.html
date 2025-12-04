@@ -4,7 +4,7 @@
 
         @for (item of menu; track item.label) {
             <li class="nav-item">
-                <a class="nav-link">
+                <a class="nav-link cursor-pointer" (click)="onOpen(item.link)">
                     {{ item.label }}
                 </a>
             </li>

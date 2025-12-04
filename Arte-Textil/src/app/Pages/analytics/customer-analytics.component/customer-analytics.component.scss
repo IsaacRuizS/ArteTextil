@@ -1,0 +1,30 @@
+.analytics-container {
+    max-width: 1400px;
+    margin: auto;
+}
+
+.metric-card {
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.timeline-item .dot {
+    width: 12px;
+    height: 12px;
+    background: #0d6efd;
+    border-radius: 50%;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f7f7f7;
+}
