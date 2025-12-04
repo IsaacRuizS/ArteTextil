@@ -1,0 +1,17 @@
+.category-container {
+    padding: 20px;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.status-badge {
+    transition: 0.25s ease;
+    user-select: none;
+}
+
+.status-badge:hover {
+    transform: scale(1.06);
+    opacity: 0.9;
+}

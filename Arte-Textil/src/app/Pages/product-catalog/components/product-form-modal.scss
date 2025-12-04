@@ -1,0 +1,19 @@
+.image-preview-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.preview-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.active-material {
+    background: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+}

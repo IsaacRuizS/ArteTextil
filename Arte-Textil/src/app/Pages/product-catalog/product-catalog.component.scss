@@ -1,0 +1,40 @@
+.catalog-container {
+    padding: 20px;
+}
+
+.product-card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+}
+
+@media (min-width: 600px) {
+    .card-body {
+        width: 350px !important;
+        height: 160px !important;
+    }
+}
+
+.product-img {
+    height: 180px;
+    object-fit: contain;
+}
+
+.state-badge {
+    cursor: pointer;
+    user-select: none;
+    transition: 0.2s ease;
+}
+
+.state-badge:hover {
+    opacity: 0.8;
+}
+
+.state-badge:active {
+    transform: scale(0.95);
+}

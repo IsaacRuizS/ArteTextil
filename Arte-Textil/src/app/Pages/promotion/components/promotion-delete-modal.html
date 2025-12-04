@@ -1,0 +1,22 @@
+<div class="modal fade show d-block modal-backdrop-custom" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">Eliminar promoción</h5>
+                <button class="btn-close" (click)="close.emit()"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>¿Seguro que deseas eliminar la promoción <strong>{{ promotion.name }}</strong>?</p>
+                <p class="text-muted small">Esta acción no elimina los datos, solo los oculta del CMS.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="close.emit()">Cancelar</button>
+                <button class="btn btn-danger" (click)="confirm.emit(); close.emit()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>

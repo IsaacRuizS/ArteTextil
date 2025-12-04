@@ -1,0 +1,107 @@
+<div class="catalog-wrapper">
+
+    <!-- TÍTULO -->
+    <h2 class="fw-bold mb-3">Catálogo de Productos</h2>
+
+    <!-- DESCRIPCIÓN -->
+    <p class="text-muted mb-4">
+        Mostrando productos activos disponibles para cotización.
+    </p>
+
+    <!-- ====================== -->
+    <!-- FILTROS -->
+    <!-- ====================== -->
+    <div class="filter-box card p-3 shadow-sm mb-4">
+
+        <div class="row g-3">
+
+            <!-- Categorías -->
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Categoría</label>
+
+                <select class="form-select" [(ngModel)]="selectedCategory">
+                    <option value="Todos">Todas</option>
+                    @for (c of categories; track c) {
+                    <option [value]="c">{{ c }}</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Precio mínimo -->
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Precio mínimo</label>
+                <input type="number" class="form-control" [(ngModel)]="minPrice" placeholder="₡0" min="0">
+            </div>
+
+            <!-- Precio máximo -->
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Precio máximo</label>
+                <input type="number" class="form-control" [(ngModel)]="maxPrice" placeholder="₡50 000" min="0">
+            </div>
+
+            <!-- Solo promociones -->
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" [(ngModel)]="onlyPromotions" id="promoCheck">
+                    <label class="form-check-label" for="promoCheck">
+                        Solo con promoción
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ====================== -->
+    <!-- LISTADO -->
+    <!-- ====================== -->
+    <div class="row g-4">
+
+        @if (filteredProducts.length === 0) {
+        <div class="col-12 text-center text-muted">
+            <p class="mt-4">No hay productos que coincidan con los filtros.</p>
+        </div>
+        }
+
+        @for (p of filteredProducts; track p.id) {
+
+        <div class="col-md-4 col-lg-3" (click)="onOpenProduct(p)">
+            <div class="product-card card shadow-sm">
+
+                <img [src]="p.image" class="card-img-top product-img" />
+
+                <div class="card-body">
+
+                    <h5 class="fw-semibold">{{ p.name }}</h5>
+
+                    <p class="mb-1">
+                        <strong>{{ p.price | customCurrency:'₡' }}</strong>
+                    </p>
+
+                    <!-- Categoría -->
+                    <p class="text-muted small mb-1">
+                        Categoría: {{ p.category }}
+                    </p>
+
+                    <!-- Estado de stock -->
+                    <span class="badge" [class.bg-success]="p.stock > 0" [class.bg-danger]="p.stock === 0">
+                        {{ p.stock > 0 ? 'Disponible' : 'Sin stock' }}
+                    </span>
+
+                    <!-- Promoción -->
+                    @if (p.promotion) {
+                    <div class="mt-2">
+                        <span class="badge bg-warning text-dark">
+                            -{{ p.promotion.percentage }}% hasta {{ p.promotion.until }}
+                        </span>
+                    </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        }
+
+    </div>
+
+</div>

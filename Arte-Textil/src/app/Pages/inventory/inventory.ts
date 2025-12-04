@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductDetailComponent } from './components/product-detail.component';
+import { StatusModalComponent } from './components/status-modal.component';
 
 @Component({
     selector: 'app-inventory',
     standalone: true,
     imports: [
         FormsModule,
-        ProductDetailComponent
+        ProductDetailComponent,
+        StatusModalComponent,
     ],
     templateUrl: './inventory.html',
     styleUrls: ['./inventory.scss']
@@ -38,7 +40,7 @@ export class InventoryComponent {
         {
             code: 'PR-002',
             name: 'Tela Licra Negra',
-            qty: 8,
+            qty: 0,
             location: 'Estante B-1',
             lastMovement: 'Salida',
             date: '2025-02-12',
@@ -52,8 +54,45 @@ export class InventoryComponent {
     ];
 
     selectedProduct: any = null;
+    statusModalProduct: any = null;
+    showLowStockAlert = true;
+
+    get lowStockProducts() {
+
+        const products = this.products.filter(p => p.qty <= 0);
+
+        // Si aparecen productos nuevos, vuelve a mostrar la alerta
+        if (products.length > 0 && this.showLowStockAlert) {
+            this.showLowStockAlert = true;
+        }
+
+        return products;
+    }
+
+    constructor() { }
 
     selectProduct(p: any) {
         this.selectedProduct = p;
+    }
+
+    openStatusModal(product: any) {
+        this.statusModalProduct = {
+            ...product,
+            newStatus: product.status,
+            description: ''
+        };
+    }
+
+    saveStatusChange() {
+
+    }
+
+    onCloseLowStockAlert() {
+        console.log('Cerrando alerta de bajo stock');
+        this.showLowStockAlert = false;
+    }
+
+    onGenerateExcel() {
+        console.log('Generar Excel (solo visual)');
     }
 }

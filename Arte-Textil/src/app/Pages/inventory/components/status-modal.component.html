@@ -1,0 +1,43 @@
+<div class="modal fade show d-block modal-backdrop-custom">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Cambiar estado del producto</h5>
+                <button class="btn-close" (click)="close.emit()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nuevo estado</label>
+                    <select class="form-select" [value]="product.newStatus">
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Descripción del movimiento</label>
+                    <textarea class="form-control" rows="3" placeholder="Ingrese motivo del cambio"
+                        [value]="product.description"></textarea>
+                </div>
+
+                @if (!product.description) {
+                    <div class="alert alert-danger p-2">
+                        Debe ingresar una descripción del movimiento.
+                    </div>
+                }
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="close.emit()">Cancelar</button>
+                <button class="btn btn-primary" [disabled]="!product.description" (click)="save.emit(product)">
+                    Guardar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

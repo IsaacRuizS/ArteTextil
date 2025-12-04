@@ -4,7 +4,7 @@ import { SpinnerComponent } from "./shared/spinner.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SpinnerComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

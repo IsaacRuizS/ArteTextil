@@ -13,9 +13,9 @@ export class LeftSidebarComponent {
     constructor() { }
 
     menu = [
-        { label: 'Dashboard', link: '/dashboard' },
-        { label: 'Clientes', link: '/clientes' },
-        { label: 'Ventas', link: '/ventas' },
-        { label: 'Inventario', link: '/inventario' }
+        { label: 'Inventario', link: '/inventory' },
+        { label: 'Categorías', link: '/categories' },
+        { label: 'Productos', link: '/products' },
+        { label: 'Promociones', link: '/promotions' },
     ];
 }

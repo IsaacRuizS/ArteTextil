@@ -1,9 +1,36 @@
 <div class="inventory-wrapper">
 
-    <h2 class="mb-4 fw-bold">Inventario General</h2>
+    <div class="d-flex justify-content-between mb-4 ">
+        <h2 class="fw-bold">Inventario General</h2>
+        <button class="btn btn-success d-flex align-items-center" (click)="onGenerateExcel()">
+            <i class="mdi mdi-file-excel me-2"></i>
+            Generar Excel
+        </button>
+    </div>
+
+    <!-- ALERTA GENERAL DE STOCK -->
+    @if (lowStockProducts.length > 0 && showLowStockAlert) {
+    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+
+        <strong>¡Alerta de inventario!</strong><br>
+
+        @for (p of lowStockProducts; track p.code) {
+        <div>
+            <i class="mdi mdi-alert-circle-outline me-1"></i>
+            El producto <strong>{{ p.name }}</strong> tiene <strong>{{ p.qty }}</strong> unidades.
+        </div>
+        }
+
+        <button type="button" class="btn-close" aria-label="Close" (click)="onCloseLowStockAlert()"
+            style="top: -8px; right: -3px;">
+        </button>
+
+    </div>
+    }
+
 
     <!-- FILTRO -->
-    <div class="filter-box mb-4">
+    <div class="filter-box flex-grow-1 me-3">
         <label class="form-label fw-semibold">Filtrar por estado</label>
         <select class="form-select" [(ngModel)]="selectedStatus">
             @for (s of statuses; track s) {
@@ -40,10 +67,10 @@
                     <td>{{ p.location }}</td>
                     <td>{{ p.date }}</td>
                     <td>
-                        <span class="badge" [class.bg-success]="p.status === 'Disponible'"
-                            [class.bg-danger]="p.status === 'Agotado'" [class.bg-warning]="p.status === 'Dañado'">
-                            {{ p.status }}
-                        </span>
+                        <button class="btn btn-link p-0" (click)="openStatusModal(p)" title="Cambiar estado">
+                            <i class="mdi" [class.mdi-eye]="p.status === 'Activo'"
+                                [class.mdi-eye-off]="p.status !== 'Activo'"></i>
+                        </button>
                     </td>
                     <td>
                         <button class="btn btn-primary btn-sm" (click)="selectProduct(p)">
@@ -62,8 +89,13 @@
 
     <!-- Modal -->
     @if (selectedProduct) {
-        <app-product-detail [selectedProduct]="selectedProduct" (onCloseEmmit)="selectedProduct = null"></app-product-detail>
+    <app-product-detail [selectedProduct]="selectedProduct"
+        (onCloseEmmit)="selectedProduct = null"></app-product-detail>
     }
 
+    @if (statusModalProduct) {
+    <app-status-modal [product]="statusModalProduct" (close)="statusModalProduct = null" (save)="saveStatusChange()">
+    </app-status-modal>
+    }
 
 </div>

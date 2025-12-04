@@ -1,0 +1,20 @@
+#main-wrapper {
+    display: flex;
+}
+
+.content-area {
+    margin-left: 240px;
+    padding: 20px;
+    width: calc(100% - 240px);
+    transition: margin-left 0.25s ease, width 0.25s ease;
+
+    @media (max-width: 992px) {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+.content-area.sidebar-closed {
+    margin-left: 0;
+    width: 100%;
+}

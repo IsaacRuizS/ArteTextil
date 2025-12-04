@@ -1,0 +1,48 @@
+<div class="modal fade show d-block modal-backdrop-custom" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">{{ title }}</h5>
+                <button class="btn-close" (click)="close.emit()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                @if (errorMsg) {
+                <div class="alert alert-danger">{{ errorMsg }}</div>
+                }
+
+                <label class="form-label fw-semibold">Nombre *</label>
+                <input class="form-control mb-3" [(ngModel)]="form.name">
+
+                <label class="form-label fw-semibold">Producto *</label>
+                <select class="form-select mb-3" [(ngModel)]="form.productId">
+                    <option value="">Seleccione</option>
+                    @for (p of products; track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                    }
+                </select>
+
+                <label class="form-label fw-semibold">Descuento (%) *</label>
+                <input type="number" class="form-control mb-3" [(ngModel)]="form.percent">
+
+                <label class="form-label fw-semibold">Fecha inicio *</label>
+                <input type="date" class="form-control mb-3" [(ngModel)]="form.start">
+
+                <label class="form-label fw-semibold">Fecha fin *</label>
+                <input type="date" class="form-control mb-3" [(ngModel)]="form.end">
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" (click)="close.emit()">Cancelar</button>
+                <button class="btn btn-primary" (click)="save()">
+                    {{ promotion ? 'Guardar cambios' : 'Crear promoción' }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

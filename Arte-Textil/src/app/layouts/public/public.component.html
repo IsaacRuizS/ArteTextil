@@ -1,0 +1,8 @@
+
+<app-public-header (toggleSidebar)="toggleSidebar()"></app-public-header>
+
+<div id="main-wrapper">
+    <div class="content-area" [class.sidebar-closed]="sidebarClosed">
+        <router-outlet></router-outlet>
+    </div>
+</div>

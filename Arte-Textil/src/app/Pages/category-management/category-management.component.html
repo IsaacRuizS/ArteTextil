@@ -1,0 +1,77 @@
+<div class="category-container">
+
+    <h2 class="fw-bold mb-3">Gestión de Categorías</h2>
+
+    <p class="text-muted">Cree nuevas categorías para asignarlas a productos.</p>
+
+    <!-- FORMULARIO -->
+    <div class="card p-4 mb-4 shadow-sm">
+
+        <h5 class="mb-3">Crear nueva categoría</h5>
+
+        @if (errorMsg) {
+        <div class="alert alert-danger">{{ errorMsg }}</div>
+        }
+
+        @if (successMsg) {
+        <div class="alert alert-success">{{ successMsg }}</div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de categoría</label>
+            <input type="text" class="form-control" [(ngModel)]="newCategory"
+                placeholder="Ej: Camisas, Pantalones, etc.">
+        </div>
+
+        <button class="btn btn-primary" (click)="createCategory()">
+            Crear categoría
+        </button>
+
+    </div>
+
+    <!-- FILTRO -->
+    <div class="filter-box flex-grow-1 mb-4">
+        <label class="form-label fw-semibold">Filtrar por estado</label>
+        <select class="form-select" [(ngModel)]="selectedStatus">
+            <option [value]="0">Todos</option>
+            <option [value]="1">Activo</option>
+            <option [value]="2">Inactivo</option>
+        </select>
+    </div>
+
+    <!-- LISTADO -->
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Categorías existentes</h5>
+
+        @if (categories.length === 0) {
+        <p class="text-muted">No hay categorías registradas.</p>
+        }
+
+        <ul class="list-group">
+
+            @for (c of categories; track c.name) {
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                {{ c.name }}
+
+                <span class="badge status-badge px-3 py-2" [class.bg-success]="c.active"
+                    [class.bg-secondary]="!c.active" (click)="toggleActive(c)" style="cursor: pointer;"
+                    title="Activar / Desactivar categoría">
+
+                    @if (c.active) {
+                    Activa
+                    } @else {
+                    Inactiva
+                    }
+
+                </span>
+
+            </li>
+
+            }
+
+        </ul>
+    </div>
+
+</div>
