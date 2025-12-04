@@ -1,0 +1,33 @@
+.carrito-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+.qty-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .qty {
+        font-weight: 600;
+        width: 30px;
+        text-align: center;
+    }
+
+    button {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+    }
+}
+
+.total-box {
+    background: #fafafa;
+}

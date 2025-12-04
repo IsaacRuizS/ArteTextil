@@ -45,6 +45,16 @@ export const routes: Routes = [
             {
                 path: 'product/:id',
                 loadComponent: () => import('./Pages/marketplace/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+            },
+            {
+                path: 'cart',
+                loadComponent: () => import('./Pages/marketplace/cart/cart.component').then(m => m.CartComponent)
+            },
+            {
+                path: 'quoate',
+                loadComponent: () =>
+                    import('./Pages/marketplace/quote/quote.component')
+                    .then(m => m.QuoteComponent)
             }
 
         ]

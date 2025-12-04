@@ -1,0 +1,85 @@
+<div class="cotizacion-container">
+    <div class="mb-3">
+        <button class="btn btn-outline-secondary" type="button" (click)="goBack()">
+            ← Regresar
+        </button>
+    </div>
+    <h2 class="fw-bold mb-4">Enviar cotización</h2>
+
+    <!-- MENSAJES -->
+    @if (errorMsg) {
+    <div class="alert alert-danger">{{ errorMsg }}</div>
+    }
+
+    @if (successMsg) {
+    <div class="alert alert-success">{{ successMsg }}</div>
+    }
+
+
+    <div class="row g-4">
+
+        <!-- FORMULARIO -->
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm p-4">
+
+                <h5 class="fw-semibold mb-3">Información del cliente</h5>
+
+                <!-- Nombre -->
+                <label class="form-label fw-semibold">Nombre completo *</label>
+                <input type="text" class="form-control mb-3" [(ngModel)]="form.nombre">
+
+                <!-- Correo -->
+                <label class="form-label fw-semibold">Correo electrónico *</label>
+                <input type="email" class="form-control mb-3" [(ngModel)]="form.correo">
+
+                <!-- WhatsApp -->
+                <label class="form-label fw-semibold">Número de WhatsApp (opcional)</label>
+                <input type="text" class="form-control mb-3" 
+                    [(ngModel)]="form.whatsapp">
+
+                <!-- Mensaje -->
+                <label class="form-label fw-semibold">Mensaje *</label>
+                <textarea class="form-control mb-3" rows="4" [(ngModel)]="form.mensaje"></textarea>
+
+                <button class="btn btn-primary btn-lg mt-2" (click)="enviar()">
+                    Enviar cotización
+                </button>
+
+            </div>
+        </div>
+
+        <!-- RESUMEN DEL CARRITO -->
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm p-4">
+
+                <h5 class="fw-semibold mb-3">Resumen de la cotización</h5>
+
+                @if (cart.length === 0) {
+                <p class="text-muted">No hay productos en el carrito.</p>
+                }
+
+                @for (item of cart; track item.id) {
+                <div class="cart-item d-flex justify-content-between mb-2">
+                    <span>{{ item.qty }}x {{ item.name }}</span>
+                    <strong>{{ (item.qty * item.price) | customCurrency:'₡' }}</strong>
+                </div>
+                }
+
+                <hr class="my-3">
+
+                <div class="d-flex justify-content-between">
+                    <strong>Total:</strong>
+                    <strong class="text-primary">
+                        {{ total | customCurrency:'₡' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

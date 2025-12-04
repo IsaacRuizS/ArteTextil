@@ -7,6 +7,8 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class PublicHeaderComponent {
 
+    cartCount = 3; 
+
     constructor() { 
     }
 
@@ -15,5 +17,10 @@ export class PublicHeaderComponent {
     onToggleSidebar() {
 
         this.toggleSidebar.emit();
+    }
+
+    onOpenCart(){
+        console.log('Abrir carrito de compras');
+        window.location.href = '/cart';
     }
 }

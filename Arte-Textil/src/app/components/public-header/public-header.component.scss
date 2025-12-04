@@ -1,3 +1,15 @@
 .navbar {
     height: 60px;
 }
+
+.cart-icon {
+    cursor: pointer;
+}
+
+.cart-badge {
+    font-size: 11px;
+    top: -4px;
+    right: -10px;
+    padding: 3px 6px;
+    border-radius: 50%;
+}

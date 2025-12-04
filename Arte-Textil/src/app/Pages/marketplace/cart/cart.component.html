@@ -1,0 +1,115 @@
+<div class="carrito-container">
+
+    <h2 class="fw-bold mb-4">Carrito de Cotización</h2>
+
+    <!-- ALERTA GENERAL -->
+    @if (alertMsg) {
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Atención:</strong> {{ alertMsg }}
+        <button type="button" class="btn-close" (click)="closeAlert()"></button>
+    </div>
+    }
+
+    <!-- CARRITO VACÍO -->
+    @if (cart.length === 0) {
+    <div class="text-center mt-5">
+        <h4 class="text-muted">Tu carrito está vacío</h4>
+        <a routerLink="/catalogo" class="btn btn-primary mt-3">Ir al catálogo</a>
+    </div>
+    }
+
+    <!-- LISTADO DEL CARRITO -->
+    @if (cart.length > 0) {
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @for (item of cart; track item.id) {
+
+                <tr>
+                    <td width="35%">
+                        <div class="d-flex gap-3 align-items-center">
+                            <img [src]="item.image" class="thumb">
+
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ item.name }}</h6>
+
+                                @if (item.stock === 0) {
+                                <span class="badge bg-danger">Sin stock</span>
+                                }
+
+                                @if (item.promotion) {
+                                <span class="badge bg-success ms-2">
+                                    -{{ item.promotion.percentage }}%
+                                </span>
+                                }
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <strong>{{ item.price | customCurrency:'₡' }}</strong>
+                    </td>
+
+                    <td width="180">
+                        <div class="qty-box">
+
+                            <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">-</button>
+
+                            <span class="qty">{{ item.qty }}</span>
+
+                            <button class="btn btn-light btn-sm" (click)="increaseQty(item)">+</button>
+                        </div>
+
+                        @if (item.qty > item.stock) {
+                        <small class="text-danger">Stock insuficiente</small>
+                        }
+                    </td>
+
+                    <td>
+                        <strong>{{ getSubtotal(item) | customCurrency:'₡' }}</strong>
+                    </td>
+
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="total-box mt-4 p-3 shadow-sm rounded d-flex justify-content-end">
+        <h4>Total: <strong>{{ total | customCurrency:'₡' }}</strong></h4>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="d-flex justify-content-between mt-4">
+
+        <a routerLink="/marketplace" class="btn btn-outline-secondary">
+            Seguir viendo productos
+        </a>
+
+        <a routerLink="/quoate" class="btn btn-primary">
+            Continuar a cotización
+        </a>
+
+    </div>
+
+    }
+
+</div>

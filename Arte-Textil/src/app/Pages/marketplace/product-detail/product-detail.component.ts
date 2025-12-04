@@ -65,7 +65,7 @@ export class ProductDetailComponent {
     }
 
     addToCart() {
-        alert(`Agregado al carrito: ${this.qty} unidades de ${this.product.name}`);
+        window.location.href = '/cart';
     }
 
     onBackToMarketplace(){
