@@ -52,7 +52,6 @@ export const routes: Routes = [
                 loadComponent: () => import('./Pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
             },
             {
-<<<<<<< Updated upstream
                 path: 'dashboard',
                 loadComponent: () => import('./Pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
             },
@@ -63,7 +62,8 @@ export const routes: Routes = [
             {
                 path: 'orders-management',
                 loadComponent: () => import('./Pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent)
-=======
+            },
+            {
                 path: 'admin/roles',
                 loadComponent: () => import('./Pages/admin/roles/roles.component').then(m => m.RolesComponent)
             },
@@ -78,9 +78,18 @@ export const routes: Routes = [
             {
                 path: 'admin/products',
                 loadComponent: () => import('./Pages/admin/products/products.component').then(m => m.ProductsComponent)
->>>>>>> Stashed changes
             },
 
+            {
+                path: 'production',
+                loadComponent: () => import('./Pages/production/production-layout.component').then(m => m.ProductionLayoutComponent),
+                children: [
+                    { path: '', redirectTo: 'tracking', pathMatch: 'full' },
+                    { path: 'tracking', loadComponent: () => import('./Pages/production/tracking/production-tracking.component').then(m => m.ProductionTrackingComponent) },
+                    { path: 'control', loadComponent: () => import('./Pages/production/control/order-control.component').then(m => m.OrderControlComponent) },
+                    { path: 'reports', loadComponent: () => import('./Pages/production/reports/production-reports.component').then(m => m.ProductionReportsComponent) }
+                ]
+            }
         ]
     },
     {

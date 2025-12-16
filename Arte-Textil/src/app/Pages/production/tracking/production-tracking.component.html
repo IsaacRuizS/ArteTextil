@@ -1,0 +1,50 @@
+<div class="tracking-container">
+    <h2 class="text-xl font-bold mb-6 text-gray-800">Mi Tablero de Producción</h2>
+
+    <div class="kanban-board grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div *ngFor="let stage of stages"
+            class="kanban-column bg-white rounded-lg shadow-sm border border-gray-100 flex flex-col h-full">
+            <div class="column-header p-4 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+                <h3 class="font-bold text-gray-700 flex justify-between items-center">
+                    {{ stage.Name }}
+                    <span class="badge bg-white text-gray-600 px-2 py-0.5 rounded shadow-sm text-xs border">
+                        {{ getProgressByStage(stage.StageId).length }}
+                    </span>
+                </h3>
+            </div>
+
+            <div class="column-content p-4 space-y-3 flex-1 overflow-y-auto max-h-[600px]">
+                <ng-container *ngFor="let progress of getProgressByStage(stage.StageId)">
+                    <div *ngIf="getOrderInfo(progress.ProductionOrderId) as order"
+                        class="kanban-card p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group"
+                        (click)="openProgressModal(progress)">
+
+                        <div class="card-header flex justify-between items-start mb-2">
+                            <span class="font-bold text-blue-600">#{{ order.ProductionOrderId }}</span>
+                            <span *ngIf="order.Status === 'En producción'" class="w-2 h-2 rounded-full bg-green-500"
+                                title="Activo"></span>
+                        </div>
+
+                        <p class="text-sm font-medium text-gray-800 mb-1">{{ order.Product?.Name }}</p>
+                        <p class="text-xs text-gray-500 mb-2">Cant: {{ order.QuantityRequired }}</p>
+
+                        <div class="card-footer pt-2 border-t border-gray-50 flex justify-between items-center">
+                            <span class="text-xs" [ngClass]="getStatusColor(progress.Status)">{{ progress.Status
+                                }}</span>
+                            <span class="text-xs text-gray-400">{{ order.DueDate | date:'dd/MM' }}</span>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div *ngIf="getProgressByStage(stage.StageId).length === 0"
+                    class="empty-state text-center py-8 text-gray-400 text-sm">
+                    No hay asignaciones
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <app-shared-modals [isOpen]="modalConfig.isOpen" [title]="modalConfig.title" [modalType]="modalConfig.type"
+        [data]="modalConfig.data" (closeEvent)="closeModal()"
+        (submitEvent)="handleModalSubmit($event)"></app-shared-modals>
+</div>

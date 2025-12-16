@@ -1,0 +1,91 @@
+<div class="control-container">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h2 class="text-xl font-bold text-gray-800">Control de Pedidos</h2>
+
+        <div class="actions flex gap-3">
+            <button (click)="openFilterModal()"
+                class="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+                    </path>
+                </svg>
+                Filtrar
+            </button>
+            <div *ngIf="alerts.length > 0"
+                class="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-100 font-medium animate-pulse">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+                {{ alerts.length }} Alertas
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedido
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stages &
+                        Asignaciones</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Vencimiento</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado
+                        Global</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let order of filteredOrders()" [class.bg-red-50]="isOrderDelayed(order)"
+                    class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#{{ order.ProductionOrderId
+                        }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ order.Product?.Name }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-2">
+                            <ng-container *ngFor="let p of getProgressList(order.ProductionOrderId)">
+                                <div class="text-xs px-2 py-1 rounded border flex items-center gap-1 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition"
+                                    [ngClass]="{'bg-green-100 border-green-200 text-green-800': p.Status === 'Finalizado', 'bg-gray-50 border-gray-200 text-gray-500': p.Status === 'Pendiente', 'bg-blue-50 border-blue-200 text-blue-700': p.Status === 'En progreso'}"
+                                    title="Click para asignar" (click)="openAssignmentModal(p)">
+                                    <span class="font-semibold">{{ p.StageName?.substring(0,3) }}:</span>
+                                    <span>{{ p.EmployeeName || 'N/A' }}</span>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <div class="flex items-center gap-1"
+                            [ngClass]="isOrderDelayed(order) ? 'text-red-600 font-bold' : 'text-gray-600'">
+                            <svg *ngIf="isOrderDelayed(order)" class="w-4 h-4" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ order.DueDate | date:'dd/MM/yyyy' }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            [ngClass]="{'bg-green-100 text-green-800': order.Status === 'Finalizado', 'bg-yellow-100 text-yellow-800': order.Status === 'En producción', 'bg-gray-100 text-gray-800': order.Status === 'Pendiente'}">
+                            {{ order.Status }}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <app-shared-modals [isOpen]="modalConfig.isOpen" [title]="modalConfig.title" [modalType]="modalConfig.type"
+        [data]="modalConfig.data" (closeEvent)="closeModal()"
+        (submitEvent)="handleModalSubmit($event)"></app-shared-modals>
+</div>

@@ -18,11 +18,10 @@ export class LeftSidebarComponent {
         { label: 'Analítica', link: '/analytics' },
         { label: 'Analítica Clientes', link: '/customer-analytics' },
         { label: 'Marketplace', link: '/marketplace' },
-<<<<<<< Updated upstream
         { label: 'Dashboard', link: '/dashboard' },
         { label: 'Pedidos', link: '/orders-management' },
         { label: 'Reportes', link: '/reports' },
-=======
+        { label: 'Producción', link: '/production' },
 
         {
             label: 'Administración General',
@@ -43,7 +42,6 @@ export class LeftSidebarComponent {
                 { label: 'Planillas', link: '/hr/payroll' }
             ]
         }
->>>>>>> Stashed changes
     ];
 
     constructor() { }

@@ -1,0 +1,30 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.btn-primary {
+    @apply bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition font-medium;
+}
+
+.btn-success {
+    @apply bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition font-medium;
+}
+
+.btn-dark {
+    @apply bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-900 transition font-medium;
+}
+
+.btn-danger {
+    @apply bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition font-medium;
+}
+
+.btn-outline {
+    @apply border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-50 transition font-medium;
+}
