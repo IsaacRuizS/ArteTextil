@@ -1,0 +1,32 @@
+.dash-container {
+  padding: 20px;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.kpi-card {
+  min-height: 120px;
+}
+
+.kpi-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 999px;
+}
+
+.progress-bar {
+  border-radius: 999px;
+}
+
+.area-item {
+  .progress {
+    margin-top: 6px;
+  }
+}

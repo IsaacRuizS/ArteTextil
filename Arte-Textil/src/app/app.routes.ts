@@ -38,6 +38,19 @@ export const routes: Routes = [
                 path: 'customer-analytics',
                 loadComponent: () => import('./Pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
             },
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./Pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            },
+            {
+                path: 'reports',
+                loadComponent: () => import('./Pages/reports/reports.component').then(m => m.ReportsComponent)
+            },
+            {
+                path: 'orders-management',
+                loadComponent: () => import('./Pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent)
+            },
+
         ]
     },
     {

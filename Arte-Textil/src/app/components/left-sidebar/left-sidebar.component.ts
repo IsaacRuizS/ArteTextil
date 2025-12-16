@@ -18,6 +18,9 @@ export class LeftSidebarComponent {
         { label: 'Analítica', link: '/analytics' },
         { label: 'Analítica Clientes', link: '/customer-analytics' },
         { label: 'Marketplace', link: '/marketplace' },
+        { label: 'Dashboard', link: '/dashboard' },
+        { label: 'Pedidos', link: '/orders-management' },
+        { label: 'Reportes', link: '/reports' },
     ];
 
     constructor() { }

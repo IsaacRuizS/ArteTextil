@@ -1,0 +1,26 @@
+.reports-container {
+  padding: 20px;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.export-box {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 300px;
+}
+
+.mini-card {
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  background: #fff;
+  transition: 0.2s ease;
+}
+
+.mini-card:hover {
+  transform: translateY(-2px);
+}

@@ -1,0 +1,243 @@
+<div class="dash-container">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2 mb-3">
+    <div>
+      <h2 class="fw-bold mb-1">Dashboard</h2>
+      <p class="text-muted mb-0">Visión general, producción y alertas del negocio.</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-light text-dark border">
+        Última actualización: {{ lastUpdateLabel }}
+      </span>
+      <span class="badge bg-primary">Tiempo real</span>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card p-3 p-md-4 shadow-sm mb-4">
+    <h5 class="mb-3">Filtros</h5>
+
+    <div class="row g-3">
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-semibold">Desde</label>
+        <input type="date" class="form-control" [(ngModel)]="filter.from">
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-semibold">Hasta</label>
+        <input type="date" class="form-control" [(ngModel)]="filter.to">
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-semibold">Categoría</label>
+        <select class="form-select" [(ngModel)]="filter.category">
+          @for (c of categories; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label fw-semibold">Estado de pedido</label>
+        <select class="form-select" [(ngModel)]="filter.status">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <button class="btn btn-primary" type="button">
+        Aplicar filtros
+      </button>
+      <button class="btn btn-outline-secondary" type="button">
+        Limpiar
+      </button>
+      <small class="text-muted align-self-center">
+      </small>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card kpi-card shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="text-muted">Pedidos activos</div>
+            <div class="kpi-value">{{ kpis.activeOrders }}</div>
+          </div>
+          <span class="badge bg-primary">Activo</span>
+        </div>
+        <div class="text-muted small mt-2">Órdenes en proceso actualmente.</div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card kpi-card shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="text-muted">Pedidos finalizados</div>
+            <div class="kpi-value">{{ kpis.finishedOrders }}</div>
+          </div>
+          <span class="badge bg-success">Finalizado</span>
+        </div>
+        <div class="text-muted small mt-2">Completados en el rango filtrado.</div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card kpi-card shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="text-muted">Stock disponible</div>
+            <div class="kpi-value">{{ kpis.stockAvailable }}</div>
+          </div>
+          <span class="badge bg-warning text-dark">Inventario</span>
+        </div>
+        <div class="text-muted small mt-2">Unidades listas para producción.</div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card kpi-card shadow-sm p-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="text-muted">Ventas totales</div>
+            <div class="kpi-value">₡ {{ kpis.totalSales | number }}</div>
+          </div>
+          <span class="badge bg-dark">Ventas</span>
+        </div>
+        <div class="text-muted small mt-2">Total acumulado.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCCIÓN + ALERTAS -->
+  <div class="row g-3 mb-4">
+    <!-- Producción en curso -->
+    <div class="col-12 col-lg-7">
+      <div class="card p-3 p-md-4 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Producción en curso</h5>
+          <span class="badge bg-light text-dark border">Etapas</span>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+          @for (st of productionStages; track st.name) {
+            <div>
+              <div class="d-flex justify-content-between">
+                <div class="fw-semibold">{{ st.name }}</div>
+                <div class="text-muted small">{{ st.active }} / {{ st.total }}</div>
+              </div>
+              <div class="progress" role="progressbar" aria-label="stage-progress">
+                <div class="progress-bar" [style.width.%]="(st.active / st.total) * 100"></div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="text-muted small mt-3">
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertas -->
+    <div class="col-12 col-lg-5">
+      <div class="card p-3 p-md-4 shadow-sm h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Alertas</h5>
+          <span class="badge bg-danger">Prioridad</span>
+        </div>
+
+        @if (alerts.length === 0) {
+          <p class="text-muted mb-0">No hay alertas por mostrar.</p>
+        } @else {
+          <div class="d-flex flex-column gap-2">
+            @for (a of alerts; track a.title) {
+              <div class="alert alert-{{ a.type }} mb-0">
+                <div class="d-flex justify-content-between">
+                  <div class="fw-semibold">{{ a.title }}</div>
+                  <div class="small text-muted">{{ a.time }}</div>
+                </div>
+                <div class="small">{{ a.detail }}</div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="text-muted small mt-3">
+          * Aquí luego podrás “notificar cambios recientes” en tiempo real.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTIVIDAD -->
+  <div class="row g-3">
+    <!-- Por empleado -->
+    <div class="col-12 col-xl-7">
+      <div class="card p-3 p-md-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Productividad por empleado</h5>
+          <span class="badge bg-light text-dark border">Resumen</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Área</th>
+                <th class="text-end">Unidades</th>
+                <th class="text-end">Eficiencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of productivityByEmployee; track p.name) {
+                <tr>
+                  <td class="fw-semibold">{{ p.name }}</td>
+                  <td><span class="badge bg-secondary">{{ p.area }}</span></td>
+                  <td class="text-end">{{ p.units }}</td>
+                  <td class="text-end">
+                    <span class="badge bg-success">{{ p.efficiency }}%</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Por área -->
+    <div class="col-12 col-xl-5">
+      <div class="card p-3 p-md-4 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Productividad por área</h5>
+          <span class="badge bg-light text-dark border">Áreas</span>
+        </div>
+
+        <div class="d-flex flex-column gap-3">
+          @for (a of productivityByArea; track a.area) {
+            <div class="area-item">
+              <div class="d-flex justify-content-between">
+                <div class="fw-semibold">{{ a.area }}</div>
+                <div class="text-muted small">{{ a.units }} u · {{ a.efficiency }}%</div>
+              </div>
+              <div class="progress" role="progressbar" aria-label="area-progress">
+                <div class="progress-bar" [style.width.%]="a.efficiency"></div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="text-muted small mt-3">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
