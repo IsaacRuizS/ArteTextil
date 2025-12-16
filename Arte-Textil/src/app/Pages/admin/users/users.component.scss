@@ -1,0 +1,13 @@
+.users-wrapper {
+    padding: 1rem;
+}
+
+// Ensure modal backdrop covers everything correctly if needed
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.5); // Fallback overlay if backdrop behaves weirdly
+}

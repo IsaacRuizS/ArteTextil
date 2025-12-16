@@ -1,0 +1,96 @@
+<div class="hr-wrapper p-4">
+
+    <!-- ROLE SWITCHER -->
+    <div class="mb-3 p-2 bg-light border rounded d-inline-flex gap-2 align-items-center">
+        <small class="text-muted fw-bold">Simular Rol:</small>
+        <div class="btn-group btn-group-sm">
+            <button class="btn" [class.btn-primary]="currentRole==='Admin'"
+                [class.btn-outline-primary]="currentRole!=='Admin'" (click)="switchRole('Admin')">Admin</button>
+            <button class="btn" [class.btn-primary]="currentRole==='Collab'"
+                [class.btn-outline-primary]="currentRole!=='Collab'" (click)="switchRole('Collab')">Colaborador</button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Planillas y Pagos</h2>
+        @if(currentRole === 'Admin') {
+        <button class="btn btn-success" (click)="notifyPayment()">
+            <i class="mdi mdi-email-multiple-outline me-1"></i>Notificar Pagos
+        </button>
+        }
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Periodo</th>
+                        <th>Colaborador</th>
+                        <th class="text-end">Salario Base</th>
+                        <th class="text-end text-danger">Deducciones</th>
+                        <th class="text-end text-success">Bonificaciones</th>
+                        <th class="text-end fw-bold">Pago Neto</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of payrolls; track p.id) {
+                    <tr>
+                        <td class="ps-4 text-muted small">{{ p.period }}</td>
+                        <td class="fw-bold">{{ p.userName }}</td>
+                        <td class="text-end">₡{{ p.baseSalary | number }}</td>
+                        <td class="text-end text-danger">-₡{{ p.deductions | number }}</td>
+                        <td class="text-end text-success">+₡{{ p.bonuses | number }}</td>
+                        <td class="text-end fw-bold">₡{{ p.netPay | number }}</td>
+                        <td class="text-center">
+                            @if(currentRole === 'Admin') {
+                            <button class="btn btn-sm btn-light text-primary" (click)="openAdjustModal(p)">
+                                <i class="mdi mdi-pencil"></i> Ajustar
+                            </button>
+                            } @else {
+                            <button class="btn btn-sm btn-light text-secondary" (click)="downloadStub(p)">
+                                <i class="mdi mdi-download"></i> PDF
+                            </button>
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ADJUST MODAL -->
+@if(showAdjustModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Ajustes de Planilla</h5>
+                <button type="button" class="btn-close" (click)="showAdjustModal=false"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="adjustForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-danger">Deducciones Totales</label>
+                        <input type="number" class="form-control" formControlName="deductions">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-success">Bonificaciones / Horas Extra</label>
+                        <input type="number" class="form-control" formControlName="bonuses">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button class="btn btn-light" (click)="showAdjustModal=false">Cancelar</button>
+                <button class="btn btn-primary" (click)="saveAdjustment()">Aplicar Ajustes</button>
+            </div>
+        </div>
+    </div>
+</div>
+}

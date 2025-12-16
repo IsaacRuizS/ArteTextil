@@ -9,7 +9,20 @@ export const routes: Routes = [
         path: '',
         component: FullComponent,
         children: [
-            //route to load the componenth and inside the comp load the html and scss 
+            // HR Routes
+            {
+                path: 'hr/attendance',
+                loadComponent: () => import('./Pages/hr/attendance/attendance.component').then(m => m.AttendanceComponent)
+            },
+            {
+                path: 'hr/vacations',
+                loadComponent: () => import('./Pages/hr/vacations/vacations.component').then(m => m.VacationsComponent)
+            },
+            {
+                path: 'hr/payroll',
+                loadComponent: () => import('./Pages/hr/payroll/payroll.component').then(m => m.PayrollComponent)
+            },
+            // Existing Routes
             {
                 path: 'inventory',
                 loadComponent: () => import('./Pages/inventory/inventory').then(m => m.InventoryComponent)
@@ -39,6 +52,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./Pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
             },
             {
+<<<<<<< Updated upstream
                 path: 'dashboard',
                 loadComponent: () => import('./Pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
             },
@@ -49,6 +63,22 @@ export const routes: Routes = [
             {
                 path: 'orders-management',
                 loadComponent: () => import('./Pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent)
+=======
+                path: 'admin/roles',
+                loadComponent: () => import('./Pages/admin/roles/roles.component').then(m => m.RolesComponent)
+            },
+            {
+                path: 'admin/users',
+                loadComponent: () => import('./Pages/admin/users/users.component').then(m => m.UsersComponent)
+            },
+            {
+                path: 'admin/suppliers',
+                loadComponent: () => import('./Pages/admin/suppliers/suppliers.component').then(m => m.SuppliersComponent)
+            },
+            {
+                path: 'admin/products',
+                loadComponent: () => import('./Pages/admin/products/products.component').then(m => m.ProductsComponent)
+>>>>>>> Stashed changes
             },
 
         ]
@@ -74,7 +104,7 @@ export const routes: Routes = [
                 path: 'quoate',
                 loadComponent: () =>
                     import('./Pages/marketplace/quote/quote.component')
-                    .then(m => m.QuoteComponent)
+                        .then(m => m.QuoteComponent)
             }
 
         ]
