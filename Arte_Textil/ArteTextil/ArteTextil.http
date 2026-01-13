@@ -1,0 +1,6 @@
+@ArteTextil_HostAddress = http://localhost:5045
+
+GET {{ArteTextil_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

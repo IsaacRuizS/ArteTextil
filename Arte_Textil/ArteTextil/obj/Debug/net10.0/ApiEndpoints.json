@@ -1,0 +1,12 @@
+[
+  {
+    "ContainingType": "ArteTextil.Controllers.SaludoController",
+    "Method": "ObtenerSaludo",
+    "RelativePath": "api/Saludo/hola",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]
