@@ -1,0 +1,97 @@
+# Frontend gitignore
+
+
+# Backend gitignore
+
+# =========================
+# Build results
+# =========================
+bin/
+obj/
+out/
+
+# =========================
+# .NET artifacts
+# =========================
+*.dll
+*.exe
+*.pdb
+*.cache
+*.deps.json
+*.runtimeconfig.json
+
+# =========================
+# User-specific files
+# =========================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# IDEs / Editors
+# =========================
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Rider
+# =========================
+.idea/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Test results
+# =========================
+TestResults/
+coverage/
+coverage.xml
+coverage.json
+
+# =========================
+# NuGet
+# =========================
+.nuget/
+packages/
+*.nupkg
+project.lock.json
+
+# =========================
+# ASP.NET Core
+# =========================
+appsettings.Development.json
+appsettings.Local.json
+
+# =========================
+# Environment variables
+# =========================
+.env
+
+# =========================
+# Publish output
+# =========================
+publish/
+
+# =========================
+# EF Core
+# =========================
+Migrations/*.csproj.user
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
