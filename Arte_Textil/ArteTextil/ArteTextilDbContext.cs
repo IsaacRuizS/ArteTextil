@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using ArteTextil.Entities;
 
-namespace ArteTextil.Models;
+namespace ArteTextil;
 
 public class ArteTextilDbContext : DbContext
 {
@@ -11,7 +11,6 @@ public class ArteTextilDbContext : DbContext
     {
     }
 
-    // Ejemplo de tablas
     public DbSet<Rol> Roles { get; set; }
     // public DbSet<Usuario> Usuarios { get; set; }
 }

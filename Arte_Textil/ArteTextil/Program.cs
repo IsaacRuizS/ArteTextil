@@ -1,6 +1,8 @@
+using ArteTextil;
+using ArteTextil.Business;
+using ArteTextil.Helpers;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-using ArteTextil.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,20 +12,32 @@ var server = Env.GetString("DB_SERVER");
 var database = Env.GetString("DB_NAME");
 var user = Env.GetString("DB_USER");
 var password = Env.GetString("DB_PASSWORD");
-var trustCert = Env.GetString("DB_TRUST_CERT");
 
 var connectionString =
     $"Server={server};" +
     $"Database={database};" +
     $"User Id={user};" +
-    $"Password={password};";
+    $"Password={password};" +
+    $"TrustServerCertificate=True;";
 
 // Agregar servicios al contenedor
 builder.Services.AddDbContext<ArteTextilDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// AutoMapper
+builder.Services.AddAutoMapper(cfg =>
+{
+    AutoMapperConfig.Initialize(cfg);
+});
+
+
+//agregar entidades
+builder.Services.AddScoped<RolBusiness>();
+
+// Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(); 
 
 var app = builder.Build();
 
