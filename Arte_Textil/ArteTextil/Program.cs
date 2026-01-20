@@ -14,11 +14,18 @@ var user = Env.GetString("DB_USER");
 var password = Env.GetString("DB_PASSWORD");
 
 var connectionString =
-    $"Server={server};" +
-    $"Database={database};" +
-    $"User Id={user};" +
+    $"Data Source={server};" +
+    $"Initial Catalog={database};" +
+    $"Persist Security Info=True;" +
+    $"User ID={user};" +
     $"Password={password};" +
-    $"TrustServerCertificate=True;";
+    $"Pooling=False;" +
+    $"MultipleActiveResultSets=False;" +
+    $"Encrypt=True;" +
+    $"TrustServerCertificate=True;" +
+    $"Application Name=\"ArteTextilApp\";" +
+    $"Command Timeout=30;";
+
 
 // Agregar servicios al contenedor
 builder.Services.AddDbContext<ArteTextilDbContext>(options =>
