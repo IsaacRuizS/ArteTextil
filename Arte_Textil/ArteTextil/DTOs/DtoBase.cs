@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace GEG.Common.Data.Models
+namespace ArteTextil.DTOs
 {
     public class DtoBase
     {
