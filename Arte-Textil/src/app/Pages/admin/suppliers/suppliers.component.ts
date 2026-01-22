@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SupplierService, Supplier } from '../../../services/supplier.service';
+import { SupplierModel } from '../../../shared/models/supplier.model';
+import { ApiSupplierService } from '../../../services/api-supplier.service';
+import { SharedService } from '../../../services/shared.service';
 
 @Component({
     selector: 'app-suppliers',
@@ -12,18 +14,19 @@ import { SupplierService, Supplier } from '../../../services/supplier.service';
 })
 export class SuppliersComponent implements OnInit {
 
-    suppliers: Supplier[] = [];
+    suppliers: SupplierModel[] = [];
     supplierForm: FormGroup;
 
     // UI State
     showFormModal = false;
     showDeleteModal = false;
     isEditing = false;
-    supplierToDelete: Supplier | null = null;
+    supplierToDelete: SupplierModel | null = null;
     searchTerm = '';
 
     constructor(
-        private supplierService: SupplierService,
+        private apiSupplierService: ApiSupplierService,
+        private sharedService: SharedService,
         private fb: FormBuilder
     ) {
         this.supplierForm = this.fb.group({
@@ -41,7 +44,23 @@ export class SuppliersComponent implements OnInit {
     }
 
     loadSuppliers() {
-        this.suppliers = this.supplierService.getSuppliers();
+        
+        this.sharedService.setLoading(true);
+
+        this.apiSupplierService.getAll().then(
+            (suppliers: SupplierModel[]) => {
+
+                console.log('Suppliers loaded:', suppliers);
+
+                this.suppliers = suppliers;
+
+                this.sharedService.setLoading(false);
+            },
+            (err: any) => {
+                this.sharedService.setLoading(false);
+            }
+        );
+        
     }
 
     get filteredSuppliers() {
@@ -60,7 +79,7 @@ export class SuppliersComponent implements OnInit {
         this.showFormModal = true;
     }
 
-    openEditModal(supplier: Supplier) {
+    openEditModal(supplier: SupplierModel) {
         this.isEditing = true;
         this.supplierForm.patchValue(supplier);
         this.showFormModal = true;
@@ -77,7 +96,7 @@ export class SuppliersComponent implements OnInit {
         }
 
         try {
-            this.supplierService.saveSupplier(this.supplierForm.value);
+            //this.supplierService.saveSupplier(this.supplierForm.value);
             this.showFormModal = false;
             // Native alerts as requested ("mensajes claros")
             alert(this.isEditing ? 'Proveedor actualizado correctamente.' : 'Proveedor creado correctamente.');
@@ -88,14 +107,14 @@ export class SuppliersComponent implements OnInit {
     }
 
     // DELETE
-    openDeleteModal(supplier: Supplier) {
+    openDeleteModal(supplier: SupplierModel) {
         this.supplierToDelete = supplier;
         this.showDeleteModal = true;
     }
 
     confirmDelete() {
         if (this.supplierToDelete) {
-            this.supplierService.deleteSupplier(this.supplierToDelete.supplierId);
+            //this.supplierService.deleteSupplier(this.supplierToDelete.supplierId);
             this.showDeleteModal = false;
             this.supplierToDelete = null;
             this.loadSuppliers();
