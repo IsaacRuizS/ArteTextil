@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using ArteTextil.Data.Entities;
 
-using ArteTextil.Entities;
-
-namespace ArteTextil;
+namespace ArteTextil.Data;
 
 public class ArteTextilDbContext : DbContext
 {

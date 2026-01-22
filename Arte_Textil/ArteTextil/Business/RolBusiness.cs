@@ -1,5 +1,6 @@
 ﻿using ArteTextil.DTOs;
-using ArteTextil.Entities;
+using ArteTextil.Data;
+using ArteTextil.Data.Repositories;
 using ArteTextil.Helpers;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -8,12 +9,12 @@ namespace ArteTextil.Business
 {
     public class RolBusiness
     {
-        private readonly ArteTextilDbContext _context;
+        private readonly IRepositoryRol _repositoryRol;
         private readonly IMapper _mapper;
 
         public RolBusiness(ArteTextilDbContext context, IMapper mapper)
         {
-            _context = context;
+            _repositoryRol = new RepositoryRol(context);
             _mapper = mapper;
         }
 
@@ -23,7 +24,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var roles = await _context.Roles.ToListAsync();
+                var roles = _repositoryRol.GetAll();
                 response.Data = _mapper.Map<List<RolDto>>(roles);
                 response.Message = "Roles obtenidos correctamente";
             }

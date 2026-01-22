@@ -1,4 +1,4 @@
-using ArteTextil;
+using ArteTextil.Data;
 using ArteTextil.Business;
 using ArteTextil.Helpers;
 using DotNetEnv;
@@ -44,7 +44,7 @@ builder.Services.AddScoped<RolBusiness>();
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
