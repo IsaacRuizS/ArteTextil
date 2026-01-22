@@ -3,28 +3,7 @@
 ------------------------------------------ */
 
 // 1. Variables globales
-@use 'variable' as *;
+@use '../../assets/scss/variable' as *;
 
-// 2. Bootstrap SCSS
-@use "../../../node_modules/bootstrap/scss/bootstrap" as *;
-
-// 3. App core
-@use 'app' as *;
-@use 'pages' as *;
-@use 'sidebar' as *; 
-
-// 6. Widgets, grid, responsive
-@use 'widgets' as *;
-@use 'grid' as *;
-@use 'responsive' as *;
-
-// 7. Extra SCSS
-@use 'spinners.scss' as *;
-@use 'animate.css'; // este archivo es CSS, por eso se queda con import
-@use 'theme-settings.scss' as *;
-
-// 4. Icon fonts (CSS → se queda como @import)
-@import '../scss/icons/font-awesome/css/font-awesome.min.css';
-@import '../scss/icons/simple-line-icons/css/simple-line-icons.css';
-@import '../scss/icons/themify-icons/themify-icons.css';
-@import "../scss/icons/material-design-iconic-font/css/materialdesignicons.min.css";
+// 3. Icon fonts
+@use '../../assets/scss/icons/material-design-iconic-font/css/materialdesignicons.min.css';

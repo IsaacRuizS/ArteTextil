@@ -21,7 +21,7 @@ export class FullComponent {
 
     constructor() { }
 
-    sidebarClosed = true;
+    sidebarClosed = false;
 
     toggleSidebar() {
         this.sidebarClosed = !this.sidebarClosed;
