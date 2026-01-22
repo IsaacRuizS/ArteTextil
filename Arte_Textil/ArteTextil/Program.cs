@@ -6,6 +6,19 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var corsPolicy = "AllowFrontend";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: corsPolicy, policy =>
+    {
+        policy.WithOrigins("http://localhost:4204")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 Env.Load();
 
 var server = Env.GetString("DB_SERVER");
@@ -37,9 +50,13 @@ builder.Services.AddAutoMapper(cfg =>
     AutoMapperConfig.Initialize(cfg);
 });
 
+builder.Services.AddScoped<ISystemLogHelper, SystemLogHelper>();
 
 //agregar entidades
 builder.Services.AddScoped<RolBusiness>();
+builder.Services.AddScoped<ProductBusiness>();
+builder.Services.AddScoped<SupplierBusiness>();
+builder.Services.AddScoped<CategoryBusiness>();
 
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
@@ -56,6 +73,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// uso del CORS aquí
+app.UseCors(corsPolicy);
 
 // NO usamos Auth todavía
 // app.UseAuthentication();
