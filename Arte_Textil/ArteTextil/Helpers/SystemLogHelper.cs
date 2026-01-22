@@ -1,4 +1,4 @@
-﻿using ArteTextil.Entities;
+﻿using ArteTextil.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArteTextil.Helpers

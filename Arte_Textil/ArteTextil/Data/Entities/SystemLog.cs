@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GEG.Common.Data.Models;
 
-namespace ArteTextil.Entities
+namespace ArteTextil.Data.Entities
 {
     public class SystemLog : EntityBase
     {

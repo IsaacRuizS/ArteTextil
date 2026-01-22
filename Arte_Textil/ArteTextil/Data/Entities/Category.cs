@@ -1,7 +1,6 @@
-using GEG.Common.Data.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace ArteTextil.Entities
+namespace ArteTextil.Data.Entities
 {
     public class Category : EntityBase
     {

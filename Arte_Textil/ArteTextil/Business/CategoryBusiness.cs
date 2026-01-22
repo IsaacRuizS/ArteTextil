@@ -1,5 +1,5 @@
 ﻿using ArteTextil.DTOs;
-using ArteTextil.Entities;
+using ArteTextil.Data.Entities;
 using ArteTextil.Helpers;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

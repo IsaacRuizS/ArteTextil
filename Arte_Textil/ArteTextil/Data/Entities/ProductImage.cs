@@ -1,8 +1,7 @@
-using GEG.Common.Data.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ArteTextil.Entities
+namespace ArteTextil.Data.Entities
 {
     public class ProductImage : EntityBase
     {
@@ -18,12 +17,6 @@ namespace ArteTextil.Entities
         public bool IsMain { get; set; }
 
         public bool IsActive { get; set; }
-
-        public DateTime CreatedAt { get; set; }
-
-        public DateTime? UpdatedAt { get; set; }
-
-        public DateTime? DeletedAt { get; set; }
 
         // Relación
         public virtual Product? Product { get; set; }

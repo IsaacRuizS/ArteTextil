@@ -1,6 +1,3 @@
-using GEG.Common.Data.Models;
-using System.ComponentModel.DataAnnotations;
-
 namespace ArteTextil.DTOs;
 
 // A DTO is a contract between the client and server since it represents
