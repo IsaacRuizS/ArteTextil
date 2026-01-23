@@ -1,15 +1,16 @@
-﻿using ArteTextil.DTOs;
+﻿using ArteTextil.Data;
 using ArteTextil.Data.Entities;
+using ArteTextil.Data.Repositories;
+using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace ArteTextil.Business
 {
     public class CategoryBusiness
     {
-        private readonly ArteTextilDbContext _context;
+        private readonly IRepositoryCategory _repositoryCategory;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
 
@@ -18,7 +19,7 @@ namespace ArteTextil.Business
             IMapper mapper,
             ISystemLogHelper logHelper)
         {
-            _context = context;
+            _repositoryCategory = new RepositoryCategory(context);
             _mapper = mapper;
             _logHelper = logHelper;
         }
@@ -30,9 +31,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var categories = await _context.Categories
-                    .Where(c => c.DeletedAt == null)
-                    .ToListAsync();
+                var categories = await _repositoryCategory.GetAllAsync(c => c.DeletedAt == null);
 
                 response.Data = _mapper.Map<List<CategoryDto>>(categories);
                 response.Message = "Categorías obtenidas correctamente";
@@ -53,8 +52,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var category = await _context.Categories
-                    .FirstOrDefaultAsync(c => c.CategoryId == id && c.DeletedAt == null);
+                var category = await _repositoryCategory.FirstOrDefaultAsync(c => c.CategoryId == id && c.DeletedAt == null);
 
                 if (category == null)
                 {
@@ -89,7 +87,7 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var exists = await _context.Categories.AnyAsync(c =>
+                var exists = await _repositoryCategory.AnyAsync(c =>
                     c.Name == dto.name && c.DeletedAt == null);
 
                 if (exists)
@@ -103,8 +101,7 @@ namespace ArteTextil.Business
                 category.IsActive = true;
                 category.CreatedAt = DateTime.UtcNow;
 
-                await _context.Categories.AddAsync(category);
-                await _context.SaveChangesAsync();
+                await _repositoryCategory.AddAsync(category);
 
                 await _logHelper.LogCreate("Categories", category.CategoryId, JsonSerializer.Serialize(category));
 
@@ -127,8 +124,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var category = await _context.Categories
-                    .FirstOrDefaultAsync(c => c.CategoryId == dto.categoryId && c.DeletedAt == null);
+                var category = await _repositoryCategory.FirstOrDefaultAsync(c => c.CategoryId == dto.categoryId && c.DeletedAt == null);
 
                 if (category == null)
                 {
@@ -137,7 +133,7 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var exists = await _context.Categories.AnyAsync(c =>
+                var exists = await _repositoryCategory.AnyAsync(c =>
                     c.Name == dto.name && c.CategoryId != dto.categoryId && c.DeletedAt == null);
 
                 if (exists)
@@ -154,8 +150,8 @@ namespace ArteTextil.Business
                 category.IsActive = dto.isActive;
                 category.UpdatedAt = DateTime.UtcNow;
 
-                _context.Categories.Update(category);
-                await _context.SaveChangesAsync();
+                _repositoryCategory.Update(category);
+                await _repositoryCategory.SaveAsync();
 
                 await _logHelper.LogUpdate("Categories", category.CategoryId, previousSnapshot, JsonSerializer.Serialize(category));
 
@@ -178,8 +174,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var category = await _context.Categories
-                    .FirstOrDefaultAsync(c => c.CategoryId == id && c.DeletedAt == null);
+                var category = await _repositoryCategory.FirstOrDefaultAsync(c => c.CategoryId == id && c.DeletedAt == null);
 
                 if (category == null)
                 {
@@ -193,8 +188,8 @@ namespace ArteTextil.Business
                 category.IsActive = false;
                 category.DeletedAt = DateTime.UtcNow;
 
-                _context.Categories.Update(category);
-                await _context.SaveChangesAsync();
+                _repositoryCategory.Update(category);
+                await _repositoryCategory.SaveAsync();
 
                 await _logHelper.LogDelete("Categories", category.CategoryId, previousSnapshot);
 

@@ -24,7 +24,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var roles = _repositoryRol.GetAll();
+                var roles = await _repositoryRol.GetAllAsync(r => r.DeletedAt == null);
                 response.Data = _mapper.Map<List<RolDto>>(roles);
                 response.Message = "Roles obtenidos correctamente";
             }

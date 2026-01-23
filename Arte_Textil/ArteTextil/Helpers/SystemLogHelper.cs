@@ -1,5 +1,5 @@
-﻿using ArteTextil.Data.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using ArteTextil.Data;
+using ArteTextil.Data.Entities;
 
 namespace ArteTextil.Helpers
 {

@@ -1,8 +1,9 @@
-﻿using ArteTextil.DTOs;
-using ArteTextil.Entities;
+﻿using ArteTextil.Data;
+using ArteTextil.Data.Entities;
+using ArteTextil.Data.Repositories;
+using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
@@ -10,7 +11,7 @@ namespace ArteTextil.Business
 {
     public class SupplierBusiness
     {
-        private readonly ArteTextilDbContext _context;
+        private readonly IRepositorySupplier _repositorySupplier;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
 
@@ -19,7 +20,7 @@ namespace ArteTextil.Business
             IMapper mapper,
             ISystemLogHelper logHelper)
         {
-            _context = context;
+            _repositorySupplier = new RepositorySupplier(context);
             _mapper = mapper;
             _logHelper = logHelper;
         }
@@ -31,9 +32,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var suppliers = await _context.Suppliers
-                    .Where(s => s.DeletedAt == null)
-                    .ToListAsync();
+                var suppliers = await _repositorySupplier.GetAllAsync(s => s.DeletedAt == null);
 
                 response.Data = _mapper.Map<List<SupplierDto>>(suppliers);
                 response.Message = "Proveedores obtenidos correctamente";
@@ -54,8 +53,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var supplier = await _context.Suppliers
-                    .FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
+                var supplier = await _repositorySupplier.FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
 
                 if (supplier == null)
                 {
@@ -97,8 +95,7 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var exists = await _context.Suppliers
-                    .AnyAsync(s => s.Name == dto.name && s.DeletedAt == null);
+                var exists = await _repositorySupplier.AnyAsync(s => s.Name == dto.name && s.DeletedAt == null);
 
                 if (exists)
                 {
@@ -111,8 +108,7 @@ namespace ArteTextil.Business
                 supplier.IsActive = true;
                 supplier.CreatedAt = DateTime.UtcNow;
 
-                await _context.Suppliers.AddAsync(supplier);
-                await _context.SaveChangesAsync();
+                await _repositorySupplier.AddAsync(supplier);
 
                 await _logHelper.LogCreate(
                     tableName: "Suppliers",
@@ -139,8 +135,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var supplier = await _context.Suppliers
-                    .FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
+                var supplier = await _repositorySupplier.FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
 
                 if (supplier == null)
                 {
@@ -157,7 +152,7 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var nameExists = await _context.Suppliers.AnyAsync(
+                var nameExists = await _repositorySupplier.AnyAsync(
                     s => s.Name == dto.name && s.SupplierId != id && s.DeletedAt == null);
 
                 if (nameExists)
@@ -176,8 +171,8 @@ namespace ArteTextil.Business
                 supplier.IsActive = dto.isActive;
                 supplier.UpdatedAt = DateTime.UtcNow;
 
-                _context.Suppliers.Update(supplier);
-                await _context.SaveChangesAsync();
+                _repositorySupplier.Update(supplier);
+                await _repositorySupplier.SaveAsync();
 
                 await _logHelper.LogUpdate(
                     tableName: "Suppliers",
@@ -205,8 +200,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var supplier = await _context.Suppliers
-                    .FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
+                var supplier = await _repositorySupplier.FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
 
                 if (supplier == null)
                 {
@@ -220,8 +214,8 @@ namespace ArteTextil.Business
                 supplier.IsActive = false;
                 supplier.DeletedAt = DateTime.UtcNow;
 
-                _context.Suppliers.Update(supplier);
-                await _context.SaveChangesAsync();
+                _repositorySupplier.Update(supplier);
+                await _repositorySupplier.SaveAsync();
 
                 await _logHelper.LogDelete(
                     tableName: "Suppliers",

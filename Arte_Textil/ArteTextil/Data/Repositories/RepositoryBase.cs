@@ -1,15 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ArteTextil.Data.Repositories
 {
     public interface IRepositoryBase<T> where T : class
     {
-        IEnumerable<T> GetAll();
-        T GetById(int id);
-        void Add(T entity);
+        Task<List<T>> GetAllAsync();
+        Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
+        Task<T?> GetByIdAsync(int id);
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+        Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
+        Task AddAsync(T entity);
         void Update(T entity);
-        void Delete(int id);
-        void Save();
+        Task SaveAsync();
+        IQueryable<T> Query();
     }
 
     public class RepositoryBase<T> : IRepositoryBase<T> where T : class
@@ -23,20 +27,35 @@ namespace ArteTextil.Data.Repositories
             _set = _context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll()
+        public async Task<List<T>> GetAllAsync()
         {
-            return _set.ToList();
+            return await _set.ToListAsync();
         }
 
-        public T GetById(int id)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
-            return _set.Find(id);
+            return await _set.Where(predicate).ToListAsync();
         }
 
-        public void Add(T entity)
+        public async Task<T?> GetByIdAsync(int id)
         {
-            _set.Add(entity);
-            Save();
+            return await _set.FindAsync(id);
+        }
+
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _set.FirstOrDefaultAsync(predicate);
+        }
+
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _set.AnyAsync(predicate);
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await _set.AddAsync(entity);
+            await SaveAsync();
         }
 
         public void Update(T entity)
@@ -45,22 +64,16 @@ namespace ArteTextil.Data.Repositories
                 _set.Attach(entity);
 
             _context.Entry(entity).State = EntityState.Modified;
-            Save();
         }
 
-        public void Delete(int id)
+        public async Task SaveAsync()
         {
-            T entityToDelete = _set.Find(id);
-            if (entityToDelete != null)
-            {
-                _set.Remove(entityToDelete);
-                Save();
-            }
+            await _context.SaveChangesAsync();
         }
 
-        public void Save()
+        public IQueryable<T> Query()
         {
-            _context.SaveChanges();
+            return _set.AsQueryable();
         }
     }
 }
