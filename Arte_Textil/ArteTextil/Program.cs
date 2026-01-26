@@ -54,6 +54,7 @@ builder.Services.AddScoped<ISystemLogHelper, SystemLogHelper>();
 
 //agregar entidades
 builder.Services.AddScoped<RolBusiness>();
+builder.Services.AddScoped<UserBusiness>();
 builder.Services.AddScoped<ProductBusiness>();
 builder.Services.AddScoped<SupplierBusiness>();
 builder.Services.AddScoped<CategoryBusiness>();
