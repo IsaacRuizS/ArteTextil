@@ -3,11 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-<<<<<<< Updated upstream
-    "analytics": "fc6e2524-ace8-4091-88b8-3289b71d0af7"
-=======
     "analytics": "24c8f5dc-4e15-48ee-88e7-ebcbba063c08"
->>>>>>> Stashed changes
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -29,6 +25,7 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"

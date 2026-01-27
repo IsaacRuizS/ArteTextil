@@ -75,7 +75,7 @@ export class ApiSupplierService extends ApiBaseService {
 
     // PUT: api/supplier
     update(data: SupplierModel): Promise<SupplierModel> {
-        return this.http.put(`${this.baseUrl}/api/supplier`, data, this.getHttpOptions())
+        return this.http.put(`${this.baseUrl}/api/supplier/${data.supplierId}`, data, this.getHttpOptions())
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {

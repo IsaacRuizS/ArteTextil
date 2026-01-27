@@ -55,29 +55,17 @@ export class SuppliersComponent implements OnInit {
                 this.suppliers = suppliers;
                 this.suppliersOrigins = suppliers;
 
-                this.cdr.detectChanges();
 
                 this.sharedService.setLoading(false);
+                this.cdr.detectChanges();
             },
             (err: any) => {
                 this.sharedService.setLoading(false);
+                this.cdr.detectChanges();
             }
         );
 
     } 
-
-    // ACTIONS
-    openCreateModal() {
-        this.isEditing = false;
-        this.supplierForm.reset({ supplierId: 0, isActive: true });
-        this.showFormModal = true;
-    }
-
-    openEditModal(supplier: SupplierModel) {
-        this.isEditing = true;
-        this.supplierForm.patchValue(supplier);
-        this.showFormModal = true;
-    }
 
     onSearch(event: any) {
         this.searchTerm = event.target.value;
@@ -100,22 +88,34 @@ export class SuppliersComponent implements OnInit {
         );
     }
 
+    // ACTIONS
+    openCreateModal() {
+        this.isEditing = false;
+        this.supplierForm.reset({ supplierId: 0, isActive: true });
+        this.showFormModal = true;
+    }
+
+    openEditModal(supplier: SupplierModel) {
+        this.isEditing = true;
+        this.supplierForm.patchValue(supplier);
+        this.showFormModal = true;
+    } 
+
     saveSupplier() {
+
         if (this.supplierForm.invalid) {
             this.supplierForm.markAllAsTouched();
             return;
         }
+        
+        this.sharedService.setLoading(true);
 
-        try {
-            //this.supplierService.saveSupplier(this.supplierForm.value);
-            this.showFormModal = false;
-            // Native alerts as requested ("mensajes claros")
-            alert(this.isEditing ? 'Proveedor actualizado correctamente.' : 'Proveedor creado correctamente.');
-            this.loadSuppliers();
-        } catch (error) {
-            alert('Error al guardar el proveedor.');
+        if(this.isEditing) {
+            this._editSupplier(this.supplierForm.value);
+        } else {
+            this._createSupplier(this.supplierForm.value);
         }
-    }
+    } 
 
     // DELETE
     openDeleteModal(supplier: SupplierModel) {
@@ -124,12 +124,59 @@ export class SuppliersComponent implements OnInit {
     }
 
     confirmDelete() {
+
         if (this.supplierToDelete) {
-            //this.supplierService.deleteSupplier(this.supplierToDelete.supplierId);
-            this.showDeleteModal = false;
-            this.supplierToDelete = null;
-            this.loadSuppliers();
-            alert('Proveedor desactivado correctamente.');
+
+            this._deleteSupplier(this.supplierToDelete.supplierId); 
         }
+    }
+
+    private _createSupplier(supplierData: SupplierModel) {
+
+        this.apiSupplierService.create(supplierData).then(
+            (suppliers: SupplierModel) => {
+
+                this.showFormModal = false;
+                this.loadSuppliers();
+
+                this.sharedService.setLoading(false);
+            },
+            (err: any) => {
+                this.sharedService.setLoading(false);
+            }
+        );
+    }
+
+    private _editSupplier(supplierData: SupplierModel) {
+
+        this.apiSupplierService.update(supplierData).then(
+            (suppliers: SupplierModel) => {
+
+                this.showFormModal = false;
+                this.loadSuppliers();
+
+                this.sharedService.setLoading(false);
+            },
+            (err: any) => {
+                this.sharedService.setLoading(false);
+            }
+        );
+    }
+
+    private _deleteSupplier(supplierId: number) {
+
+        this.apiSupplierService.delete(supplierId).then(
+            (deleted: boolean) => {
+                
+                this.showDeleteModal = false;
+                this.supplierToDelete = null;
+                this.loadSuppliers();
+
+                this.sharedService.setLoading(false);
+            },
+            (err: any) => {
+                this.sharedService.setLoading(false);
+            }
+        );
     }
 }
