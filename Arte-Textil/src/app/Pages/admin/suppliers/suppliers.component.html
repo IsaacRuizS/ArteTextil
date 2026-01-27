@@ -1,5 +1,4 @@
 <div class="suppliers-wrapper p-4">
-
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Gestión de Proveedores</h2>
@@ -28,9 +27,8 @@
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @for (s of filteredSuppliers; track s.supplierId) {
-                    <tr>
+                <tbody >
+                    <tr *ngFor="let s of suppliers;">
                         <td class="ps-4 fw-semibold">{{ s.name }}</td>
                         <td>{{ s.contactPerson }}</td>
                         <td>{{ s.email }}</td>
@@ -53,7 +51,6 @@
                             }
                         </td>
                     </tr>
-                    }
                 </tbody>
             </table>
         </div>

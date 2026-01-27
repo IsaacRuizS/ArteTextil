@@ -7,7 +7,7 @@ import { Injectable } from "@angular/core";
 export class ApiBaseService {
 
     // baseUrl = 'https://localhost:44338';
-    baseUrl = 'https://192.168.64.3:45456'; // conveyor.cloud
+    baseUrl = 'https://192.168.64.3:45455'; // conveyor.cloud para los de mac
 
     constructor(public http: HttpClient) {
     }

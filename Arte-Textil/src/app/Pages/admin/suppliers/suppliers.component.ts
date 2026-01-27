@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SupplierModel } from '../../../shared/models/supplier.model';
@@ -15,6 +15,7 @@ import { SharedService } from '../../../services/shared.service';
 export class SuppliersComponent implements OnInit {
 
     suppliers: SupplierModel[] = [];
+    suppliersOrigins: SupplierModel[] = [];
     supplierForm: FormGroup;
 
     // UI State
@@ -27,6 +28,7 @@ export class SuppliersComponent implements OnInit {
     constructor(
         private apiSupplierService: ApiSupplierService,
         private sharedService: SharedService,
+        private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
         this.supplierForm = this.fb.group({
@@ -34,7 +36,7 @@ export class SuppliersComponent implements OnInit {
             name: ['', [Validators.required, Validators.minLength(3)]],
             contactPerson: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
-            phone: ['', Validators.required],
+            phone: ['', [Validators.required, Validators.minLength(8)]],
             isActive: [true]
         });
     }
@@ -44,15 +46,16 @@ export class SuppliersComponent implements OnInit {
     }
 
     loadSuppliers() {
-        
+
         this.sharedService.setLoading(true);
 
         this.apiSupplierService.getAll().then(
             (suppliers: SupplierModel[]) => {
 
-                console.log('Suppliers loaded:', suppliers);
-
                 this.suppliers = suppliers;
+                this.suppliersOrigins = suppliers;
+
+                this.cdr.detectChanges();
 
                 this.sharedService.setLoading(false);
             },
@@ -60,17 +63,8 @@ export class SuppliersComponent implements OnInit {
                 this.sharedService.setLoading(false);
             }
         );
-        
-    }
 
-    get filteredSuppliers() {
-        if (!this.searchTerm) return this.suppliers;
-        const term = this.searchTerm.toLowerCase();
-        return this.suppliers.filter(s =>
-            s.name.toLowerCase().includes(term) ||
-            s.contactPerson.toLowerCase().includes(term)
-        );
-    }
+    } 
 
     // ACTIONS
     openCreateModal() {
@@ -87,6 +81,23 @@ export class SuppliersComponent implements OnInit {
 
     onSearch(event: any) {
         this.searchTerm = event.target.value;
+        this.onFilterInfo();
+    }
+
+    onFilterInfo() {
+
+        this.suppliers = this.suppliersOrigins;
+
+        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+        
+        const term = this.searchTerm.toLowerCase();
+        
+        this.suppliers = this.suppliers.filter(s =>
+            s.name.toLowerCase().includes(term) ||
+            s.email.toLowerCase().includes(term) ||
+            s.phone.toLowerCase().includes(term) ||
+            s.contactPerson.toLowerCase().includes(term)
+        );
     }
 
     saveSupplier() {

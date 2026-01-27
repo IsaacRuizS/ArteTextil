@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 // componentes
@@ -8,6 +8,7 @@ import { LeftSidebarComponent } from '../../components/left-sidebar/left-sidebar
 @Component({
     selector: 'app-full',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Default,
     templateUrl: './full.component.html',
     styleUrls: ['./full.component.scss'],
 
