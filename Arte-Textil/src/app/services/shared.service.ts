@@ -9,11 +9,9 @@ export class SharedService {
     private loadingSubject = new BehaviorSubject<boolean>(false);
     loading$ = this.loadingSubject.asObservable();
 
-    setLoading(loading: boolean): void {
-        if (loading) {
-            this.loadingSubject.next(true);
-        } else {
-            setTimeout(() => this.loadingSubject.next(false), 0);
-        }
+    setLoading(value: boolean): void {
+        Promise.resolve().then(() => {
+            this.loadingSubject.next(value);
+        });
     }
 }

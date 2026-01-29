@@ -89,7 +89,6 @@ export class MarketplaceComponent {
     }
 
     onOpenProduct(p: any){
-        console.log('Abriendo producto:', p);
         window.location.href = `/product/${p.id}`;
     }
 

@@ -20,7 +20,6 @@ export class PublicHeaderComponent {
     }
 
     onOpenCart(){
-        console.log('Abrir carrito de compras');
         window.location.href = '/cart';
     }
 }

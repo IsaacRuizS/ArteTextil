@@ -34,7 +34,6 @@ export class CustomerAnalyticsComponent implements AfterViewInit {
     categorias = ['Ropa', 'Accesorios', 'Uniformes'];
 
     aplicarFiltros() {
-        console.log('Aplicando filtros', this.filtros);
 
         // EJEMPLO: actualizar el pieChart según filtros
         this.pieChart.data.datasets[0].data = [

@@ -2,10 +2,13 @@ import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SharedService } from '../../services/shared.service';
+import { AsyncPipe, CommonModule } from '@angular/common';
 
 
 @Component({
     selector: 'app-spinner',
+    standalone: true,
+    imports: [CommonModule, AsyncPipe],
     templateUrl: './spinner.component.html',
     styleUrls: ['./spinner.component.scss']
 })

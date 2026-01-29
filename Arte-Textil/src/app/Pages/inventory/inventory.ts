@@ -88,11 +88,9 @@ export class InventoryComponent {
     }
 
     onCloseLowStockAlert() {
-        console.log('Cerrando alerta de bajo stock');
         this.showLowStockAlert = false;
     }
 
     onGenerateExcel() {
-        console.log('Generar Excel (solo visual)');
     }
 }
