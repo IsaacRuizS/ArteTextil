@@ -1,6 +1,27 @@
-CREATE DATABASE ArteTextilDB;
+-- =========================================================
+--  SCRIPT DE CREACIÓN DE BASE DE DATOS - ArteTextilDB
+--  Este script crea la base de datos y todas las tablas necesarias
+-- =========================================================
 
-USE ArteTextilDB;
+USE master;
+GO
+
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'artetextil_')
+BEGIN
+    CREATE DATABASE artetextil_;
+    PRINT 'Base de datos artetextil_ creada correctamente.';
+END
+ELSE
+BEGIN
+    PRINT 'La base de datos artetextil_ ya existe.';
+END
+GO
+
+USE artetextil_;
+GO
+
+PRINT 'Creando tablas en artetextil_';
+
 -- =========================================================
 --  ROLES Y USUARIOS
 -- =========================================================
@@ -51,8 +72,10 @@ CREATE TABLE Products (
     Price          DECIMAL(18,2) NOT NULL,
     Stock          INT NOT NULL DEFAULT 0,
     MinStock       INT NOT NULL DEFAULT 0,
+    Location       NVARCHAR(200) NULL,
     Status         NVARCHAR(50) NOT NULL, -- Activo, Inactivo, Oculto
     CategoryId     INT NOT NULL,
+    SupplierId     INT NULL,
     isActive       BIT NOT NULL DEFAULT 1,
     createdAt      DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     updatedAt      DATETIME2 NULL,
@@ -76,16 +99,17 @@ CREATE TABLE ProductImages (
 );
 
 -- =========================================================
---  INVENTARIO
+--  INVENTARIO DE PRODUCTOS (SISTEMA ANTERIOR)
 -- =========================================================
 CREATE TABLE InventoryMovements (
     MovementId         INT IDENTITY(1,1) PRIMARY KEY,
     ProductId          INT NOT NULL,
     Type               NVARCHAR(50) NOT NULL, -- Entrada, Salida, Ajuste
     Quantity           INT NOT NULL,
-    Reason             NVARCHAR(255) NULL,
+    Observations       NVARCHAR(MAX) NULL,
     PreviousStock      INT NOT NULL,
     NewStock           INT NOT NULL,
+    MovementDate       DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     PerformedByUserId  INT NOT NULL,
     isActive           BIT NOT NULL DEFAULT 1,
     createdAt          DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
@@ -109,6 +133,50 @@ CREATE TABLE InventoryStatusHistory (
     CONSTRAINT FK_InventoryStatusHistory_Products
         FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
 );
+
+-- =========================================================
+--  INVENTARIO DE MATERIALES (MÓDULO NUEVO)
+-- =========================================================
+CREATE TABLE Materiales (
+    MaterialId              INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo                  NVARCHAR(50) NOT NULL UNIQUE,
+    Nombre                  NVARCHAR(200) NOT NULL,
+    Categoria               NVARCHAR(100) NOT NULL DEFAULT N'Tela',
+    UnidadMedida            NVARCHAR(50) NOT NULL DEFAULT N'm',
+    CantidadActual          DECIMAL(18,2) NOT NULL,
+    Ubicacion               NVARCHAR(200) NULL,
+    Estado                  NVARCHAR(50) NOT NULL DEFAULT N'ACTIVO',
+    StockMinimo             DECIMAL(18,2) NOT NULL,
+    FechaUltimoMovimiento   DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Observaciones           NVARCHAR(MAX) NULL,
+    CreatedAt               DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    UpdatedAt               DATETIME2 NULL,
+    DeletedAt               DATETIME2 NULL
+);
+
+CREATE INDEX IX_Materiales_Codigo ON Materiales(Codigo);
+CREATE INDEX IX_Materiales_Estado ON Materiales(Estado);
+CREATE INDEX IX_Materiales_Categoria ON Materiales(Categoria);
+
+CREATE TABLE MovimientosInventario (
+    MovimientoId        INT IDENTITY(1,1) PRIMARY KEY,
+    MaterialId          INT NOT NULL,
+    Tipo                NVARCHAR(50) NOT NULL,
+    Cantidad            DECIMAL(18,2) NOT NULL,
+    FechaMovimiento     DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Descripcion         NVARCHAR(MAX) NOT NULL,
+    EstadoAnterior      NVARCHAR(50) NULL,
+    EstadoNuevo         NVARCHAR(50) NULL,
+    CreatedAt           DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    UpdatedAt           DATETIME2 NULL,
+    DeletedAt           DATETIME2 NULL,
+    CONSTRAINT FK_MovimientosInventario_Materiales FOREIGN KEY (MaterialId) 
+        REFERENCES Materiales(MaterialId)
+);
+
+CREATE INDEX IX_MovimientosInventario_MaterialId ON MovimientosInventario(MaterialId);
+CREATE INDEX IX_MovimientosInventario_FechaMovimiento ON MovimientosInventario(FechaMovimiento);
+CREATE INDEX IX_MovimientosInventario_Tipo ON MovimientosInventario(Tipo);
 
 -- =========================================================
 --  PROMOCIONES
@@ -355,6 +423,7 @@ CREATE TABLE DashboardAlerts (
     Type            NVARCHAR(50) NOT NULL,  -- StockBajo, PedidoAtrasado, PromocionPorVencer, etc.
     Description     NVARCHAR(255) NOT NULL,
     RelatedEntityId INT NULL,               -- Id del registro relacionado según el tipo
+    IsRead          BIT NOT NULL DEFAULT 0,
     isActive        BIT NOT NULL DEFAULT 1,
     createdAt       DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     updatedAt       DATETIME2 NULL,

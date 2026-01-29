@@ -1,6 +1,6 @@
-﻿using ArteTextil.Business;
-using ArteTextil.DTOs;
+﻿using ArteTextil.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArteTextil.Controllers
 {
@@ -8,71 +8,52 @@ namespace ArteTextil.Controllers
     [Route("api/[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly CategoryBusiness _categoryBusiness;
+        private readonly ArteTextilDbContext _context;
 
-        public CategoryController(CategoryBusiness categoryBusiness)
+        public CategoryController(ArteTextilDbContext context)
         {
-            _categoryBusiness = categoryBusiness;
+            _context = context;
         }
 
-        // GET: api/category/all
-        [HttpGet("all")]
+        // GET: api/category
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _categoryBusiness.GetAll();
+            var categories = await _context.Categories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.Name)
+                .Select(c => new
+                {
+                    categoryId = c.CategoryId,
+                    name = c.Name,
+                    description = c.Description,
+                    isActive = c.IsActive
+                })
+                .ToListAsync();
 
-            if (!result.Success)
-                return StatusCode(500, result);
-
-            return Ok(result);
+            return Ok(categories);
         }
 
         // GET: api/category/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _categoryBusiness.GetById(id);
+            var category = await _context.Categories
+                .Where(c => c.CategoryId == id)
+                .Select(c => new
+                {
+                    categoryId = c.CategoryId,
+                    name = c.Name,
+                    description = c.Description,
+                    isActive = c.IsActive
+                })
+                .FirstOrDefaultAsync();
 
-            if (!result.Success)
-                return NotFound(result);
+            if (category == null)
+                return NotFound(new { message = "Categoría no encontrada" });
 
-            return Ok(result);
-        }
-
-        // POST: api/category
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoryDto dto)
-        {
-            var result = await _categoryBusiness.Create(dto);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Ok(result);
-        }
-
-        // PUT: api/category/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromBody] CategoryDto dto)
-        {
-            var result = await _categoryBusiness.Update(dto);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Ok(result);
-        }
-
-        // DELETE: api/category/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _categoryBusiness.Delete(id);
-
-            if (!result.Success)
-                return NotFound(result);
-
-            return Ok(result);
+            return Ok(category);
         }
     }
 }
+

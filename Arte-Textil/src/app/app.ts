@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SpinnerComponent } from './components/spinner/spinner.component';
+import { SpinnerComponent } from "./shared/spinner.component";
 
 @Component({
   selector: 'app-root',
-  changeDetection: ChangeDetectionStrategy.Default,
-  imports: [RouterOutlet, SpinnerComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

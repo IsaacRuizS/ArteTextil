@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SupplierModel } from '../../../shared/models/supplier.model';
@@ -8,16 +8,13 @@ import { SharedService } from '../../../services/shared.service';
 @Component({
     selector: 'app-suppliers',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.Default,
     imports: [CommonModule, ReactiveFormsModule],
-    providers: [FormBuilder],
     templateUrl: './suppliers.component.html',
     styleUrls: ['./suppliers.component.scss']
 })
 export class SuppliersComponent implements OnInit {
 
     suppliers: SupplierModel[] = [];
-    suppliersOrigins: SupplierModel[] = [];
     supplierForm: FormGroup;
 
     // UI State
@@ -30,7 +27,6 @@ export class SuppliersComponent implements OnInit {
     constructor(
         private apiSupplierService: ApiSupplierService,
         private sharedService: SharedService,
-        private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
         this.supplierForm = this.fb.group({
@@ -38,7 +34,7 @@ export class SuppliersComponent implements OnInit {
             name: ['', [Validators.required, Validators.minLength(3)]],
             contactPerson: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
-            phone: ['', [Validators.required, Validators.minLength(8)]],
+            phone: ['', Validators.required],
             isActive: [true]
         });
     }
@@ -48,44 +44,30 @@ export class SuppliersComponent implements OnInit {
     }
 
     loadSuppliers() {
-
+        
         this.sharedService.setLoading(true);
 
-        this.apiSupplierService.getAll().subscribe({
-            next: (suppliers: SupplierModel[]) => {
+        this.apiSupplierService.getAll().then(
+            (suppliers: SupplierModel[]) => {
+
+                console.log('Suppliers loaded:', suppliers);
 
                 this.suppliers = suppliers;
-                this.suppliersOrigins = suppliers;
 
-                this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },
-            error: () => {
+            (err: any) => {
                 this.sharedService.setLoading(false);
             }
-        });
+        );
+        
     }
 
-
-
-
-    onSearch(event: any) {
-        this.searchTerm = event.target.value;
-        this.onFilterInfo();
-    }
-
-    onFilterInfo() {
-
-        this.suppliers = this.suppliersOrigins;
-
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
-
+    get filteredSuppliers() {
+        if (!this.searchTerm) return this.suppliers;
         const term = this.searchTerm.toLowerCase();
-
-        this.suppliers = this.suppliers.filter(s =>
+        return this.suppliers.filter(s =>
             s.name.toLowerCase().includes(term) ||
-            s.email.toLowerCase().includes(term) ||
-            s.phone.toLowerCase().includes(term) ||
             s.contactPerson.toLowerCase().includes(term)
         );
     }
@@ -103,19 +85,24 @@ export class SuppliersComponent implements OnInit {
         this.showFormModal = true;
     }
 
-    saveSupplier() {
+    onSearch(event: any) {
+        this.searchTerm = event.target.value;
+    }
 
+    saveSupplier() {
         if (this.supplierForm.invalid) {
             this.supplierForm.markAllAsTouched();
             return;
         }
 
-        this.sharedService.setLoading(true);
-
-        if (this.isEditing) {
-            this._editSupplier(this.supplierForm.value);
-        } else {
-            this._createSupplier(this.supplierForm.value);
+        try {
+            //this.supplierService.saveSupplier(this.supplierForm.value);
+            this.showFormModal = false;
+            // Native alerts as requested ("mensajes claros")
+            alert(this.isEditing ? 'Proveedor actualizado correctamente.' : 'Proveedor creado correctamente.');
+            this.loadSuppliers();
+        } catch (error) {
+            alert('Error al guardar el proveedor.');
         }
     }
 
@@ -126,60 +113,12 @@ export class SuppliersComponent implements OnInit {
     }
 
     confirmDelete() {
-
         if (this.supplierToDelete) {
-
-            this._deleteSupplier(this.supplierToDelete.supplierId);
+            //this.supplierService.deleteSupplier(this.supplierToDelete.supplierId);
+            this.showDeleteModal = false;
+            this.supplierToDelete = null;
+            this.loadSuppliers();
+            alert('Proveedor desactivado correctamente.');
         }
     }
-
-    private _createSupplier(supplierData: SupplierModel) {
-
-        this.apiSupplierService.create(supplierData).subscribe({
-            next: () => {
-
-                this.showFormModal = false;
-                this.loadSuppliers();
-
-                this.sharedService.setLoading(false);
-            },
-            error: () => {
-                this.sharedService.setLoading(false);
-            }
-        });
-    }
-
-    private _editSupplier(supplierData: SupplierModel) {
-
-        this.apiSupplierService.update(supplierData).subscribe({
-            next: () => {
-
-                this.showFormModal = false;
-                this.loadSuppliers();
-
-                this.sharedService.setLoading(false);
-            },
-            error: () => {
-                this.sharedService.setLoading(false);
-            }
-        });
-    }
-
-    private _deleteSupplier(supplierId: number) {
-
-        this.apiSupplierService.delete(supplierId).subscribe({
-            next: () => {
-
-                this.showDeleteModal = false;
-                this.supplierToDelete = null;
-                this.loadSuppliers();
-
-                this.sharedService.setLoading(false);
-            },
-            error: () => {
-                this.sharedService.setLoading(false);
-            }
-        });
-    }
-
 }

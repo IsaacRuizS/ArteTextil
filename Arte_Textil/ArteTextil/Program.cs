@@ -12,32 +12,27 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: corsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:4204")
+        policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
 
-Env.Load();
-
-var server = Env.GetString("DB_SERVER");
-var database = Env.GetString("DB_NAME");
-var user = Env.GetString("DB_USER");
-var password = Env.GetString("DB_PASSWORD");
+// ConfiguraciÃ³n para base de datos en lÃ­nea
+var server = "sql.bsite.net\\MSSQL2016";
+var database = "artetextil_";
+var username = "artetextil_";
+var password = "artetextil2026";
 
 var connectionString =
-    $"Data Source={server};" +
-    $"Initial Catalog={database};" +
-    $"Persist Security Info=True;" +
-    $"User ID={user};" +
+    $"Server={server};" +
+    $"Database={database};" +
+    $"User Id={username};" +
     $"Password={password};" +
-    $"Pooling=False;" +
-    $"MultipleActiveResultSets=False;" +
     $"Encrypt=True;" +
     $"TrustServerCertificate=True;" +
-    $"Application Name=\"ArteTextilApp\";" +
-    $"Command Timeout=30;";
+    $"MultipleActiveResultSets=True;";
 
 
 // Agregar servicios al contenedor
@@ -54,19 +49,22 @@ builder.Services.AddScoped<ISystemLogHelper, SystemLogHelper>();
 
 //agregar entidades
 builder.Services.AddScoped<RolBusiness>();
-builder.Services.AddScoped<UserBusiness>();
 builder.Services.AddScoped<ProductBusiness>();
 builder.Services.AddScoped<SupplierBusiness>();
 builder.Services.AddScoped<CategoryBusiness>();
 
 // Agregar servicios de controladores y Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
+// Configuraciï¿½n del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -74,10 +72,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-// uso del CORS aquí
+// uso del CORS aquï¿½
 app.UseCors(corsPolicy);
 
-// NO usamos Auth todavía
+// NO usamos Auth todavï¿½a
 // app.UseAuthentication();
 // app.UseAuthorization();
 

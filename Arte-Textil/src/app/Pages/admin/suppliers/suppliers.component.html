@@ -1,4 +1,5 @@
 <div class="suppliers-wrapper p-4">
+
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Gestión de Proveedores</h2>
@@ -27,8 +28,9 @@
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody >
-                    <tr *ngFor="let s of suppliers;">
+                <tbody>
+                    @for (s of filteredSuppliers; track s.supplierId) {
+                    <tr>
                         <td class="ps-4 fw-semibold">{{ s.name }}</td>
                         <td>{{ s.contactPerson }}</td>
                         <td>{{ s.email }}</td>
@@ -51,6 +53,7 @@
                             }
                         </td>
                     </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -113,7 +116,7 @@
                 <p class="text-muted small">El proveedor no podrá ser utilizado en nuevas operaciones.</p>
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Sí, desactivar</button>
                 </div>
             </div>
         </div>

@@ -24,6 +24,9 @@ namespace ArteTextil.Data.Entities
 
         public int MinStock { get; set; }
 
+        [MaxLength(200)]
+        public string? Location { get; set; }
+
         public string? Status { get; set; }
 
         [ForeignKey("Category")]
@@ -35,6 +38,8 @@ namespace ArteTextil.Data.Entities
         public bool IsActive { get; set; }
 
         // Relaciones
+        public virtual Category? Category { get; set; }
+        public virtual Supplier? Supplier { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
     }
 }

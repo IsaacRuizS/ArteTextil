@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
-})
+})  
 export class SharedService {
 
-    private loadingSubject = new BehaviorSubject<boolean>(false);
-    loading$ = this.loadingSubject.asObservable();
+    public loadingSubject: Subject<boolean> = new Subject<boolean>();
 
     setLoading(loading: boolean): void {
+        
         if (loading) {
-            this.loadingSubject.next(true);
+            this.loadingSubject.next(loading);
         } else {
-            setTimeout(() => this.loadingSubject.next(false), 0);
+            setTimeout(() => this.loadingSubject.next(loading), 300);
         }
     }
 }

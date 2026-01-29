@@ -1,101 +1,564 @@
 <div class="inventory-wrapper">
-
-    <div class="d-flex justify-content-between mb-4 ">
-        <h2 class="fw-bold">Inventario General</h2>
-        <button class="btn btn-success d-flex align-items-center" (click)="onGenerateExcel()">
-            <i class="mdi mdi-file-excel me-2"></i>
-            Generar Excel
-        </button>
-    </div>
-
-    <!-- ALERTA GENERAL DE STOCK -->
-    @if (lowStockProducts.length > 0 && showLowStockAlert) {
-    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-
-        <strong>¡Alerta de inventario!</strong><br>
-
-        @for (p of lowStockProducts; track p.code) {
-        <div>
-            <i class="mdi mdi-alert-circle-outline me-1"></i>
-            El producto <strong>{{ p.name }}</strong> tiene <strong>{{ p.qty }}</strong> unidades.
-        </div>
+    <!-- Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        @for (toast of toasts; track toast.id) {
+            <div [ngClass]="getToastClass(toast.type)" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">{{ toast.message }}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                            (click)="removeToast(toast.id)"></button>
+                </div>
+            </div>
         }
-
-        <button type="button" class="btn-close" aria-label="Close" (click)="onCloseLowStockAlert()"
-            style="top: -8px; right: -3px;">
-        </button>
-
     </div>
-    }
 
+    <div class="d-flex justify-content-between mb-4">
+        <h2 class="fw-bold">Inventario General</h2>
+        <div>
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#nuevoProductoModal">
+                <i class="mdi mdi-plus-circle me-2"></i>
+                Nuevo Producto
+            </button>
+            <button class="btn btn-info me-2" data-bs-toggle="modal" data-bs-target="#reportesModal" (click)="abrirModalReportes()">
+                <i class="mdi mdi-chart-box me-2"></i>
+                Ver Reportes
+            </button>
+            <button class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#movimientoModal">
+                <i class="mdi mdi-swap-horizontal me-2"></i>
+                Registrar Movimiento
+            </button>
+        </div>
+    </div>
 
-    <!-- FILTRO -->
-    <div class="filter-box flex-grow-1 me-3 mb-4">
-        <label class="form-label fw-semibold">Filtrar por estado</label>
-        <select class="form-select" [(ngModel)]="selectedStatus">
-            @for (s of statuses; track s) {
-            <option [value]="s">{{ s }}</option>
-            }
-        </select>
+    <!-- FILTROS -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Filtrar por estado</label>
+            <select class="form-select" [(ngModel)]="selectedStatus" (change)="filtrar()">
+                @for (s of statuses; track s) {
+                    <option [value]="s">{{ s }}</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-semibold">Búsqueda</label>
+            <input type="text" class="form-control" [(ngModel)]="busqueda" 
+                   placeholder="Código o nombre" (keyup.enter)="filtrar()">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-primary" (click)="filtrar()">
+                <i class="mdi mdi-magnify me-2"></i>Buscar
+            </button>
+        </div>
     </div>
 
     <!-- LISTADO DE INVENTARIO -->
     <div class="inventory-table table-responsive">
-
         <table class="table table-striped align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>Código</th>
                     <th>Producto</th>
-                    <th>Cantidad</th>
+                    <th>Stock</th>
+                    <th>Stock Mínimo</th>
                     <th>Ubicación</th>
-                    <th>Fecha</th>
                     <th>Estado</th>
-                    <th>Acción</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
                 </tr>
             </thead>
-
             <tbody>
-
-                @for (p of products; track p.code) {
-                @if (selectedStatus === 'Todos' || p.status === selectedStatus) {
-
-                <tr>
-                    <td>{{ p.code }}</td>
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.qty }}</td>
-                    <td>{{ p.location }}</td>
-                    <td>{{ p.date }}</td>
-                    <td>
-                        <button class="btn btn-link p-0" (click)="openStatusModal(p)" title="Cambiar estado">
-                            <i class="mdi" [class.mdi-eye]="p.status === 'Activo'"
-                                [class.mdi-eye-off]="p.status !== 'Activo'"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" (click)="selectProduct(p)">
-                            Ver detalles
-                        </button>
-                    </td>
-                </tr>
-
+                @if (productos.length === 0) {
+                    <tr>
+                        <td colspan="8" class="text-center">No hay productos en el inventario</td>
+                    </tr>
                 }
+                @for (p of productos; track p.productId) {
+                    <tr [class.table-danger]="p.stock <= p.stockMinimo">
+                        <td>{{ p.codigo }}</td>
+                        <td>{{ p.nombre }}</td>
+                        <td>{{ p.stock }}</td>
+                        <td>{{ p.stockMinimo }}</td>
+                        <td>{{ p.ubicacion }}</td>
+                        <td>
+                            <span class="badge" 
+                                  [class.bg-success]="p.estado === 'Disponible'"
+                                  [class.bg-danger]="p.estado === 'Agotado'"
+                                  [class.bg-warning]="p.estado === 'Stock Bajo'">
+                                {{ p.estado }}
+                            </span>
+                        </td>
+                        <td>{{ p.categoriaNombre }}</td>
+                        <td>{{ p.precio | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                    </tr>
                 }
-
             </tbody>
-
         </table>
     </div>
 
-    <!-- Modal -->
-    @if (selectedProduct) {
-    <app-product-detail [selectedProduct]="selectedProduct"
-        (onCloseEmmit)="selectedProduct = null"></app-product-detail>
-    }
+    <!-- Modal Nuevo Producto -->
+    <div class="modal fade" id="nuevoProductoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código *</label>
+                                <input type="text" class="form-control" [(ngModel)]="nuevoProducto.codigo" 
+                                       name="codigo" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" [(ngModel)]="nuevoProducto.nombre" 
+                                       name="nombre" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Cantidad Inicial *</label>
+                                <input type="number" class="form-control" [(ngModel)]="nuevoProducto.cantidad" 
+                                       name="cantidad" min="0" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Stock Mínimo *</label>
+                                <input type="number" class="form-control" [(ngModel)]="nuevoProducto.stockMinimo" 
+                                       name="stockMinimo" min="0" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Precio *</label>
+                                <input type="number" class="form-control" [(ngModel)]="nuevoProducto.precio" 
+                                       name="precio" min="0" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" [(ngModel)]="nuevoProducto.estado" name="estado">
+                                    @for (s of statuses; track s) {
+                                        @if (s !== 'Todos') {
+                                            <option [value]="s">{{ s }}</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Categoría *</label>
+                                <select class="form-select" [(ngModel)]="nuevoProducto.categoriaId" 
+                                        name="categoriaId" required>
+                                    <option [value]="0">Seleccione una categoría</option>
+                                    @for (cat of categorias; track cat.categoryId) {
+                                        <option [value]="cat.categoryId">{{ cat.name }}</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Ubicación</label>
+                                <input type="text" class="form-control" [(ngModel)]="nuevoProducto.ubicacion" 
+                                       name="ubicacion">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" [(ngModel)]="nuevoProducto.observaciones" 
+                                      name="observaciones" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" (click)="crearProducto()" 
+                            data-bs-dismiss="modal">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    @if (statusModalProduct) {
-    <app-status-modal [product]="statusModalProduct" (close)="statusModalProduct = null" (save)="saveStatusChange()">
-    </app-status-modal>
-    }
+    <!-- Modal Registrar Movimiento -->
+    <div class="modal fade" id="movimientoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="mdi mdi-swap-horizontal me-2"></i>
+                        Registrar Movimiento de Inventario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Producto *</label>
+                            <select class="form-select" [(ngModel)]="movimiento.productoId" 
+                                    name="productoId" required>
+                                <option [value]="0">Seleccione un producto</option>
+                                @for (prod of productos; track prod.productId) {
+                                    <option [value]="prod.productId">
+                                        {{ prod.codigo }} - {{ prod.nombre }} (Stock: {{ prod.stock }})
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Movimiento *</label>
+                            <select class="form-select" [(ngModel)]="movimiento.tipo" name="tipo" required>
+                                <option value="Entrada">Entrada (Agregar stock)</option>
+                                <option value="Salida">Salida (Restar stock)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cantidad *</label>
+                            <input type="number" class="form-control" [(ngModel)]="movimiento.cantidad" 
+                                   name="cantidad" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" [(ngModel)]="movimiento.observaciones" 
+                                      name="observaciones" rows="3" 
+                                      placeholder="Ej: Compra de proveedor, Venta, Ajuste de inventario"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" (click)="registrarMovimiento()" 
+                            data-bs-dismiss="modal">Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Modal Reportes -->
+    <div class="modal fade" id="reportesModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">
+                        <i class="mdi mdi-chart-box me-2"></i>
+                        Reportes de Inventario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabs de Reportes -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#reporteGeneral" 
+                                    type="button" (click)="cargarReporteGeneral()">
+                                <i class="mdi mdi-chart-bar me-1"></i>
+                                Reporte General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reporteStockBajo" 
+                                    type="button" (click)="cargarReporteStockBajo()">
+                                <i class="mdi mdi-alert-circle me-1"></i>
+                                Stock Bajo
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reporteMovimientos" 
+                                    type="button" (click)="cargarReporteMovimientos()">
+                                <i class="mdi mdi-swap-horizontal me-1"></i>
+                                Movimientos
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Contenido de Tabs -->
+                    <div class="tab-content">
+                        <!-- Reporte General -->
+                        <div class="tab-pane fade show active" id="reporteGeneral">
+                            @if (reporteGeneral) {
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <h6 class="fw-bold">Resumen General</h6>
+                                        <p class="text-muted mb-2">
+                                            <small>Generado: {{ reporteGeneral.fecha | date:'dd/MM/yyyy HH:mm' }}</small>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-primary">{{ reporteGeneral.resumen.totalProductos }}</h3>
+                                                <p class="mb-0">Total Productos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-success">{{ reporteGeneral.resumen.productosDisponibles }}</h3>
+                                                <p class="mb-0">Disponibles</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-warning">{{ reporteGeneral.resumen.productosStockBajo }}</h3>
+                                                <p class="mb-0">Stock Bajo</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-danger">{{ reporteGeneral.resumen.productosAgotados }}</h3>
+                                                <p class="mb-0">Agotados</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Valor Total del Inventario</h5>
+                                                <h3 class="text-success">
+                                                    {{ reporteGeneral.resumen.valorTotalInventario | currency:'MXN':'symbol-narrow':'1.2-2' }}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold mb-3">Productos por Categoría</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Categoría</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Valor</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (cat of reporteGeneral.productosPorCategoria; track cat.categoria) {
+                                                        <tr>
+                                                            <td>{{ cat.categoria }}</td>
+                                                            <td>{{ cat.cantidad }}</td>
+                                                            <td>{{ cat.valor | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold mb-3">Top 10 Productos por Valor</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Código</th>
+                                                        <th>Producto</th>
+                                                        <th>Stock</th>
+                                                        <th>Valor Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (prod of reporteGeneral.top10ProductosValor; track prod.codigo) {
+                                                        <tr>
+                                                            <td>{{ prod.codigo }}</td>
+                                                            <td>{{ prod.nombre }}</td>
+                                                            <td>{{ prod.stock }}</td>
+                                                            <td>{{ prod.valorTotal | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            } @else {
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-3">Cargando reporte...</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Reporte Stock Bajo -->
+                        <div class="tab-pane fade" id="reporteStockBajo">
+                            @if (reporteStockBajo) {
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-warning">
+                                            <h6 class="alert-heading">
+                                                <i class="mdi mdi-alert-circle me-2"></i>
+                                                Productos que requieren atención
+                                            </h6>
+                                            <p class="mb-0">
+                                                <strong>{{ reporteStockBajo.totalProductosAfectados }}</strong> productos con stock bajo o agotado. 
+                                                <strong>{{ reporteStockBajo.productosAgotados }}</strong> están completamente agotados.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Prioridad</th>
+                                                <th>Código</th>
+                                                <th>Producto</th>
+                                                <th>Categoría</th>
+                                                <th>Stock Actual</th>
+                                                <th>Stock Mínimo</th>
+                                                <th>Diferencia</th>
+                                                <th>Ubicación</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (prod of reporteStockBajo.productos; track prod.productoId) {
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge" 
+                                                              [class.bg-danger]="prod.prioridad === 'Alta'"
+                                                              [class.bg-warning]="prod.prioridad === 'Media'"
+                                                              [class.bg-secondary]="prod.prioridad === 'Baja'">
+                                                            {{ prod.prioridad }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ prod.codigo }}</td>
+                                                    <td>{{ prod.nombre }}</td>
+                                                    <td>{{ prod.categoria }}</td>
+                                                    <td>{{ prod.stock }}</td>
+                                                    <td>{{ prod.stockMinimo }}</td>
+                                                    <td class="text-danger">-{{ prod.diferencia }}</td>
+                                                    <td>{{ prod.ubicacion }}</td>
+                                                    <td>
+                                                        <span class="badge" 
+                                                              [class.bg-danger]="prod.estado === 'Agotado'"
+                                                              [class.bg-warning]="prod.estado === 'Stock Bajo'">
+                                                            {{ prod.estado }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            } @else {
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-warning" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-3">Cargando reporte...</p>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Reporte Movimientos -->
+                        <div class="tab-pane fade" id="reporteMovimientos">
+                            @if (reporteMovimientos) {
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <p class="text-muted">
+                                            Período: {{ reporteMovimientos.fechaInicio | date:'dd/MM/yyyy' }} - 
+                                            {{ reporteMovimientos.fechaFin | date:'dd/MM/yyyy' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3>{{ reporteMovimientos.resumen.totalMovimientos }}</h3>
+                                                <p class="mb-0">Total Movimientos</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-success">{{ reporteMovimientos.resumen.totalEntradas }}</h3>
+                                                <p class="mb-0">Entradas</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 class="text-danger">{{ reporteMovimientos.resumen.totalSalidas }}</h3>
+                                                <p class="mb-0">Salidas</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card text-center">
+                                            <div class="card-body">
+                                                <h3 [class.text-success]="reporteMovimientos.resumen.diferencia >= 0"
+                                                    [class.text-danger]="reporteMovimientos.resumen.diferencia < 0">
+                                                    {{ reporteMovimientos.resumen.diferencia }}
+                                                </h3>
+                                                <p class="mb-0">Diferencia</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Producto</th>
+                                                <th>Código</th>
+                                                <th>Tipo</th>
+                                                <th>Cantidad</th>
+                                                <th>Stock Anterior</th>
+                                                <th>Stock Nuevo</th>
+                                                <th>Observaciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (mov of reporteMovimientos.movimientos; track mov.movimientoId) {
+                                                <tr>
+                                                    <td>{{ mov.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                                                    <td>{{ mov.productoNombre }}</td>
+                                                    <td>{{ mov.productoCodigo }}</td>
+                                                    <td>
+                                                        <span class="badge" 
+                                                              [class.bg-success]="mov.tipo === 'Entrada'"
+                                                              [class.bg-danger]="mov.tipo === 'Salida'">
+                                                            {{ mov.tipo }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ mov.cantidad }}</td>
+                                                    <td>{{ mov.stockAnterior }}</td>
+                                                    <td>{{ mov.stockNuevo }}</td>
+                                                    <td>{{ mov.observaciones || '-' }}</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            } @else {
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-info" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="mt-3">Cargando reporte...</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
