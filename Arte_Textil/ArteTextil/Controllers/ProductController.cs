@@ -51,8 +51,8 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
-        // PUT: api/product
-        [HttpPut]
+        // PUT: api/product/{id}
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromBody] ProductDto dto)
         {
             var result = await _productBusiness.Update(dto);

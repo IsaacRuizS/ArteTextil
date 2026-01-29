@@ -98,6 +98,7 @@ namespace ArteTextil.Business
                 var product = _mapper.Map<Product>(dto);
                 product.IsActive = true;
                 product.CreatedAt = DateTime.UtcNow;
+                product.Status = "Activo";
 
                 await _repositoryProduct.AddAsync(product);
 
@@ -169,7 +170,6 @@ namespace ArteTextil.Business
                 product.Price = dto.price;
                 product.Stock = dto.stock;
                 product.MinStock = dto.minStock;
-                product.Status = dto.status;
                 product.CategoryId = dto.categoryId;
                 product.SupplierId = dto.supplierId;
                 product.IsActive = dto.isActive;
