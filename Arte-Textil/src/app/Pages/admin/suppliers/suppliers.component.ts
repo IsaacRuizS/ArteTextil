@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SupplierModel } from '../../../shared/models/supplier.model';
@@ -8,7 +8,9 @@ import { SharedService } from '../../../services/shared.service';
 @Component({
     selector: 'app-suppliers',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Default,
     imports: [CommonModule, ReactiveFormsModule],
+    providers: [FormBuilder],
     templateUrl: './suppliers.component.html',
     styleUrls: ['./suppliers.component.scss']
 })
@@ -49,23 +51,23 @@ export class SuppliersComponent implements OnInit {
 
         this.sharedService.setLoading(true);
 
-        this.apiSupplierService.getAll().then(
-            (suppliers: SupplierModel[]) => {
+        this.apiSupplierService.getAll().subscribe({
+            next: (suppliers: SupplierModel[]) => {
 
                 this.suppliers = suppliers;
                 this.suppliersOrigins = suppliers;
 
-
+                this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
             },
-            (err: any) => {
+            error: () => {
                 this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
             }
-        );
+        });
+    }
 
-    } 
+
+
 
     onSearch(event: any) {
         this.searchTerm = event.target.value;
@@ -77,9 +79,9 @@ export class SuppliersComponent implements OnInit {
         this.suppliers = this.suppliersOrigins;
 
         if (!this.searchTerm || this.searchTerm.trim() === '') return;
-        
+
         const term = this.searchTerm.toLowerCase();
-        
+
         this.suppliers = this.suppliers.filter(s =>
             s.name.toLowerCase().includes(term) ||
             s.email.toLowerCase().includes(term) ||
@@ -99,7 +101,7 @@ export class SuppliersComponent implements OnInit {
         this.isEditing = true;
         this.supplierForm.patchValue(supplier);
         this.showFormModal = true;
-    } 
+    }
 
     saveSupplier() {
 
@@ -107,15 +109,15 @@ export class SuppliersComponent implements OnInit {
             this.supplierForm.markAllAsTouched();
             return;
         }
-        
+
         this.sharedService.setLoading(true);
 
-        if(this.isEditing) {
+        if (this.isEditing) {
             this._editSupplier(this.supplierForm.value);
         } else {
             this._createSupplier(this.supplierForm.value);
         }
-    } 
+    }
 
     // DELETE
     openDeleteModal(supplier: SupplierModel) {
@@ -127,56 +129,57 @@ export class SuppliersComponent implements OnInit {
 
         if (this.supplierToDelete) {
 
-            this._deleteSupplier(this.supplierToDelete.supplierId); 
+            this._deleteSupplier(this.supplierToDelete.supplierId);
         }
     }
 
     private _createSupplier(supplierData: SupplierModel) {
 
-        this.apiSupplierService.create(supplierData).then(
-            (suppliers: SupplierModel) => {
+        this.apiSupplierService.create(supplierData).subscribe({
+            next: () => {
 
                 this.showFormModal = false;
                 this.loadSuppliers();
 
                 this.sharedService.setLoading(false);
             },
-            (err: any) => {
+            error: () => {
                 this.sharedService.setLoading(false);
             }
-        );
+        });
     }
 
     private _editSupplier(supplierData: SupplierModel) {
 
-        this.apiSupplierService.update(supplierData).then(
-            (suppliers: SupplierModel) => {
+        this.apiSupplierService.update(supplierData).subscribe({
+            next: () => {
 
                 this.showFormModal = false;
                 this.loadSuppliers();
 
                 this.sharedService.setLoading(false);
             },
-            (err: any) => {
+            error: () => {
                 this.sharedService.setLoading(false);
             }
-        );
+        });
     }
 
     private _deleteSupplier(supplierId: number) {
 
-        this.apiSupplierService.delete(supplierId).then(
-            (deleted: boolean) => {
-                
+        this.apiSupplierService.delete(supplierId).subscribe({
+            next: () => {
+
                 this.showDeleteModal = false;
                 this.supplierToDelete = null;
                 this.loadSuppliers();
 
                 this.sharedService.setLoading(false);
             },
-            (err: any) => {
+            error: () => {
                 this.sharedService.setLoading(false);
             }
-        );
+        });
     }
+
 }

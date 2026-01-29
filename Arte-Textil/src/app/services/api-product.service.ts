@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { ApiBaseService } from './api-base.service';
 import { ProductModel } from '../shared/models/product.model';
 
 @Injectable({
     providedIn: 'root'
-})  
+})
 export class ApiProductService extends ApiBaseService {
 
     constructor(public override http: HttpClient) {
@@ -14,102 +16,89 @@ export class ApiProductService extends ApiBaseService {
     }
 
     // GET: api/product/all
-    getAll(): Promise<ProductModel[]> {
-        return this.http.get(`${this.baseUrl}/api/product/all`, this.getHttpOptions())
-            .toPromise()
-            .then((res: any) => {
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error desconocido al obtener productos.');
-                }
+    getAll(): Observable<ProductModel[]> {
 
-                return res?.data.map((item: any) => new ProductModel(item));
-            })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
+        return this.http.get<any>(`${this.baseUrl}/api/product/all`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
 
-                return Promise.reject(new Error(`Error al cargar productos: ${errMsg}`));
-            });
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error desconocido al obtener productos.');
+                    }
+
+                    if (!Array.isArray(res.data)) return [];
+
+                    return res.data.map((item: any) => new ProductModel(item));
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // GET: api/product/{id}
-    getById(id: number): Promise<ProductModel> {
-        return this.http.get(`${this.baseUrl}/api/product/${id}`, this.getHttpOptions())
-            .toPromise()
-            .then((res: any) => {
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al obtener el producto.');
-                }
+    getById(id: number): Observable<ProductModel> {
 
-                return new ProductModel(res?.data);
-            })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
+        return this.http.get<any>(`${this.baseUrl}/api/product/${id}`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
 
-                return Promise.reject(new Error(`Error al cargar producto: ${errMsg}`));
-            });
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al obtener el producto.');
+                    }
+
+                    return new ProductModel(res.data);
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // POST: api/product
-    create(data: ProductModel): Promise<ProductModel> {
-        return this.http.post(`${this.baseUrl}/api/product`, data, this.getHttpOptions())
-            .toPromise()
-            .then((res: any) => {
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al crear el producto.');
-                }
+    create(data: ProductModel): Observable<ProductModel> {
 
-                return new ProductModel(res?.data);
-            })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
+        return this.http.post<any>(`${this.baseUrl}/api/product`, data, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
 
-                return Promise.reject(new Error(`Error al crear producto: ${errMsg}`));
-            });
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al crear el producto.');
+                    }
+
+                    return new ProductModel(res.data);
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
-    // PUT: api/product
-    update(data: ProductModel): Promise<ProductModel> {
-        return this.http.put(`${this.baseUrl}/api/product`, data, this.getHttpOptions())
-            .toPromise()
-            .then((res: any) => {
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al actualizar el producto.');
-                }
+    // PUT: api/product/{id}
+    update(data: ProductModel): Observable<ProductModel> {
 
-                return new ProductModel(res?.data);
-            })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
+        return this.http.put<any>(`${this.baseUrl}/api/product/${data.productId}`, data, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
 
-                return Promise.reject(new Error(`Error al actualizar producto: ${errMsg}`));
-            });
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al actualizar el producto.');
+                    }
+
+                    return new ProductModel(res.data);
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // DELETE: api/product/{id}
-    delete(id: number): Promise<boolean> {
-        return this.http.delete(`${this.baseUrl}/api/product/${id}`, this.getHttpOptions())
-            .toPromise()
-            .then((res: any) => {
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al eliminar el producto.');
-                }
+    delete(id: number): Observable<boolean> {
 
-                return res?.data === true;
-            })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
+        return this.http.delete<any>(`${this.baseUrl}/api/product/${id}`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
 
-                return Promise.reject(new Error(`Error al eliminar producto: ${errMsg}`));
-            });
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al eliminar el producto.');
+                    }
+
+                    return res.data === true;
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 }

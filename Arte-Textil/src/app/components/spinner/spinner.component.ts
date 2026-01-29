@@ -20,7 +20,7 @@ export class SpinnerComponent implements OnDestroy {
     ) { 
 
         // Set loading from state manual
-        this.loadingSubscription = this.sharedService.loadingSubject.subscribe((isVisible: boolean) => {
+        this.loadingSubscription = this.sharedService.loading$.subscribe((isVisible: boolean) => {
 
 
             if (isVisible){ 
