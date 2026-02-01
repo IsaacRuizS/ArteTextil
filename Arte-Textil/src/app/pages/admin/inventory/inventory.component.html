@@ -1,0 +1,527 @@
+<div class="inventory-wrapper p-4">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Gestión de Inventario</h2>
+            <p class="text-muted mb-0 small">Control completo de entradas, salidas y reportes</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-danger" (click)="openAlertsModal()" *ngIf="alerts.length > 0">
+                <i class="mdi mdi-alert-circle me-2"></i>
+                <strong>Alertas de Stock ({{ alerts.length }})</strong>
+            </button>
+            <button class="btn btn-success btn-lg" (click)="openQuickMovementModal()">
+                <i class="mdi mdi-plus-circle me-2"></i>
+                <strong>Registrar Movimiento</strong>
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" (click)="toggleReportDropdown()" [attr.aria-expanded]="showReportDropdown">
+                    <i class="mdi mdi-file-chart me-2"></i><strong>Reportes</strong>
+                </button>
+                <ul class="dropdown-menu" [class.show]="showReportDropdown" style="right: 0; left: auto;">
+                    <li><a class="dropdown-item" (click)="generateGeneralReport(); showReportDropdown = false">
+                        <i class="mdi mdi-chart-bar text-primary me-2"></i>Reporte General
+                    </a></li>
+                    <li><a class="dropdown-item" (click)="generateCategoryReport(); showReportDropdown = false">
+                        <i class="mdi mdi-shape text-info me-2"></i>Por Categoría
+                    </a></li>
+                    <li><a class="dropdown-item" (click)="generateLowStockReport(); showReportDropdown = false">
+                        <i class="mdi mdi-alert text-warning me-2"></i>Stock Bajo
+                    </a></li>
+                    <li><a class="dropdown-item" (click)="generateTopProductsReport(); showReportDropdown = false">
+                        <i class="mdi mdi-star text-success me-2"></i>Top Productos
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" (click)="generateValueReport(); showReportDropdown = false">
+                        <i class="mdi mdi-currency-usd text-dark me-2"></i>Valor de Inventario
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTA DE STOCK BAJO BANNER -->
+    @if (alerts.length > 0) {
+    <div class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+        <i class="mdi mdi-alert-circle me-3" style="font-size: 2rem;"></i>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-1">
+                <strong>⚠️ Atención: {{ alerts.length }} producto(s) con stock bajo</strong>
+            </h5>
+            <p class="mb-0">
+                Hay productos que requieren reabastecimiento. 
+                <span *ngIf="criticalAlertsCount > 0" class="badge bg-danger ms-2">
+                    {{ criticalAlertsCount }} Crítico(s)
+                </span>
+            </p>
+        </div>
+        <button class="btn btn-light" (click)="openAlertsModal()">
+            <i class="mdi mdi-eye me-1"></i>Ver Detalles
+        </button>
+    </div>
+    }
+
+    <!-- FILTERS -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <input type="text" class="form-control" placeholder="Buscar por nombre, código o categoría..."
+                (input)="onSearch($event)">
+        </div>
+        <div class="col-md-4">
+            <button class="btn w-100" 
+                [class.btn-warning]="filterLowStock" 
+                [class.btn-outline-warning]="!filterLowStock"
+                (click)="onToggleLowStockFilter()">
+                <i class="mdi mdi-filter me-1"></i>{{ filterLowStock ? 'Mostrando Stock Bajo' : 'Filtrar Stock Bajo' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- INVENTORY LIST -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Código</th>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock Actual</th>
+                        <th>Stock Mínimo</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of inventory">
+                        <td class="ps-4">
+                            <code>{{ item.productCode || 'N/A' }}</code>
+                        </td>
+                        <td class="fw-semibold">{{ item.productName }}</td>
+                        <td>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ item.categoryName }}</span>
+                        </td>
+                        <td>₡{{ item.price | number:'1.2-2' }}</td>
+                        <td>
+                            <span [class]="getStockClass(item)">
+                                {{ item.stock }}
+                                <i *ngIf="item.isLowStock" class="mdi mdi-alert-circle ms-1"></i>
+                            </span>
+                        </td>
+                        <td>{{ item.minStock }}</td>
+                        <td>
+                            <span class="badge rounded-pill" 
+                                [class.bg-success-subtle]="!item.isLowStock"
+                                [class.text-success]="!item.isLowStock"
+                                [class.bg-danger-subtle]="item.stock === 0"
+                                [class.text-danger]="item.stock === 0"
+                                [class.bg-warning-subtle]="item.isLowStock && item.stock > 0"
+                                [class.text-warning]="item.isLowStock && item.stock > 0">
+                                {{ item.stock === 0 ? 'Agotado' : (item.isLowStock ? 'Bajo' : 'Normal') }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-info" (click)="checkProductAvailability(item)" 
+                                    title="Consultar disponibilidad">
+                                    <i class="mdi mdi-information-outline"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" (click)="viewProductHistory(item)"
+                                    title="Ver historial">
+                                    <i class="mdi mdi-history"></i>
+                                </button>
+                                <button class="btn btn-sm btn-success" (click)="openMovementModal(item)">
+                                    <i class="mdi mdi-package-variant me-1"></i><strong>Entrada/Salida</strong>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MOVEMENT MODAL -->
+@if (showMovementModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0 bg-success-subtle">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-package-variant text-success me-2"></i>
+                    Registrar Movimiento de Inventario
+                </h5>
+                <button type="button" class="btn-close" (click)="showMovementModal = false"></button>
+            </div>
+            <div class="modal-body">
+                @if (selectedProduct) {
+                <div class="alert alert-info mb-3">
+                    <strong>Producto:</strong> {{ selectedProduct.productName }}<br>
+                    <strong>Stock actual:</strong> <span class="badge bg-primary">{{ selectedProduct.stock }}</span>
+                </div>
+                }
+                <form [formGroup]="movementForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Tipo de Movimiento</label>
+                        <select class="form-select" formControlName="type">
+                            <option *ngFor="let type of movementTypes" [value]="type">{{ type }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Cantidad</label>
+                        <input type="number" class="form-control" formControlName="quantity" min="1"
+                            [class.is-invalid]="movementForm.get('quantity')?.invalid && movementForm.get('quantity')?.touched">
+                        <div class="form-text">Para tipo "Ajuste", ingrese el nuevo stock total</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Razón/Motivo</label>
+                        <textarea class="form-control" formControlName="reason" rows="3" 
+                            placeholder="Ej: Compra a proveedor, venta, ajuste por conteo físico..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" (click)="showMovementModal = false">Cancelar</button>
+                <button type="button" class="btn btn-success px-4" (click)="saveMovement()">
+                    <i class="mdi mdi-check me-1"></i>Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- QUICK MOVEMENT MODAL (seleccionar producto) -->
+@if (showQuickMovementModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0 bg-success-subtle">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-plus-circle text-success me-2"></i>
+                    Registrar Movimiento Rápido
+                </h5>
+                <button type="button" class="btn-close" (click)="showQuickMovementModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="movementForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Seleccionar Producto *</label>
+                        <select class="form-select" formControlName="productId"
+                            [class.is-invalid]="movementForm.get('productId')?.invalid && movementForm.get('productId')?.touched">
+                            <option [value]="0">-- Seleccione un producto --</option>
+                            <option *ngFor="let item of inventoryOrigin" [value]="item.productId">
+                                {{ item.productName }} - Stock: {{ item.stock }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Tipo de Movimiento</label>
+                        <select class="form-select" formControlName="type">
+                            <option *ngFor="let type of movementTypes" [value]="type">{{ type }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Cantidad</label>
+                        <input type="number" class="form-control" formControlName="quantity" min="1"
+                            [class.is-invalid]="movementForm.get('quantity')?.invalid && movementForm.get('quantity')?.touched">
+                        <div class="form-text">Para tipo "Ajuste", ingrese el nuevo stock total</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Razón/Motivo</label>
+                        <textarea class="form-control" formControlName="reason" rows="3" 
+                            placeholder="Ej: Compra a proveedor, venta, ajuste por conteo físico..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light" (click)="showQuickMovementModal = false">Cancelar</button>
+                <button type="button" class="btn btn-success px-4" (click)="saveMovement()">
+                    <i class="mdi mdi-check me-1"></i>Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- AVAILABILITY DETAIL MODAL (RF-03-003) -->
+@if (showAvailabilityModal && selectedProduct) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-information-outline text-info me-2"></i>Disponibilidad de Material
+                </h5>
+                <button type="button" class="btn-close" (click)="showAvailabilityModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <h6 class="text-muted">Producto</h6>
+                        <h5>{{ selectedProduct.productName }}</h5>
+                        <small class="text-muted">Código: {{ selectedProduct.productCode || 'N/A' }}</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h3 [class]="getStockClass(selectedProduct)">{{ selectedProduct.stock }}</h3>
+                                <small class="text-muted">Stock Actual</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h3>{{ selectedProduct.minStock }}</h3>
+                                <small class="text-muted">Stock Mínimo</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h3 class="text-primary">₡{{ selectedProduct.price | number:'1.2-2' }}</h3>
+                                <small class="text-muted">Precio Unitario</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h3 class="text-success">₡{{ (selectedProduct.stock * selectedProduct.price) | number:'1.2-2' }}</h3>
+                                <small class="text-muted">Valor Total</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert" 
+                    [class.alert-danger]="selectedProduct.stock === 0"
+                    [class.alert-warning]="selectedProduct.isLowStock && selectedProduct.stock > 0"
+                    [class.alert-success]="!selectedProduct.isLowStock && selectedProduct.stock > 0">
+                    <strong>Estado:</strong> 
+                    @if (selectedProduct.stock === 0) {
+                        <span>❌ Producto agotado - Requiere reabastecimiento inmediato</span>
+                    } @else if (selectedProduct.isLowStock) {
+                        <span>⚠️ Stock bajo - Se recomienda reabastecer pronto</span>
+                    } @else {
+                        <span>✅ Stock disponible - Sin alertas</span>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-primary" (click)="showAvailabilityModal = false">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- HISTORY MODAL -->
+@if (showHistoryModal && selectedProduct) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-history text-secondary me-2"></i>Historial de Movimientos - {{ selectedProduct.productName }}
+                </h5>
+                <button type="button" class="btn-close" (click)="showHistoryModal = false"></button>
+            </div>
+            <div class="modal-body">
+                @if (productHistory.length === 0) {
+                    <div class="text-center py-4">
+                        <i class="mdi mdi-inbox text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted">No hay movimientos registrados para este producto</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-sm">
+                            <thead class="sticky-top bg-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                    <th>Stock Anterior</th>
+                                    <th>Stock Nuevo</th>
+                                    <th>Razón</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let mov of productHistory">
+                                    <td><small>{{ mov.createdAt | date:'dd/MM/yy HH:mm' }}</small></td>
+                                    <td>
+                                        <span class="badge"
+                                            [class.bg-success]="mov.type === 'Entrada'"
+                                            [class.bg-danger]="mov.type === 'Salida'"
+                                            [class.bg-warning]="mov.type === 'Ajuste'">
+                                            {{ mov.type }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ mov.quantity }}</strong></td>
+                                    <td>{{ mov.previousStock }}</td>
+                                    <td><strong>{{ mov.newStock }}</strong></td>
+                                    <td><small>{{ mov.reason || 'Sin razón especificada' }}</small></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-primary" (click)="showHistoryModal = false">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ALERTS MODAL -->
+@if (showAlertsModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-alert-circle text-danger me-2"></i>Alertas de Stock Bajo
+                </h5>
+                <button type="button" class="btn-close" (click)="showAlertsModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <div *ngFor="let alert of alerts" class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ alert.productName }}</h6>
+                                <small class="text-muted">Código: {{ alert.productCode || 'N/A' }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge rounded-pill" [class]="getAlertClass(alert)">
+                                    {{ alert.alertLevel }}
+                                </span>
+                                <div class="small mt-1">
+                                    Stock: <strong>{{ alert.currentStock }}</strong> / Min: {{ alert.minStock }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-primary" (click)="showAlertsModal = false">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- REPORT MODAL -->
+@if (showReportModal && report) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0 bg-primary-subtle">
+                <div>
+                    <h5 class="modal-title fw-bold">
+                        <i class="mdi mdi-file-chart text-primary me-2"></i>
+                        @if (reportType === 'general') { Reporte General de Inventario }
+                        @else if (reportType === 'category') { Reporte por Categoría }
+                        @else if (reportType === 'lowstock') { Reporte de Stock Bajo }
+                        @else if (reportType === 'top') { Top 20 Productos por Valor }
+                        @else if (reportType === 'value') { Reporte de Valor de Inventario }
+                    </h5>
+                    <small class="text-muted">Generado: {{ report.generatedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                <button type="button" class="btn-close" (click)="showReportModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary-subtle border-0">
+                            <div class="card-body text-center">
+                                <i class="mdi mdi-package-variant text-primary" style="font-size: 2rem;"></i>
+                                <h3 class="text-primary mb-0">{{ report.totalProducts }}</h3>
+                                <small class="text-muted">Total Productos</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning-subtle border-0">
+                            <div class="card-body text-center">
+                                <i class="mdi mdi-alert text-warning" style="font-size: 2rem;"></i>
+                                <h3 class="text-warning mb-0">{{ report.lowStockProducts }}</h3>
+                                <small class="text-muted">Stock Bajo</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger-subtle border-0">
+                            <div class="card-body text-center">
+                                <i class="mdi mdi-close-circle text-danger" style="font-size: 2rem;"></i>
+                                <h3 class="text-danger mb-0">{{ report.outOfStockProducts }}</h3>
+                                <small class="text-muted">Agotados</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success-subtle border-0">
+                            <div class="card-body text-center">
+                                <i class="mdi mdi-currency-usd text-success" style="font-size: 2rem;"></i>
+                                <h3 class="text-success mb-0">₡{{ report.totalInventoryValue | number:'1.2-2' }}</h3>
+                                <small class="text-muted">Valor Total</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Table -->
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm table-hover">
+                        <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th class="text-end">Stock</th>
+                                <th class="text-end">Min Stock</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-end">Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of report.items">
+                                <td><code>{{ item.productCode || 'N/A' }}</code></td>
+                                <td><strong>{{ item.productName }}</strong></td>
+                                <td><span class="badge bg-secondary-subtle text-secondary">{{ item.categoryName }}</span></td>
+                                <td class="text-end" [class]="getStockClass(item)">{{ item.stock }}</td>
+                                <td class="text-end">{{ item.minStock }}</td>
+                                <td class="text-end">₡{{ item.price | number:'1.2-2' }}</td>
+                                <td class="text-end"><strong>₡{{ (item.stock * item.price) | number:'1.2-2' }}</strong></td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="sticky-bottom bg-light">
+                            <tr>
+                                <th colspan="6" class="text-end">TOTAL:</th>
+                                <th class="text-end text-success">₡{{ report.totalInventoryValue | number:'1.2-2' }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="mdi mdi-printer me-1"></i>Imprimir
+                </button>
+                <button type="button" class="btn btn-primary" (click)="showReportModal = false">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+}

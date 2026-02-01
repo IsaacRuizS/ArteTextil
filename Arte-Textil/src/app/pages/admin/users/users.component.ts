@@ -1,191 +1,139 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { UserModel } from '../../../shared/models/user.model';
-import { RolModel } from '../../../shared/models/rol.model';
-import { ApiUserService } from '../../../services/api-user.service';
-import { ApiRolService } from '../../../services/api-role.service';
-import { SharedService } from '../../../services/shared.service';
+import { FormsModule } from '@angular/forms';
+import { UserService, User } from '../../../services/user.service';
+import { RoleService, Role } from '../../../services/role.service';
 
 @Component({
     selector: 'app-users',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
 
-    users: UserModel[] = [];
-    roles: RolModel[] = [];
-    usersOrigins: UserModel[] = [];
-    userForm: FormGroup;
+    users: User[] = [];
+    roles: Role[] = [];
 
-    // UI State
+    // Filters
+    selectedRoleFilter: number | string = 'Todos';
+
+    // Modal State
     showFormModal = false;
     showDeleteModal = false;
+
+    // Edit/Create State
     isEditing = false;
-    userToDelete: UserModel | null = null;
-    searchTerm = '';
+    currentUser: User = this.getEmptyUser();
 
     constructor(
-        private apiUserService: ApiUserService,
-        private apiRolService: ApiRolService,
-        private sharedService: SharedService,
-        private cdr: ChangeDetectorRef,
-        private fb: FormBuilder
-    ) {
-        this.userForm = this.fb.group({
-            userId: [0],
-            name: ['', [Validators.required, Validators.minLength(3)]],
-            contactPerson: ['', Validators.required],
-            email: ['', [Validators.required, Validators.email]],
-            phone: ['', [Validators.required, Validators.minLength(8)]],
-            isActive: [true]
-        });
-    }
+        private userService: UserService,
+        private roleService: RoleService
+    ) { }
 
     ngOnInit(): void {
-        this.loadUsers();
+        this.loadData();
     }
 
-    loadUsers() {
+    loadData() {
+        this.users = this.userService.getUsers();
+        this.roles = this.roleService.getRoles();
+    }
 
-        this.sharedService.setLoading(true);
-
-        this.apiUserService.getAll().then(
-            (users: UserModel[]) => {
-
-                this.users = users;
-                this.usersOrigins = users;
-
-
-                this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
-            }
-        );
-
-    } 
+    get filteredUsers() {
+        if (this.selectedRoleFilter === 'Todos') {
+            return this.users;
+        }
+        return this.users.filter(u => u.roleId === +this.selectedRoleFilter);
+    }
 
     getRoleName(roleId: number): string {
         const role = this.roles.find(r => r.roleId === roleId);
         return role ? role.name : 'Desconocido';
     }
 
-    onSearch(event: any) {
-        this.searchTerm = event.target.value;
-        this.onFilterInfo();
+    getEmptyUser(): User {
+        return {
+            userId: 0,
+            fullName: '',
+            email: '',
+            roleId: 0, // Invalid initially to force selection
+            phone: '',
+            isActive: true,
+            password: ''
+        };
     }
 
-    onFilterInfo() {
-
-        this.users = this.usersOrigins;
-
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
-        
-        const term = this.searchTerm.toLowerCase();
-        
-        this.users = this.users.filter(s =>
-            s.fullName.toLowerCase().includes(term) ||
-            s.email.toLowerCase().includes(term) ||
-            s.phone.toLowerCase().includes(term) ||
-            s.lastLoginAt ||
-            this.getRoleName(s.roleId).toLowerCase().includes(term)
-        );
-    }
-
+    // ======================================
     // ACTIONS
+    // ======================================
+
     openCreateModal() {
         this.isEditing = false;
-        this.userForm.reset({ userId: 0, isActive: true });
+        this.currentUser = this.getEmptyUser();
+        // Set default role if available
+        if (this.roles.length > 0) {
+            this.currentUser.roleId = this.roles[0].roleId;
+        }
         this.showFormModal = true;
     }
 
-    openEditModal(user: UserModel) {
+    openEditModal(user: User) {
         this.isEditing = true;
-        this.userForm.patchValue(user);
+        // Clone to avoid direct mutation before save
+        this.currentUser = { ...user };
         this.showFormModal = true;
-    } 
+    }
+
+    closeFormModal() {
+        this.showFormModal = false;
+    }
 
     saveUser() {
-        if (this.userForm.invalid) {
-            this.userForm.markAllAsTouched();
+        // Basic Validation
+        if (!this.currentUser.fullName || !this.currentUser.email) {
+            alert('Por favor complete el nombre y el correo.');
             return;
         }
-        
-        this.sharedService.setLoading(true);
 
-        if(this.isEditing) {
-            this._editUser(this.userForm.value);
-        } else {
-            this._createUser(this.userForm.value);
+        try {
+            if (this.isEditing) {
+                this.userService.updateUser(this.currentUser);
+                alert('Usuario actualizado correctamente.');
+            } else {
+                this.userService.createUser(this.currentUser);
+                alert('Usuario creado correctamente.');
+            }
+            this.loadData(); // Refresh list
+            this.closeFormModal();
+        } catch (error: any) {
+            alert(error.message || 'Ocurrió un error al guardar el usuario.');
         }
-    } 
+    }
 
-    // DELETE
-    openDeleteModal(user: UserModel) {
+    // ======================================
+    // DELETE / DEACTIVATE
+    // ======================================
+
+    userToDelete: User | null = null;
+
+    openDeleteConfirmation(user: User) {
         this.userToDelete = user;
         this.showDeleteModal = true;
     }
 
     confirmDelete() {
-
         if (this.userToDelete) {
-
-            this._deleteUser(this.userToDelete.userId); 
+            this.userService.deleteUser(this.userToDelete.userId);
+            this.loadData();
+            this.userToDelete = null;
+            this.showDeleteModal = false;
         }
     }
 
-    private _createUser(userData: UserModel) {
-
-        this.apiUserService.create(userData).then(
-            (users: UserModel) => {
-
-                this.showFormModal = false;
-                this.loadUsers();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
-    }
-
-    private _editUser(userData: UserModel) {
-
-        this.apiUserService.update(userData).then(
-            (users: UserModel) => {
-
-                this.showFormModal = false;
-                this.loadUsers();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
-    }
-
-    private _deleteUser(userId: number) {
-
-        this.apiUserService.delete(userId).then(
-            (deleted: boolean) => {
-                
-                this.showDeleteModal = false;
-                this.userToDelete = null;
-                this.loadUsers();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
+    closeDeleteModal() {
+        this.userToDelete = null;
+        this.showDeleteModal = false;
     }
 }

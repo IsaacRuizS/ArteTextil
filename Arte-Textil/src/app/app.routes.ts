@@ -12,82 +12,86 @@ export const routes: Routes = [
             // HR Routes
             {
                 path: 'hr/attendance',
-                loadComponent: () => import('./pages/hr/attendance/attendance.component').then(m => m.AttendanceComponent)
+                loadComponent: () => import('./Pages/hr/attendance/attendance.component').then(m => m.AttendanceComponent)
             },
             {
                 path: 'hr/vacations',
-                loadComponent: () => import('./pages/hr/vacations/vacations.component').then(m => m.VacationsComponent)
+                loadComponent: () => import('./Pages/hr/vacations/vacations.component').then(m => m.VacationsComponent)
             },
             {
                 path: 'hr/payroll',
-                loadComponent: () => import('./pages/hr/payroll/payroll.component').then(m => m.PayrollComponent)
+                loadComponent: () => import('./Pages/hr/payroll/payroll.component').then(m => m.PayrollComponent)
             },
             // Existing Routes
             {
                 path: 'inventory',
-                loadComponent: () => import('./pages/inventory/inventory').then(m => m.InventoryComponent)
+                loadComponent: () => import('./Pages/admin/inventory/inventory.component').then(m => m.InventoryComponent)
             },
             {
                 path: 'products',
                 loadComponent: () =>
-                    import('./pages/product-catalog/product-catalog.component')
+                    import('./Pages/product-catalog/product-catalog.component')
                         .then(m => m.ProductCatalogComponent)
             },
             {
                 path: 'categories',
                 loadComponent: () =>
-                    import('./pages/category-management/category-management.component')
+                    import('./Pages/category-management/category-management.component')
                         .then(m => m.CategoryManagementComponent)
             },
             {
                 path: 'promotions',
-                loadComponent: () => import('./pages/promotion/promotion.component').then(m => m.PromotionComponent)
+                loadComponent: () => import('./Pages/promotion/promotion.component').then(m => m.PromotionComponent)
             },
             {
                 path: 'analytics',
-                loadComponent: () => import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent)
+                loadComponent: () => import('./Pages/analytics/analytics.component').then(m => m.AnalyticsComponent)
             },
             {
                 path: 'customer-analytics',
-                loadComponent: () => import('./pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
+                loadComponent: () => import('./Pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
             },
             {
                 path: 'dashboard',
-                loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+                loadComponent: () => import('./Pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
             },
             {
                 path: 'reports',
-                loadComponent: () => import('./pages/reports/reports.component').then(m => m.ReportsComponent)
+                loadComponent: () => import('./Pages/reports/reports.component').then(m => m.ReportsComponent)
             },
             {
                 path: 'orders-management',
-                loadComponent: () => import('./pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent)
+                loadComponent: () => import('./Pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent)
             },
             {
                 path: 'admin/roles',
-                loadComponent: () => import('./pages/admin/roles/roles.component').then(m => m.RolesComponent)
+                loadComponent: () => import('./Pages/admin/roles/roles.component').then(m => m.RolesComponent)
             },
             {
                 path: 'admin/users',
-                loadComponent: () => import('./pages/admin/users/users.component').then(m => m.UsersComponent)
+                loadComponent: () => import('./Pages/admin/users/users.component').then(m => m.UsersComponent)
             },
             {
                 path: 'admin/suppliers',
-                loadComponent: () => import('./pages/admin/suppliers/suppliers.component').then(m => m.SuppliersComponent)
+                loadComponent: () => import('./Pages/admin/suppliers/suppliers.component').then(m => m.SuppliersComponent)
+            },
+            {
+                path: 'admin/inventory',
+                loadComponent: () => import('./Pages/admin/inventory/inventory.component').then(m => m.InventoryComponent)
             },
             {
                 path: 'admin/products',
-                loadComponent: () => import('./pages/admin/products/products.component').then(m => m.ProductsComponent)
+                loadComponent: () => import('./Pages/admin/products/products.component').then(m => m.ProductsComponent)
             },
 
             {
                 path: 'production',
-                loadComponent: () => import('./pages/production/production-layout.component').then(m => m.ProductionLayoutComponent),
+                loadComponent: () => import('./Pages/production/production-layout.component').then(m => m.ProductionLayoutComponent),
                 children: [
                     { path: '', redirectTo: 'tracking', pathMatch: 'full' },
-                    { path: 'tracking', loadComponent: () => import('./pages/production/tracking/production-tracking.component').then(m => m.ProductionTrackingComponent) },
-                    { path: 'control', loadComponent: () => import('./pages/production/control/order-control.component').then(m => m.OrderControlComponent) },
-                    { path: 'reports', loadComponent: () => import('./pages/production/reports/production-reports.component').then(m => m.ProductionReportsComponent) }
+                    { path: 'tracking', loadComponent: () => import('./Pages/production/tracking/production-tracking.component').then(m => m.ProductionTrackingComponent) },
+                    { path: 'control', loadComponent: () => import('./Pages/production/control/order-control.component').then(m => m.OrderControlComponent) },
+                    { path: 'reports', loadComponent: () => import('./Pages/production/reports/production-reports.component').then(m => m.ProductionReportsComponent) }
                 ]
             }
         ]
@@ -99,20 +103,20 @@ export const routes: Routes = [
             //route to load the componenth and inside the comp load the html and scss 
             {
                 path: 'marketplace',
-                loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
+                loadComponent: () => import('./Pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
             },
             {
                 path: 'product/:id',
-                loadComponent: () => import('./pages/marketplace/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+                loadComponent: () => import('./Pages/marketplace/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
             },
             {
                 path: 'cart',
-                loadComponent: () => import('./pages/marketplace/cart/cart.component').then(m => m.CartComponent)
+                loadComponent: () => import('./Pages/marketplace/cart/cart.component').then(m => m.CartComponent)
             },
             {
                 path: 'quoate',
                 loadComponent: () =>
-                    import('./pages/marketplace/quote/quote.component')
+                    import('./Pages/marketplace/quote/quote.component')
                         .then(m => m.QuoteComponent)
             }
 

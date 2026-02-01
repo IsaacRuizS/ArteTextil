@@ -1,0 +1,148 @@
+.inventory-wrapper {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+
+    h2 {
+        color: #2c3e50;
+    }
+
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+
+        .table {
+            margin-bottom: 0;
+
+            thead {
+                th {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    color: #6c757d;
+                    border-bottom: 2px solid #dee2e6;
+                    padding: 1rem 0.75rem;
+                }
+            }
+
+            tbody {
+                tr {
+                    transition: background-color 0.2s;
+
+                    &:hover {
+                        background-color: #f8f9fa;
+                    }
+
+                    td {
+                        padding: 1rem 0.75rem;
+                        vertical-align: middle;
+
+                        code {
+                            background-color: #e9ecef;
+                            padding: 0.25rem 0.5rem;
+                            border-radius: 4px;
+                            font-size: 0.875rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        &.btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    .dropdown-menu {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        padding: 0.5rem 0;
+
+        .dropdown-item {
+            padding: 0.625rem 1.25rem;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: #f8f9fa;
+            }
+
+            i {
+                font-size: 1.25rem;
+                vertical-align: middle;
+            }
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+        }
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.625rem 0.875rem;
+
+        &:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        }
+    }
+
+    .list-group-item {
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border: 1px solid #dee2e6;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Print styles for report
+@media print {
+    .modal-header,
+    .modal-footer,
+    .btn {
+        display: none !important;
+    }
+
+    .modal {
+        position: static;
+        background: white !important;
+    }
+
+    .modal-dialog {
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .modal-content {
+        border: none;
+        box-shadow: none;
+    }
+}

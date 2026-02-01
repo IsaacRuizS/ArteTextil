@@ -45,6 +45,28 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<CategoryDto, Category>()
                 .ForMember(dest => dest.CategoryId, src => src.MapFrom(i => i.categoryId));
 
+            cfg.CreateMap<InventoryMovement, InventoryMovementDto>()
+                .ForMember(dest => dest.movementId, src => src.MapFrom(i => i.MovementId))
+                .ForMember(dest => dest.productId, src => src.MapFrom(i => i.ProductId))
+                .ForMember(dest => dest.type, src => src.MapFrom(i => i.Type))
+                .ForMember(dest => dest.quantity, src => src.MapFrom(i => i.Quantity))
+                .ForMember(dest => dest.reason, src => src.MapFrom(i => i.Reason))
+                .ForMember(dest => dest.previousStock, src => src.MapFrom(i => i.PreviousStock))
+                .ForMember(dest => dest.newStock, src => src.MapFrom(i => i.NewStock))
+                .ForMember(dest => dest.performedByUserId, src => src.MapFrom(i => i.PerformedByUserId))
+                .ForMember(dest => dest.isActive, src => src.MapFrom(i => i.IsActive));
+
+            cfg.CreateMap<InventoryMovementDto, InventoryMovement>()
+                .ForMember(dest => dest.MovementId, src => src.MapFrom(i => i.movementId))
+                .ForMember(dest => dest.ProductId, src => src.MapFrom(i => i.productId))
+                .ForMember(dest => dest.Type, src => src.MapFrom(i => i.type))
+                .ForMember(dest => dest.Quantity, src => src.MapFrom(i => i.quantity))
+                .ForMember(dest => dest.Reason, src => src.MapFrom(i => i.reason))
+                .ForMember(dest => dest.PreviousStock, src => src.MapFrom(i => i.previousStock))
+                .ForMember(dest => dest.NewStock, src => src.MapFrom(i => i.newStock))
+                .ForMember(dest => dest.PerformedByUserId, src => src.MapFrom(i => i.performedByUserId))
+                .ForMember(dest => dest.IsActive, src => src.MapFrom(i => i.isActive));
+
         }
     }
 }
