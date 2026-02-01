@@ -52,7 +52,7 @@ namespace ArteTextil.Controllers
         }
 
         // PUT: api/user
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto dto)
         {
             var result = await _userBusiness.Update(id, dto);

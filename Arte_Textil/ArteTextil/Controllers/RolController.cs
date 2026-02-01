@@ -52,7 +52,7 @@ namespace ArteTextil.Controllers
         }
 
         // PUT: api/rol
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] RolDto dto)
         {
             var result = await _rolBusiness.Update(id, dto);
