@@ -1,181 +1,49 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RolModel } from '../../../shared/models/rol.model';
-import { ApiRolService } from '../../../services/api-role.service';
-import { SharedService } from '../../../services/shared.service';
+import { FormsModule } from '@angular/forms';
+
+interface Role {
+    roleId: number;
+    name: string;
+    description: string;
+    isActive: boolean;
+}
 
 @Component({
     selector: 'app-roles',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule],
     templateUrl: './roles.component.html',
     styleUrls: ['./roles.component.scss']
 })
+export class RolesComponent {
 
-export class RolesComponent implements OnInit {
+    searchTerm: string = '';
 
-    roles: RolModel[] = [];
-    rolesOrigins: RolModel[] = [];
-    rolForm: FormGroup;
+    // Mock data matching DB schema
+    roles: Role[] = [
+        { roleId: 1, name: 'Admin', description: 'Acceso total al sistema', isActive: true },
+        { roleId: 2, name: 'Colaborador', description: 'Acceso a ventas y clientes', isActive: true }
+    ];
 
-    // UI State
-    showFormModal = false;
-    showDeleteModal = false;
-    isEditing = false;
-    RolToDelete: RolModel | null = null;
-    searchTerm = '';
+    get filteredRoles() {
+        if (!this.searchTerm) return this.roles;
 
-    constructor(
-        private apiRolService: ApiRolService,
-        private sharedService: SharedService,
-        private cdr: ChangeDetectorRef,
-        private fb: FormBuilder
-    ) {
-        this.rolForm = this.fb.group({
-            RolId: [0],
-            name: ['', [Validators.required, Validators.minLength(3)]],
-            contactPerson: ['', Validators.required],
-            email: ['', [Validators.required, Validators.email]],
-            phone: ['', [Validators.required, Validators.minLength(8)]],
-            isActive: [true]
-        });
+        return this.roles.filter(r =>
+            r.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+        );
     }
 
-    ngOnInit(): void {
-        this.loadRoles();
-    }
-
-    loadRoles() {
-
-        this.sharedService.setLoading(true);
-
-        this.apiRolService.getAll().then(
-            (Roles: RolModel[]) => {
-
-                this.roles = Roles;
-                this.rolesOrigins = Roles;
-
-
-                this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
+    onDeactivate(role: Role) {
+        if (confirm(`¿Está seguro que desea desactivar el rol "${role.name}"?`)) {
+            try {
+                // Simulate API call
+                role.isActive = false;
+                alert('El rol ha sido desactivado correctamente.');
+            } catch (error) {
+                console.error(error);
+                alert('Ocurrió un error al intentar desactivar el rol.');
             }
-        );
-
-    } 
-
-    onSearch(event: any) {
-        this.searchTerm = event.target.value;
-        this.onFilterInfo();
-    }
-
-    onFilterInfo() {
-
-        this.roles = this.rolesOrigins;
-
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
-        
-        const term = this.searchTerm.toLowerCase();
-        
-        this.roles = this.roles.filter(s =>
-            s.name.toLowerCase().includes(term) ||
-            s.description.toLowerCase().includes(term)
-        );
-    }
-
-    // ACTIONS
-    openCreateModal() {
-        this.isEditing = false;
-        this.rolForm.reset({ RolId: 0, isActive: true });
-        this.showFormModal = true;
-    }
-
-    openEditModal(Rol: RolModel) {
-        this.isEditing = true;
-        this.rolForm.patchValue(Rol);
-        this.showFormModal = true;
-    } 
-
-    saveRol() {
-
-        if (this.rolForm.invalid) {
-            this.rolForm.markAllAsTouched();
-            return;
         }
-        
-        this.sharedService.setLoading(true);
-
-        if(this.isEditing) {
-            this._editRol(this.rolForm.value);
-        } else {
-            this._createRol(this.rolForm.value);
-        }
-    } 
-
-    // DELETE
-    openDeleteModal(Rol: RolModel) {
-        this.RolToDelete = Rol;
-        this.showDeleteModal = true;
-    }
-
-    confirmDelete() {
-
-        if (this.RolToDelete) {
-
-            this._deleteRol(this.RolToDelete.roleId); 
-        }
-    }
-
-    private _createRol(RolData: RolModel) {
-
-        this.apiRolService.create(RolData).then(
-            (Roles: RolModel) => {
-
-                this.showFormModal = false;
-                this.loadRoles();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
-    }
-
-    private _editRol(RolData: RolModel) {
-
-        this.apiRolService.update(RolData).then(
-            (Roles: RolModel) => {
-
-                this.showFormModal = false;
-                this.loadRoles();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
-    }
-
-    private _deleteRol(RolId: number) {
-
-        this.apiRolService.delete(RolId).then(
-            (deleted: boolean) => {
-                
-                this.showDeleteModal = false;
-                this.RolToDelete = null;
-                this.loadRoles();
-
-                this.sharedService.setLoading(false);
-            },
-            (err: any) => {
-                this.sharedService.setLoading(false);
-            }
-        );
     }
 }

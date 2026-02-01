@@ -7,10 +7,19 @@
         </button>
     </div>
 
-    <!-- FILTER -->
-    <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
-            (input)="onSearch($event)">
+    <!-- FILTRO -->
+    <div class="filter-box card p-3 shadow-sm mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Filtrar por Rol</label>
+                <select class="form-select" [(ngModel)]="selectedRoleFilter">
+                    <option value="Todos">Todos</option>
+                    @for (r of roles; track r.roleId) {
+                    <option [value]="r.roleId">{{ r.name }}</option>
+                    }
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- LISTADO -->
@@ -27,7 +36,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let user of users;">
+                @for (user of filteredUsers; track user.userId) {
+                <tr>
                     <td>
                         <div class="fw-bold">{{ user.fullName }}</div>
                     </td>
@@ -47,7 +57,7 @@
                         </button>
 
                         @if(user.isActive){
-                        <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(user)">
+                        <button class="btn btn-sm btn-outline-danger" (click)="openDeleteConfirmation(user)">
                             <i class="mdi mdi-account-off"></i>
                         </button>
                         } @else {
@@ -57,147 +67,98 @@
                         }
                     </td>
                 </tr>
+                }
+                @if (filteredUsers.length === 0) {
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        No se encontraron usuarios.
+                    </td>
+                </tr>
+                }
             </tbody>
         </table>
     </div>
 
 </div>
 
-<!-- FORM MODAL USUARIOS -->
+<!-- ========================= -->
+<!-- MODAL FORMULARIO (CREAR/EDITAR) -->
+<!-- ========================= -->
 @if (showFormModal) {
-<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal d-block" tabindex="-1" role="dialog">
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-
-            <!-- HEADER -->
-            <div class="modal-header border-0 pb-0">
+            <div class="modal-header">
                 <h5 class="modal-title fw-bold">
                     {{ isEditing ? 'Editar Usuario' : 'Nuevo Usuario' }}
                 </h5>
-                <button type="button" class="btn-close" (click)="showFormModal = false"></button>
+                <button type="button" class="btn-close" (click)="closeFormModal()"></button>
             </div>
-
-            <!-- BODY -->
             <div class="modal-body">
-                <form [formGroup]="userForm">
-
+                <form>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">
-                            Nombre Completo
-                        </label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            formControlName="fullName"
-                            [class.is-invalid]="userForm.get('fullName')?.invalid && userForm.get('fullName')?.touched">
+                        <label class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" [(ngModel)]="currentUser.fullName" name="fullName">
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">
-                            Correo Electrónico
-                        </label>
-                        <input
-                            type="email"
-                            class="form-control"
-                            formControlName="email"
-                            [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                        <label class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" [(ngModel)]="currentUser.email" name="email">
                     </div>
 
                     @if (!isEditing) {
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">
-                            Contraseña
-                        </label>
-                        <input
-                            type="password"
-                            class="form-control"
-                            formControlName="password"
-                            [class.is-invalid]="userForm.get('password')?.invalid && userForm.get('password')?.touched">
+                        <label class="form-label">Contraseña <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" [(ngModel)]="currentUser.password" name="password">
                     </div>
                     }
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Rol</label>
-                            <select
-                                class="form-select"
-                                formControlName="roleId"
-                                [class.is-invalid]="userForm.get('roleId')?.invalid && userForm.get('roleId')?.touched">
-                                <option value="">Seleccione un rol</option>
+                            <label class="form-label">Rol</label>
+                            <select class="form-select" [(ngModel)]="currentUser.roleId" name="roleId">
                                 @for (r of roles; track r.roleId) {
                                 <option [value]="r.roleId">{{ r.name }}</option>
                                 }
                             </select>
                         </div>
-
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Teléfono</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                formControlName="phone">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" [(ngModel)]="currentUser.phone" name="phone">
                         </div>
                     </div>
 
                 </form>
             </div>
-
-            <!-- FOOTER -->
-            <div class="modal-footer border-0 pt-0">
-                <button
-                    type="button"
-                    class="btn btn-light"
-                    (click)="showFormModal = false">
-                    Cancelar
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary px-4"
-                    [disabled]="userForm.invalid"
-                    (click)="saveUser()">
-                    Guardar
-                </button>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeFormModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="saveUser()">Guardar</button>
             </div>
-
         </div>
     </div>
 </div>
 }
 
-<!-- DELETE MODAL USUARIO -->
+<!-- ========================= -->
+<!-- MODAL CONFIRMACION DELETE -->
+<!-- ========================= -->
 @if (showDeleteModal) {
-<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content text-center p-3">
-
-            <div class="modal-body">
-                <div class="mb-3 text-danger display-4">
-                    <i class="mdi mdi-alert-circle-outline"></i>
-                </div>
-
-                <h5 class="mb-2 fw-bold">¿Desactivar usuario?</h5>
-
-                <p class="text-muted small">
-                    El usuario <strong>{{ userToDelete?.fullName }}</strong> no podrá iniciar sesión.
-                </p>
-
-                <div class="d-flex justify-content-center gap-2 mt-4">
-                    <button
-                        type="button"
-                        class="btn btn-light"
-                        (click)="showDeleteModal = false">
-                        Cancelar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-danger px-4"
-                        (click)="confirmDelete()">
-                        Sí, desactivar
-                    </button>
-                </div>
+<div class="modal d-block" tabindex="-1" role="dialog">
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Desactivar Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()"></button>
             </div>
-
+            <div class="modal-body">
+                <p>¿Está seguro que desea desactivar al usuario <strong>{{ userToDelete?.fullName }}</strong>?</p>
+                <p class="small text-muted mb-0">Esta acción impedirá que el usuario inicie sesión.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" (click)="confirmDelete()">Desactivar</button>
+            </div>
         </div>
     </div>
 </div>

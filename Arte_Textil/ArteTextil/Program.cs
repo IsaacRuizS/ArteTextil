@@ -58,6 +58,17 @@ builder.Services.AddScoped<ProductBusiness>();
 builder.Services.AddScoped<SupplierBusiness>();
 builder.Services.AddScoped<CategoryBusiness>();
 
+// Inventario: Usar MOCK (datos locales) en desarrollo, real en producciÃ³n
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<MockInventoryBusiness>();
+    Console.WriteLine("ðŸ“¦ Inventario: Usando MOCK (datos en memoria - sin BD)");
+}
+else
+{
+    builder.Services.AddScoped<InventoryBusiness>();
+}
+
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -65,7 +76,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
+// Configuraciï¿½n del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -73,10 +84,10 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-// uso del CORS aquí
+// uso del CORS aquï¿½
 app.UseCors(corsPolicy);
 
-// NO usamos Auth todavía
+// NO usamos Auth todavï¿½a
 // app.UseAuthentication();
 // app.UseAuthorization();
 
