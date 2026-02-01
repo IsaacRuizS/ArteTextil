@@ -33,11 +33,9 @@ export class RolesComponent implements OnInit {
         private fb: FormBuilder
     ) {
         this.rolForm = this.fb.group({
-            RolId: [0],
+            roleId: [0],
             name: ['', [Validators.required, Validators.minLength(3)]],
-            contactPerson: ['', Validators.required],
-            email: ['', [Validators.required, Validators.email]],
-            phone: ['', [Validators.required, Validators.minLength(8)]],
+            description: ['', [Validators.required, Validators.minLength(10)]],
             isActive: [true]
         });
     }
@@ -101,7 +99,6 @@ export class RolesComponent implements OnInit {
     } 
 
     saveRol() {
-
         if (this.rolForm.invalid) {
             this.rolForm.markAllAsTouched();
             return;

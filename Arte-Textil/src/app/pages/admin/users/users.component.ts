@@ -37,16 +37,25 @@ export class UsersComponent implements OnInit {
     ) {
         this.userForm = this.fb.group({
             userId: [0],
-            name: ['', [Validators.required, Validators.minLength(3)]],
-            contactPerson: ['', Validators.required],
+            fullName: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required, Validators.minLength(8)]],
+            passwordHash: ['', [Validators.required, Validators.minLength(8)]],
+            roleId: [null, Validators.required],
+            lastLoginAt: [null],
             isActive: [true]
         });
     }
 
     ngOnInit(): void {
         this.loadUsers();
+        this.loadRoles();
+    }
+
+    loadRoles() {
+        this.apiRolService.getAll().then(roles => {
+            this.roles = roles;
+        });
     }
 
     loadUsers() {
@@ -90,11 +99,21 @@ export class UsersComponent implements OnInit {
         const term = this.searchTerm.toLowerCase();
         
         this.users = this.users.filter(s =>
-            s.fullName.toLowerCase().includes(term) ||
-            s.email.toLowerCase().includes(term) ||
-            s.phone.toLowerCase().includes(term) ||
-            s.lastLoginAt ||
-            this.getRoleName(s.roleId).toLowerCase().includes(term)
+            s.fullName?.toLowerCase().includes(term) ||
+            s.email?.toLowerCase().includes(term) ||
+            s.phone?.toLowerCase().includes(term) ||
+            (
+                s.lastLoginAt &&
+                new Date(s.lastLoginAt)
+                    .toLocaleString()
+                    .toLowerCase()
+                    .includes(term)
+            ) ||
+            (
+                this.getRoleName(s.roleId)
+                    ?.toLowerCase()
+                    .includes(term)
+            )
         );
     }
 

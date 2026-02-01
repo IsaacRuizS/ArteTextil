@@ -111,8 +111,8 @@
                         <input
                             type="password"
                             class="form-control"
-                            formControlName="password"
-                            [class.is-invalid]="userForm.get('password')?.invalid && userForm.get('password')?.touched">
+                            formControlName="passwordHash"
+                            [class.is-invalid]="userForm.get('passwordHash')?.invalid && userForm.get('passwordHash')?.touched">
                     </div>
                     }
 
