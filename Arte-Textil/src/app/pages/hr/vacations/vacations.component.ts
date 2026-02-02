@@ -1,28 +1,39 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HrService, VacationRequest } from '../../../services/hr.service';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+import { VacationModel } from '../../../shared/models/vacation.model';
+import { ApiVacationService } from '../../../services/api-vacation.service';
+import { SharedService } from '../../../services/shared.service';
 
 @Component({
     selector: 'app-vacations',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.Default,
+    imports: [CommonModule, ReactiveFormsModule],
+    providers: [FormBuilder],
     templateUrl: './vacations.component.html',
     styleUrls: ['./vacations.component.scss']
 })
 export class VacationsComponent implements OnInit {
 
-    requests: VacationRequest[] = [];
-    requestForm: FormGroup;
-    currentRole = 'Collab';
+    vacations: VacationModel[] = [];
+    vacationsOrigin: VacationModel[] = [];
+    vacationForm: FormGroup;
 
     showFormModal = false;
+    isEditing = false;
+    searchTerm = '';
 
     constructor(
-        private hrService: HrService,
+        private apiVacation: ApiVacationService,
+        private sharedService: SharedService,
+        private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
-        this.requestForm = this.fb.group({
+        this.vacationForm = this.fb.group({
+            vacationId: [0],
+            userId: ['', Validators.required],
             startDate: ['', Validators.required],
             endDate: ['', Validators.required]
         });
@@ -33,42 +44,60 @@ export class VacationsComponent implements OnInit {
     }
 
     loadVacations() {
-        this.hrService.getVacations().subscribe(data => this.requests = data);
+        this.sharedService.setLoading(true);
+
+        this.apiVacation.getPending().subscribe({
+            next: (data) => {
+                this.vacations = data;
+                this.vacationsOrigin = data;
+                this.cdr.markForCheck();
+                this.sharedService.setLoading(false);
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
     }
 
-    switchRole(role: string) {
-        this.currentRole = role;
+    onSearch(event: any) {
+        this.searchTerm = event.target.value;
+        this.onFilter();
     }
 
-    // ACTIONS
-    openRequestModal() {
-        this.requestForm.reset();
-        this.showFormModal = true;
+    onFilter() {
+        this.vacations = this.vacationsOrigin;
+
+        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+
+        const term = this.searchTerm.toLowerCase();
+
+        this.vacations = this.vacations.filter(v =>
+            v.userId.toString().includes(term) ||
+            v.status.toLowerCase().includes(term)
+        );
     }
 
-    submitRequest() {
-        if (this.requestForm.valid) {
-            this.hrService.requestVacation({
-                userId: 99,
-                userName: 'Usuario Actual',
-                startDate: new Date(this.requestForm.value.startDate),
-                endDate: new Date(this.requestForm.value.endDate)
-            });
-            this.showFormModal = false;
-            this.loadVacations();
-            alert('Solicitud enviada.');
-        }
+    approve(vacation: VacationModel) {
+        const approvedByUserId = 1; // luego tomar del token
+        this.sharedService.setLoading(true);
+
+        this.apiVacation.approve(vacation.vacationId, approvedByUserId).subscribe({
+            next: () => {
+                this.loadVacations();
+                this.sharedService.setLoading(false);
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
     }
 
-    approve(req: VacationRequest) {
-        this.hrService.updateVacationStatus(req.id, 'Approved', 'Disfrute sus vacaciones');
-        this.loadVacations();
-        alert('Solicitud aprobada.');
-    }
+    reject(vacation: VacationModel) {
+        const approvedByUserId = 1;
+        this.sharedService.setLoading(true);
 
-    reject(req: VacationRequest) {
-        this.hrService.updateVacationStatus(req.id, 'Rejected', 'Lo sentimos, requerimos su presencia');
-        this.loadVacations();
-        alert('Solicitud rechazada.');
+        this.apiVacation.reject(vacation.vacationId, approvedByUserId).subscribe({
+            next: () => {
+                this.loadVacations();
+                this.sharedService.setLoading(false);
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
     }
 }

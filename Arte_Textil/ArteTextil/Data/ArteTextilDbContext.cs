@@ -17,6 +17,10 @@ public class ArteTextilDbContext : DbContext
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<SystemLog> SystemLogs { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Attendance> Attendance { get; set; }
+    public DbSet<Vacation> Vacations { get; set; }
+    public DbSet<PayrollAdjustment> PayrollAdjustments { get; set; }
+    
 
     // public DbSet<Usuario> Usuarios { get; set; }
 }

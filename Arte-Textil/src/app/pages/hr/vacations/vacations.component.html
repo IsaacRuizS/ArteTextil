@@ -1,104 +1,59 @@
 <div class="hr-wrapper p-4">
 
-    <!-- ROLE SWITCHER -->
-    <div class="mb-3 p-2 bg-light border rounded d-inline-flex gap-2 align-items-center">
-        <small class="text-muted fw-bold">Simular Rol:</small>
-        <div class="btn-group btn-group-sm">
-            <button class="btn" [class.btn-primary]="currentRole==='Collab'"
-                [class.btn-outline-primary]="currentRole!=='Collab'" (click)="switchRole('Collab')">Colaborador</button>
-            <button class="btn" [class.btn-primary]="currentRole==='Manager'"
-                [class.btn-outline-primary]="currentRole!=='Manager'" (click)="switchRole('Manager')">Gerente</button>
-        </div>
-    </div>
-
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Gestión de Vacaciones</h2>
-        @if(currentRole === 'Collab') {
-        <button class="btn btn-primary" (click)="openRequestModal()">
-            <i class="mdi mdi-beach me-1"></i>Solicitar Vacaciones
-        </button>
-        }
+        <h2 class="fw-bold mb-0">Solicitudes de Vacaciones</h2>
     </div>
 
-    <!-- TABLE -->
+    <!-- FILTER -->
+    <div class="mb-4">
+        <input type="text" class="form-control" placeholder="Buscar por usuario o estado..."
+            (input)="onSearch($event)">
+    </div>
+
+    <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Solicitante</th>
-                        <th>Fecha Solicitud</th>
+                        <th class="ps-4">Usuario</th>
                         <th>Inicio</th>
                         <th>Fin</th>
                         <th>Estado</th>
-                        <th>Comentario</th>
-                        @if(currentRole === 'Manager') { <th>Acciones</th> }
+                        <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (req of requests; track req.id) {
-                    <tr>
-                        <td class="ps-4 fw-bold">{{ req.userName }}</td>
-                        <td>{{ req.requestDate | date:'shortDate' }}</td>
-                        <td>{{ req.startDate | date:'shortDate' }}</td>
-                        <td>{{ req.endDate | date:'shortDate' }}</td>
+                    <tr *ngFor="let v of vacations">
+                        <td class="ps-4 fw-semibold">{{ v.userId }}</td>
+                        <td>{{ v.startDate | date:'shortDate' }}</td>
+                        <td>{{ v.endDate | date:'shortDate' }}</td>
                         <td>
-                            <span class="badge" [class.bg-success-subtle]="req.status==='Approved'"
-                                [class.text-success]="req.status==='Approved'"
-                                [class.bg-danger-subtle]="req.status==='Rejected'"
-                                [class.text-danger]="req.status==='Rejected'"
-                                [class.bg-warning-subtle]="req.status==='Pending'"
-                                [class.text-warning-emphasis]="req.status==='Pending'">
-                                {{ req.status }}
+                            <span class="badge rounded-pill"
+                                [class.bg-warning-subtle]="v.status === 'Pendiente'"
+                                [class.text-warning]="v.status === 'Pendiente'"
+                                [class.bg-success-subtle]="v.status === 'Aprobada'"
+                                [class.text-success]="v.status === 'Aprobada'"
+                                [class.bg-danger-subtle]="v.status === 'Rechazada'"
+                                [class.text-danger]="v.status === 'Rechazada'">
+                                {{ v.status }}
                             </span>
                         </td>
-                        <td class="small text-muted">{{ req.comment || '-' }}</td>
-                        @if(currentRole === 'Manager' && req.status === 'Pending') {
-                        <td>
-                            <button class="btn btn-sm btn-outline-success me-1" (click)="approve(req)">Aprobar</button>
-                            <button class="btn btn-sm btn-outline-danger" (click)="reject(req)">Rechazar</button>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-light text-success me-2"
+                                (click)="approve(v)">
+                                <i class="mdi mdi-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light text-danger"
+                                (click)="reject(v)">
+                                <i class="mdi mdi-close"></i>
+                            </button>
                         </td>
-                        } @else if (currentRole === 'Manager') {
-                        <td><span class="text-muted small">Finalizado</span></td>
-                        }
                     </tr>
-                    }
                 </tbody>
             </table>
         </div>
     </div>
 
 </div>
-
-<!-- REQUEST MODAL -->
-@if(showFormModal) {
-<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Solicitar Vacaciones</h5>
-                <button type="button" class="btn-close" (click)="showFormModal=false"></button>
-            </div>
-            <div class="modal-body">
-                <form [formGroup]="requestForm">
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label small fw-bold">Fecha Inicio</label>
-                            <input type="date" class="form-control" formControlName="startDate">
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label small fw-bold">Fecha Fin</label>
-                            <input type="date" class="form-control" formControlName="endDate">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0">
-                <button class="btn btn-light" (click)="showFormModal=false">Cancelar</button>
-                <button class="btn btn-primary" (click)="submitRequest()">Enviar Solicitud</button>
-            </div>
-        </div>
-    </div>
-</div>
-}

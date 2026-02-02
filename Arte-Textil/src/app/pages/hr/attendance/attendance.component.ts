@@ -1,80 +1,88 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HrService, Attendance } from '../../../services/hr.service';
+import { AttendanceModel } from '../../../shared/models/attendance.model';
+import { ApiAttendanceService } from '../../../services/api-attendance.service';
+import { SharedService } from '../../../services/shared.service';
 
 @Component({
     selector: 'app-attendance',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.Default,
+    imports: [CommonModule],
     templateUrl: './attendance.component.html',
     styleUrls: ['./attendance.component.scss']
 })
 export class AttendanceComponent implements OnInit {
 
-    records: Attendance[] = [];
-    currentRole = 'Admin'; // Mock Role: 'Admin', 'Manager', 'Collab'
+    attendances: AttendanceModel[] = [];
+    attendancesOrigin: AttendanceModel[] = [];
 
-    // Edit Modal
-    showEditModal = false;
-    editForm: FormGroup;
-    selectedRecord: Attendance | null = null;
+    searchTerm = '';
+    currentUserId = 1; // sacarlo despues del token o de la sesion
 
     constructor(
-        private hrService: HrService,
-        private fb: FormBuilder
-    ) {
-        this.editForm = this.fb.group({
-            checkIn: ['', Validators.required],
-            checkOut: ['', Validators.required]
-        });
-    }
+        private apiAttendance: ApiAttendanceService,
+        private sharedService: SharedService,
+        private cdr: ChangeDetectorRef
+    ) { }
 
     ngOnInit(): void {
-        this.loadAttendance();
+        this.loadAttendances();
     }
 
-    loadAttendance() {
-        this.hrService.getAttendance().subscribe(data => this.records = data);
-    }
+    loadAttendances() {
+        this.sharedService.setLoading(true);
 
-    // Role Simulation
-    switchRole(role: string) {
-        this.currentRole = role;
-    }
-
-    // ACTIONS
-    onCheckIn() {
-        this.hrService.checkIn(99, 'Usuario Actual'); // Mock User
-        this.loadAttendance();
-        alert('Entrada registrada.');
-    }
-
-    onCheckOut() {
-        this.hrService.checkOut(99);
-        this.loadAttendance();
-        alert('Salida registrada.');
-    }
-
-    openEditModal(record: Attendance) {
-        this.selectedRecord = record;
-        this.editForm.patchValue({
-            checkIn: record.checkIn,
-            checkOut: record.checkOut
+        this.apiAttendance.getAll().subscribe({
+            next: (data) => {
+                this.attendances = data;
+                this.attendancesOrigin = data;
+                this.cdr.markForCheck();
+                this.sharedService.setLoading(false);
+            },
+            error: () => this.sharedService.setLoading(false)
         });
-        this.showEditModal = true;
     }
 
-    saveEdit() {
-        if (this.editForm.valid && this.selectedRecord) {
-            this.hrService.updateAttendance(
-                this.selectedRecord.id,
-                this.editForm.value.checkIn,
-                this.editForm.value.checkOut
-            );
-            this.showEditModal = false;
-            this.loadAttendance();
-            alert('Registro corregido.');
-        }
+    // CHECK IN
+    checkIn() {
+        this.sharedService.setLoading(true);
+
+        this.apiAttendance.checkIn(this.currentUserId).subscribe({
+            next: () => {
+                this.loadAttendances();
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
+    }
+
+    // CHECK OUT
+    checkOut() {
+        this.sharedService.setLoading(true);
+
+        this.apiAttendance.checkOut(this.currentUserId).subscribe({
+            next: () => {
+                this.loadAttendances();
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
+    }
+
+    onSearch(event: any) {
+        this.searchTerm = event.target.value;
+        this.onFilter();
+    }
+
+    onFilter() {
+        this.attendances = this.attendancesOrigin;
+
+        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+
+        const term = this.searchTerm.toLowerCase();
+
+        this.attendances = this.attendances.filter(a =>
+            a.userId.toString().includes(term) ||
+            (a.checkIn && a.checkIn.toString().toLowerCase().includes(term))
+        );
     }
 }

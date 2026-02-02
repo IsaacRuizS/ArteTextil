@@ -45,6 +45,33 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<CategoryDto, Category>()
                 .ForMember(dest => dest.CategoryId, src => src.MapFrom(i => i.categoryId));
 
+            cfg.CreateMap<Attendance, AttendanceDto>()
+                .ForMember(d => d.attendanceId, o => o.MapFrom(s => s.AttendanceId))
+                .ForMember(d => d.userId, o => o.MapFrom(s => s.UserId))
+                .ForMember(d => d.checkIn, o => o.MapFrom(s => s.CheckIn))
+                .ForMember(d => d.checkOut, o => o.MapFrom(s => s.CheckOut))
+                .ForMember(d => d.isActive, o => o.MapFrom(s => s.IsActive));
+
+            cfg.CreateMap<AttendanceDto, Attendance>()
+                .ForMember(d => d.AttendanceId, o => o.MapFrom(s => s.attendanceId))
+                .ForMember(d => d.UserId, o => o.MapFrom(s => s.userId))
+                .ForMember(d => d.CheckIn, o => o.MapFrom(s => s.checkIn))
+                .ForMember(d => d.CheckOut, o => o.MapFrom(s => s.checkOut))
+                .ForMember(d => d.IsActive, o => o.MapFrom(s => s.isActive));
+
+            cfg.CreateMap<Vacation, VacationRequestDto>()
+                .ForMember(d => d.vacationRequestId, o => o.MapFrom(s => s.VacationId));
+
+            cfg.CreateMap<VacationRequestDto, Vacation>()
+                .ForMember(d => d.VacationId, o => o.MapFrom(s => s.vacationRequestId));
+
+            cfg.CreateMap<PayrollAdjustment, PayrollAdjustmentDto>()
+                .ForMember(d => d.adjustmentId, o => o.MapFrom(s => s.AdjustmentId));
+
+            cfg.CreateMap<PayrollAdjustmentDto, PayrollAdjustment>()
+                .ForMember(d => d.AdjustmentId, o => o.MapFrom(s => s.adjustmentId));
+
+
         }
     }
 }

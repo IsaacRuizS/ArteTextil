@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { FullComponent } from './layouts/full/full.component';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { PublicComponent } from './layouts/public/public.component';
+import { PayrollAdjustmentsComponent } from './pages/hr/payroll/payroll-adjustments.component';
 
 export const routes: Routes = [
     {
@@ -20,7 +21,7 @@ export const routes: Routes = [
             },
             {
                 path: 'hr/payroll',
-                loadComponent: () => import('./pages/hr/payroll/payroll.component').then(m => m.PayrollComponent)
+                loadComponent: () => import('./pages/hr/payroll/payroll-adjustments.component').then(m => m.PayrollAdjustmentsComponent)
             },
             // Existing Routes
             {
