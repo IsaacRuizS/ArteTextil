@@ -3,26 +3,29 @@
     <!-- TÍTULO -->
     <h2 class="fw-bold mb-3">Catálogo de Productos</h2>
 
-    <!-- DESCRIPCIÓN -->
-    <p class="text-muted mb-4">
-        Mostrando productos activos disponibles para cotización.
-    </p>
-
-    <!-- ====================== -->
     <!-- FILTROS -->
-    <!-- ====================== -->
     <div class="filter-box card p-3 shadow-sm mb-4">
 
         <div class="row g-3">
 
-            <!-- Categorías -->
+            <!-- Categoría -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Categoría</label>
-
-                <select class="form-select" [(ngModel)]="selectedCategory">
-                    <option value="Todos">Todas</option>
+                <select class="form-select" [(ngModel)]="filters.categoryId">
+                    <option value="0">Todas</option>
                     @for (c of categories; track c) {
-                    <option [value]="c">{{ c }}</option>
+                    <option [value]="c.categoryId">{{ c.name }}</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Proveedor -->
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Proveedor</label>
+                <select class="form-select" [(ngModel)]="filters.supplierId">
+                    <option value="0">Todos</option>
+                    @for (s of suppliers; track s) {
+                    <option [value]="s.supplierId">{{ s.name }}</option>
                     }
                 </select>
             </div>
@@ -30,24 +33,37 @@
             <!-- Precio mínimo -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Precio mínimo</label>
-                <input type="number" class="form-control" [(ngModel)]="minPrice" placeholder="₡0" min="0">
+                <input type="number" class="form-control" [(ngModel)]="filters.minPrice">
             </div>
 
             <!-- Precio máximo -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Precio máximo</label>
-                <input type="number" class="form-control" [(ngModel)]="maxPrice" placeholder="₡50 000" min="0">
+                <input type="number" class="form-control" [(ngModel)]="filters.maxPrice">
             </div>
+
 
             <!-- Solo promociones -->
             <div class="col-md-3 d-flex align-items-end">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" [(ngModel)]="onlyPromotions" id="promoCheck">
+                    <input type="checkbox" class="form-check-input" [(ngModel)]="filters.isPromotion" id="promoCheck">
                     <label class="form-check-label" for="promoCheck">
                         Solo con promoción
                     </label>
                 </div>
             </div>
+
+            <!-- BOTONES -->
+            <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                <button class="btn btn-outline-secondary" (click)="onClearFilters()">
+                    Limpiar
+                </button>
+
+                <button class="btn btn-primary" (click)="onFilter()">
+                    Aplicar filtros
+                </button>
+            </div>
+
 
         </div>
     </div>
@@ -63,24 +79,36 @@
         </div>
         }
 
-        @for (p of filteredProducts; track p.id) {
+        @for (p of filteredProducts; track p.productId) {
 
         <div class="col-md-4 col-lg-3" (click)="onOpenProduct(p)">
             <div class="product-card card shadow-sm">
 
-                <img [src]="p.image" class="card-img-top product-img" />
+                <img [src]="p.mainImageUrl" class="card-img-top product-img" />
 
                 <div class="card-body">
 
-                    <h5 class="fw-semibold">{{ p.name }}</h5>
+                    <div class="fw-semibold font-18">{{ p.name | truncate : 20 :true}}</div>
 
+                    @if (!p.bestPromotion) {
                     <p class="mb-1">
                         <strong>{{ p.price | customCurrency:'₡' }}</strong>
                     </p>
+                    }@else{
+                        <p class="mb-1">
+                            <strong class="text-success">{{ getFinalPrice(p) | customCurrency:'₡' }}</strong>
+                        </p>
+                    }
+
 
                     <!-- Categoría -->
                     <p class="text-muted small mb-1">
-                        Categoría: {{ p.category }}
+                        Categoría: {{ categoryName(p.categoryId) | truncate : 12 :true }}
+                    </p>
+
+                    <!-- Proveedor -->
+                    <p class="text-muted small mb-1">
+                        Proveedor: {{ supplierName(p.supplierId) | truncate : 12 :true }}
                     </p>
 
                     <!-- Estado de stock -->
@@ -89,10 +117,10 @@
                     </span>
 
                     <!-- Promoción -->
-                    @if (p.promotion) {
+                    @if (p.bestPromotion) {
                     <div class="mt-2">
                         <span class="badge bg-warning text-dark">
-                            -{{ p.promotion.percentage }}% hasta {{ p.promotion.until }}
+                            -{{ p.bestPromotion.discountPercent }}% hasta {{ p.bestPromotion.endDate | date }}
                         </span>
                     </div>
                     }

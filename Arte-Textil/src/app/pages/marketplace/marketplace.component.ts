@@ -1,7 +1,16 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomCurrencyPipe } from '../../shared/pipes/crc-currency.pipe';
+import { finalize } from 'rxjs';
+import { ApiCategoryService } from '../../services/api-category.service';
+import { ApiProductService } from '../../services/api-product.service';
+import { ApiSupplierService } from '../../services/api-supplier.service';
+import { SharedService } from '../../services/shared.service';
+import { CategoryModel } from '../../shared/models/category.model';
+import { ProductModel } from '../../shared/models/product.model';
+import { SupplierModel } from '../../shared/models/supplier.model';
+import { TruncatePipe } from "../../shared/pipes/truncate.pipe";
 
 
 @Component({
@@ -10,86 +19,168 @@ import { CustomCurrencyPipe } from '../../shared/pipes/crc-currency.pipe';
     imports: [
         CommonModule,
         FormsModule,
-        CustomCurrencyPipe
+        CustomCurrencyPipe,
+        TruncatePipe
     ],
     templateUrl: './marketplace.component.html',
     styleUrls: ['./marketplace.component.scss']
 })
 export class MarketplaceComponent {
 
-    categories = ['Camisas', 'Pantalones', 'Accesorios', 'Otros'];
+    products: ProductModel[] = [];
+    productsOrigins: ProductModel[] = [];
 
-    products: any[] = [
-        {
-            id: 1,
-            name: 'Camisa Azul',
-            price: 8500,
-            category: 'Camisas',
-            stock: 10,
-            image: 'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000',
-            promotion: {
-                percentage: 15,
-                until: '2025-12-30'
-            }
-        },
-        {
-            id: 2,
-            name: 'Pantalón Negro',
-            price: 12500,
-            category: 'Pantalones',
-            stock: 0,
-            image: 'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000',
-            promotion: null
-        },
-        {
-            id: 3,
-            name: 'Gorra Roja',
-            price: 4500,
-            category: 'Accesorios',
-            stock: 5,
-            image: 'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000',
-            promotion: { percentage: 10, until: '2025-11-01' }
+    categories: CategoryModel[] = [];
+    suppliers: SupplierModel[] = [];
+
+    filters = {
+        categoryId: 0,
+        supplierId: 0,
+        minPrice: null as number | null,
+        maxPrice: null as number | null,
+        isPromotion: false
+    };
+
+
+    constructor(private apiProductService: ApiProductService,
+        private sharedService: SharedService,
+        private cdr: ChangeDetectorRef,
+        private apiSupplierService: ApiSupplierService,
+        private apiCategoryService: ApiCategoryService,
+    ) { }
+
+    ngOnInit() {
+        // Cargar productos
+        this._loadProducts(); 
+    }
+
+    onClearFilters() {
+
+        this.filters = {
+            categoryId: 0,
+            supplierId: 0,
+            minPrice: null,
+            maxPrice: null,
+            isPromotion: false
+        };
+
+        this.products = [...this.productsOrigins];
+
+        this.cdr.markForCheck();
+    }
+
+    onFilter() {
+
+        // Siempre partir del original
+        let filtered = [...this.productsOrigins];
+
+
+        // Categoría
+        if (this.filters.categoryId && Number(this.filters.categoryId) > 0) {
+            filtered = filtered.filter(p => p.categoryId == Number(this.filters.categoryId));
         }
-    ];
 
-    // FILTROS
-    selectedCategory: string = 'Todos';
-    minPrice: number | null = null;
-    maxPrice: number | null = null;
-    onlyPromotions: boolean = false;
+        // Proveedor
+        if (this.filters.supplierId && Number(this.filters.supplierId) > 0) {
+            filtered = filtered.filter(p => p.supplierId === Number(this.filters.supplierId));
+        }
 
-    // FILTRO PRINCIPAL
-    get filteredProducts() {
-        return this.products.filter(p => {
+        // Precio mínimo
+        if (this.filters.minPrice != null) {
+            filtered = filtered.filter(p => p.price >= this.filters.minPrice!);
+        }
 
-            let pass = true;
+        // Precio máximo
+        if (this.filters.maxPrice != null) {
+            filtered = filtered.filter(p => p.price <= this.filters.maxPrice!);
+        }
 
-            // Categoría
-            if (this.selectedCategory !== 'Todos') {
-                pass = pass && p.category === this.selectedCategory;
+        // Solo promociones
+        if (this.filters.isPromotion) {
+            filtered = filtered.filter(p => p.promotions?.length);
+        }
+
+        this.products = filtered;
+
+        this.cdr.markForCheck();
+    }
+
+    getFinalPrice(p: ProductModel): number {
+
+        const promo = p.bestPromotion;
+        return promo
+            ? p.price - (p.price * promo.discountPercent! / 100)
+            : p.price;
+    }
+
+    onOpenProduct(p: any) {
+        window.location.href = `/product/${p.productId}`;
+    }
+
+    categoryName(categoryId: number): string {
+        const category = this.categories.find(c => c.categoryId === categoryId);
+        return category ? category.name : '';
+    }
+
+    supplierName(supplierId: number): string {
+        const supplier = this.suppliers.find(s => s.supplierId === supplierId);
+        return supplier ? supplier.name : '';
+    }
+
+    // DATA LOAD
+    private _loadProducts() {
+
+        this.sharedService.setLoading(true);
+
+        this.apiProductService.getAllForMarket()
+            .pipe(finalize(() => this.sharedService.setLoading(false)))
+            .subscribe({
+                next: (products: ProductModel[]) => {
+
+                    this.products = [...products];
+                    this.productsOrigins = [...products];
+                    this.cdr.markForCheck();
+
+                    this._loadCategories();
+                    this._loadSuppliers();
+                },
+                error: (err) => {
+                    // manejar error
+                }
+            });
+    }
+
+    private _loadCategories() {
+
+        this.apiCategoryService.getAllActive().subscribe({
+            next: (categories: CategoryModel[]) => {
+
+                this.categories = categories.filter(c => this.productsOrigins.some(p => p.categoryId === c.categoryId));
+
+                this.cdr.markForCheck();
+            },
+            error: (err) => {
+                // manejar error
             }
-
-            // Precio mínimo
-            if (this.minPrice !== null) {
-                pass = pass && p.price >= this.minPrice;
-            }
-
-            // Precio máximo
-            if (this.maxPrice !== null) {
-                pass = pass && p.price <= this.maxPrice;
-            }
-
-            // Solo promociones
-            if (this.onlyPromotions) {
-                pass = pass && p.promotion !== null;
-            }
-
-            return pass;
         });
     }
 
-    onOpenProduct(p: any){
-        window.location.href = `/product/${p.id}`;
+    private _loadSuppliers() {
+
+        this.apiSupplierService.getAllActive().subscribe({
+            next: (suppliers: SupplierModel[]) => {
+
+                this.suppliers = suppliers.filter(s => this.productsOrigins.some(p => p.supplierId === s.supplierId));
+                this.cdr.markForCheck();
+            },
+            error: (err) => {
+                // manejar error
+            }
+        });
+    }
+
+    get filteredProducts(): ProductModel[] {
+        return this.products;
     }
 
 }

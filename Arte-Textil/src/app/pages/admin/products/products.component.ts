@@ -87,7 +87,7 @@ export class ProductsComponent implements OnInit {
     }
 
     loadCategories() {
-        this.apiCategoryService.getAll().subscribe({
+        this.apiCategoryService.getAllActive().subscribe({
             next: (categories: CategoryModel[]) => {
 
                 // opcional: solo activas
@@ -106,7 +106,7 @@ export class ProductsComponent implements OnInit {
     }
 
     loadSuppliers() {
-        this.apiSupplierService.getAll().subscribe({
+        this.apiSupplierService.getAllActive().subscribe({
             next: (suppliers: SupplierModel[]) => {
 
                 // solo activos si quieres

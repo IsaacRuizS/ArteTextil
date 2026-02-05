@@ -110,4 +110,25 @@ export class ApiSupplierService extends ApiBaseService {
                 })
             );
     }
+
+    // GET: api/supplier/all-active
+    getAllActive(): Observable<SupplierModel[]> {
+
+        return this.http.get<any>(`${this.baseUrl}/api/supplier/all-active`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
+
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al obtener proveedores.');
+                    }
+
+                    if (!Array.isArray(res.data)) return [];
+
+                    return res.data.map((x: any) => new SupplierModel(x));
+                }),
+                catchError(err => {
+                    return throwError(() => err);
+                })
+            );
+    }
 }

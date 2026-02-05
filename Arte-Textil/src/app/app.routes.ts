@@ -29,12 +29,6 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/inventory/inventory').then(m => m.InventoryComponent)
             },
             {
-                path: 'products',
-                loadComponent: () =>
-                    import('./pages/product-catalog/product-catalog.component')
-                        .then(m => m.ProductCatalogComponent)
-            },
-            {
                 path: 'categories',
                 loadComponent: () =>
                     import('./pages/category-management/category-management.component')

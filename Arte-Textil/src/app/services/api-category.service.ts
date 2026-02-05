@@ -101,4 +101,23 @@ export class ApiCategoryService extends ApiBaseService {
                 catchError(err => throwError(() => err))
             );
     }
+
+    // GET: api/category/all-active
+    getAllActive(): Observable<CategoryModel[]> {
+
+        return this.http.get<any>(`${this.baseUrl}/api/category/all-active`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
+
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error desconocido al obtener categorías.');
+                    }
+
+                    if (!Array.isArray(res.data)) return [];
+
+                    return res.data.map((item: any) => new CategoryModel(item));
+                }),
+                catchError(err => throwError(() => err))
+            );
+    }
 }
