@@ -36,5 +36,6 @@ namespace ArteTextil.Data.Entities
 
         // Relaciones
         public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+        public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
     }
 }

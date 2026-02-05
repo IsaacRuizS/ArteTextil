@@ -270,5 +270,39 @@ namespace ArteTextil.Business
 
             return response;
         }
+
+        // GET ALL For Market
+        public async Task<ApiResponse<List<ProductDto>>> GetAllForMarket()
+        {
+            var response = new ApiResponse<List<ProductDto>>();
+
+            try
+            {
+                var now = DateTime.UtcNow;
+
+                var products = await _repositoryProduct.Query()
+                    .Where(p => p.DeletedAt == null && p.IsActive)
+                    .Include(p => p.ProductImages)
+                    .Include(p => p.Promotions
+                        .Where(pr =>
+                            pr.IsActive &&
+                            pr.DeletedAt == null &&
+                            pr.StartDate <= now &&
+                            (pr.EndDate == null || pr.EndDate >= now)
+                        )
+                    )
+                    .ToListAsync();
+
+                response.Data = _mapper.Map<List<ProductDto>>(products);
+                response.Message = "Productos obtenidos correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener productos: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

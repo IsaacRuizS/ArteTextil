@@ -204,5 +204,26 @@ namespace ArteTextil.Business
 
             return response;
         }
+
+        // GET ALL Active
+        public async Task<ApiResponse<List<CategoryDto>>> GetAllActive()
+        {
+            var response = new ApiResponse<List<CategoryDto>>();
+
+            try
+            {
+                var categories = await _repositoryCategory.GetAllAsync(c => c.DeletedAt == null && c.IsActive);
+
+                response.Data = _mapper.Map<List<CategoryDto>>(categories);
+                response.Message = "Categorías obtenidas correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener categorías: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

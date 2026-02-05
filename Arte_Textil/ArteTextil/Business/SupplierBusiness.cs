@@ -234,5 +234,26 @@ namespace ArteTextil.Business
 
             return response;
         }
+
+        // GET ALL Active
+        public async Task<ApiResponse<List<SupplierDto>>> GetAllActive()
+        {
+            var response = new ApiResponse<List<SupplierDto>>();
+
+            try
+            {
+                var suppliers = await _repositorySupplier.GetAllAsync(s => s.DeletedAt == null && s.IsActive);
+
+                response.Data = _mapper.Map<List<SupplierDto>>(suppliers);
+                response.Message = "Proveedores obtenidos correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener proveedores: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

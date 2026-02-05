@@ -16,5 +16,6 @@ namespace ArteTextil.DTOs
 
         // Relacionado
         public List<ProductImageDto>? productImages { get; set; }
+        public List<PromotionDto>? promotions { get; set; }
     }
 }

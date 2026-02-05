@@ -20,7 +20,8 @@ public class ArteTextilDbContext : DbContext
     public DbSet<Attendance> Attendance { get; set; }
     public DbSet<Vacation> Vacations { get; set; }
     public DbSet<PayrollAdjustment> PayrollAdjustments { get; set; }
-    
+    public DbSet<Promotion> Promotions { get; set; }
+
 
     // public DbSet<Usuario> Usuarios { get; set; }
 }

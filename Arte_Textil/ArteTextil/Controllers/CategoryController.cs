@@ -74,5 +74,17 @@ namespace ArteTextil.Controllers
 
             return Ok(result);
         }
+
+        // GET: api/category/all-active
+        [HttpGet("all-active")]
+        public async Task<IActionResult> GetAllActive()
+        {
+            var result = await _categoryBusiness.GetAllActive();
+
+            if (!result.Success)
+                return StatusCode(500, result);
+
+            return Ok(result);
+        }
     }
 }

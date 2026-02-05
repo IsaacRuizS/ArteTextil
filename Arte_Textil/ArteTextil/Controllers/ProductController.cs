@@ -74,5 +74,17 @@ namespace ArteTextil.Controllers
 
             return Ok(result);
         }
+
+        // GET: api/product/market-all
+        [HttpGet("market-all")]
+        public async Task<IActionResult> GetAllForMarket()
+        {
+            var result = await _productBusiness.GetAllForMarket();
+
+            if (!result.Success)
+                return StatusCode(500, result);
+
+            return Ok(result);
+        }
     }
 }

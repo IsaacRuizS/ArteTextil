@@ -71,6 +71,12 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<PayrollAdjustmentDto, PayrollAdjustment>()
                 .ForMember(d => d.AdjustmentId, o => o.MapFrom(s => s.adjustmentId));
 
+            cfg.CreateMap<Promotion, PromotionDto>()
+               .ForMember(d => d.promotionId, o => o.MapFrom(s => s.PromotionId));
+
+            cfg.CreateMap<PromotionDto, Promotion>()
+                .ForMember(d => d.PromotionId, o => o.MapFrom(s => s.promotionId));
+
 
         }
     }
