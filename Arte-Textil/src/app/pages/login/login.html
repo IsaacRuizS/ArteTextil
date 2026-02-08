@@ -1,1 +1,36 @@
-<p>login works!</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div class="card shadow-sm p-4" style="max-width: 400px; width: 100%;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Iniciar Sesión</h3>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <input type="email" id="email" class="form-control" formControlName="email"
+                        [ngClass]="{ 'is-invalid': submitted && f['email'].errors }" placeholder="nombre@ejemplo.com">
+                    <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                        <div *ngIf="f['email'].errors['required']">El correo es requerido</div>
+                        <div *ngIf="f['email'].errors['email']">Correo inválido</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" class="form-control" formControlName="password"
+                        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" placeholder="••••••••">
+                    <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                        <div *ngIf="f['password'].errors['required']">La contraseña es requerida</div>
+                    </div>
+                </div>
+
+                <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" [disabled]="loading">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1" role="status"
+                            aria-hidden="true"></span>
+                        Ingresar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

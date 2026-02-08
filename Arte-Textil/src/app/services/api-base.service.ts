@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 
 @Injectable({
     providedIn: 'root'
-})  
+})
 export class ApiBaseService {
 
     //baseUrl = 'http://localhost:5045';
@@ -14,24 +14,26 @@ export class ApiBaseService {
 
     getHttpOptions(): any {
 
-        const headers = this._getHeaders(/* session?.accessToken */);
+        const headers = this._getHeaders();
         const httpOpts = { headers: new HttpHeaders(headers) };
 
         return httpOpts;
     }
 
-    private _getHeaders(/* authenticationToken?: string */) {
+    private _getHeaders() {
 
-        const headers = {
+        const headers: any = {
             "Cache-Control": "no-cache",
             "Content-Type": "application/json, text/plain, */*", // DEFAULT
             "Access-Control-Allow-Headers": "Content-Type",
             "Access-Control-Allow-Methods": "GET,POST,UPDATE,DELETE,OPTIONS",
             "Access-Control-Allow-Origin": "*"
         };
-        /* if (authenticationToken) {
-            headers["Authorization"] = `Bearer ${authenticationToken}`;
-        } */
+
+        // const token = localStorage.getItem('auth_token');
+        // if (token) {
+        //     headers["Authorization"] = `Bearer ${token}`;
+        // }
         return headers;
     }
 

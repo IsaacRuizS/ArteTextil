@@ -246,5 +246,55 @@ namespace ArteTextil.Business
 
             return response;
         }
+        // LOGIN
+        public async Task<ApiResponse<UserDto>> Login(LoginDto dto)
+        {
+            var response = new ApiResponse<UserDto>();
+
+            try
+            {
+                var user = await _repositoryUser.FirstOrDefaultAsync(s => s.Email == dto.email && s.DeletedAt == null);
+
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "Credenciales incorrectas.";
+                    return response;
+                }
+
+                if (!user.IsActive)
+                {
+                    response.Success = false;
+                    response.Message = "El usuario se encuentra inactivo.";
+                    return response;
+                }
+
+                var hasher = new PasswordHasher<User>();
+                var result = hasher.VerifyHashedPassword(user, user.PasswordHash, dto.password);
+
+                if (result == PasswordVerificationResult.Failed)
+                {
+                    response.Success = false;
+                    response.Message = "Credenciales incorrectas.";
+                    return response;
+                }
+
+                // Update LastLoginAt
+                user.LastLoginAt = DateTime.UtcNow;
+                _repositoryUser.Update(user);
+                await _repositoryUser.SaveAsync();
+
+
+                response.Data = _mapper.Map<UserDto>(user);
+                response.Message = "Login exitoso";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error en login: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

@@ -6,11 +6,31 @@ import { UserModel } from '../shared/models/user.model';
 
 @Injectable({
     providedIn: 'root'
-})  
+})
 export class ApiUserService extends ApiBaseService {
 
     constructor(public override http: HttpClient) {
         super(http);
+    }
+
+    // POST: api/user/login
+    login(credentials: any): Promise<any> {
+        // Assuming the API endpoint is api/user/login or similar, adjusting based on standard pattern
+        // If it relies on a specificauth controller, I might need to change this, but based on instructions to use users info:
+        return this.http.post(`${this.baseUrl}/api/user/login`, credentials, this.getHttpOptions())
+            .toPromise()
+            .then((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al iniciar sesión.');
+                }
+                return res.data; // Should return { user: UserModel, token: string }
+            })
+            .catch((err: HttpErrorResponse | Error) => {
+                const errMsg = err instanceof HttpErrorResponse
+                    ? this.getErrorMsg(err)
+                    : err.message;
+                return Promise.reject(new Error(`Error de autenticación: ${errMsg}`));
+            });
     }
 
     // GET: api/user/all

@@ -4,11 +4,13 @@ import { FullComponent } from './layouts/full/full.component';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { PublicComponent } from './layouts/public/public.component';
 import { PayrollAdjustmentsComponent } from './pages/hr/payroll/payroll-adjustments.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     {
         path: '',
         component: FullComponent,
+        canActivate: [AuthGuard],
         children: [
             // HR Routes
             {
@@ -84,6 +86,16 @@ export const routes: Routes = [
                     { path: 'control', loadComponent: () => import('./pages/production/control/order-control.component').then(m => m.OrderControlComponent) },
                     { path: 'reports', loadComponent: () => import('./pages/production/reports/production-reports.component').then(m => m.ProductionReportsComponent) }
                 ]
+            }
+        ]
+    },
+    {
+        path: '',
+        component: BlankComponent,
+        children: [
+            {
+                path: 'login',
+                loadComponent: () => import('./pages/login/login').then(m => m.Login)
             }
         ]
     },

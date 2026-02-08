@@ -74,5 +74,21 @@ namespace ArteTextil.Controllers
 
             return Ok(result);
         }
+        // POST: api/user/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var result = await _userBusiness.Login(dto);
+
+            if (!result.Success)
+            {
+                // Return generic 401/400 or just OK with success=false depending on preference, 
+                // but usually for security generic message is better.
+                // Here we return existing structure
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
     }
 }
