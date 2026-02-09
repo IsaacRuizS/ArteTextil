@@ -58,16 +58,9 @@ builder.Services.AddScoped<ProductBusiness>();
 builder.Services.AddScoped<SupplierBusiness>();
 builder.Services.AddScoped<CategoryBusiness>();
 
-// Inventario: Usar MOCK (datos locales) en desarrollo, real en producción
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddScoped<MockInventoryBusiness>();
-    Console.WriteLine("📦 Inventario: Usando MOCK (datos en memoria - sin BD)");
-}
-else
-{
-    builder.Services.AddScoped<InventoryBusiness>();
-}
+// Inventario: Siempre usar datos reales de la base de datos
+builder.Services.AddScoped<InventoryBusiness>();
+Console.WriteLine("📦 Inventario: Usando Base de Datos real");
 
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();

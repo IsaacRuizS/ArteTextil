@@ -8,13 +8,12 @@ namespace ArteTextil.Controllers
     [Route("api/[controller]")]
     public class InventoryController : ControllerBase
     {
-        private readonly dynamic _inventoryBusiness;
+        private readonly InventoryBusiness _inventoryBusiness;
 
-        public InventoryController(IServiceProvider serviceProvider)
+        public InventoryController(InventoryBusiness inventoryBusiness)
         {
-            // Usar MockInventoryBusiness si está registrado, sino usar el real
-            _inventoryBusiness = serviceProvider.GetService<MockInventoryBusiness>() 
-                ?? (dynamic)serviceProvider.GetRequiredService<InventoryBusiness>();
+            // Usar siempre InventoryBusiness con datos de la base de datos
+            _inventoryBusiness = inventoryBusiness;
         }
 
         // GET: api/inventory

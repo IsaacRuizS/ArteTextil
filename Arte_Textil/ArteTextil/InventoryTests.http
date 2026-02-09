@@ -1,0 +1,207 @@
+@baseUrl = http://localhost:5045/api/inventory
+
+### =====================================================
+### TESTS DE ENDPOINTS DE INVENTARIO - Arte Textil
+### =====================================================
+### Requiere: Backend corriendo en localhost:5045
+### Uso: Abrir en VS Code con extensión REST Client
+###      o en Visual Studio, y hacer clic en "Send Request"
+### =====================================================
+
+### ===========================================
+### RF-03-001: Visualizar inventario completo
+### ===========================================
+
+### Obtener todo el inventario
+# @name GetInventory
+GET {{baseUrl}}
+Accept: application/json
+
+###
+
+### ===========================================
+### RF-03-002: Registrar movimientos de inventario
+### ===========================================
+
+### Registrar ENTRADA de inventario (suma al stock)
+# @name RegisterEntrada
+POST {{baseUrl}}/movement
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "type": "Entrada",
+    "quantity": 10,
+    "reason": "Compra de mercadería",
+    "performedByUserId": 1
+}
+
+###
+
+### Registrar SALIDA de inventario (resta del stock)
+# @name RegisterSalida
+POST {{baseUrl}}/movement
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "type": "Salida",
+    "quantity": 5,
+    "reason": "Venta al cliente",
+    "performedByUserId": 1
+}
+
+###
+
+### Registrar AJUSTE de inventario (establece nuevo stock)
+# @name RegisterAjuste
+POST {{baseUrl}}/movement
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "type": "Ajuste",
+    "quantity": 100,
+    "reason": "Corrección por conteo físico",
+    "performedByUserId": 1
+}
+
+###
+
+### ===========================================
+### RF-03-003: Consultar disponibilidad de materiales
+### ===========================================
+
+### Consultar disponibilidad del producto ID 1
+# @name CheckAvailability1
+GET {{baseUrl}}/availability/1
+Accept: application/json
+
+###
+
+### Consultar disponibilidad del producto ID 2
+# @name CheckAvailability2
+GET {{baseUrl}}/availability/2
+Accept: application/json
+
+###
+
+### ===========================================
+### RF-03-004: Filtrar productos del inventario
+### ===========================================
+
+### Filtrar por búsqueda de texto (nombre, código, categoría)
+# @name FilterBySearch
+GET {{baseUrl}}/filter?search=Camisa
+Accept: application/json
+
+###
+
+### Filtrar solo productos con stock bajo
+# @name FilterLowStock
+GET {{baseUrl}}/filter?lowStockOnly=true
+Accept: application/json
+
+###
+
+### Filtrar por categoría (categoryId = 1)
+# @name FilterByCategory
+GET {{baseUrl}}/filter?categoryId=1
+Accept: application/json
+
+###
+
+### Filtrar combinando múltiples criterios
+# @name FilterCombined
+GET {{baseUrl}}/filter?search=Pantalon&lowStockOnly=false
+Accept: application/json
+
+###
+
+### ===========================================
+### RF-03-005: Generar reportes de inventario
+### ===========================================
+
+### Generar reporte completo de inventario
+# @name GenerateReport
+GET {{baseUrl}}/report
+Accept: application/json
+
+###
+
+### ===========================================
+### RF-03-006: Alertas por stock bajo
+### ===========================================
+
+### Obtener alertas de stock bajo
+# @name GetStockAlerts
+GET {{baseUrl}}/alerts
+Accept: application/json
+
+###
+
+### ===========================================
+### EXTRA: Historial de movimientos
+### ===========================================
+
+### Obtener todos los movimientos de inventario
+# @name GetAllMovements
+GET {{baseUrl}}/movements
+Accept: application/json
+
+###
+
+### Obtener historial de movimientos del producto ID 1
+# @name GetMovementHistory1
+GET {{baseUrl}}/movements/1
+Accept: application/json
+
+###
+
+### Obtener historial de movimientos del producto ID 2
+# @name GetMovementHistory2
+GET {{baseUrl}}/movements/2
+Accept: application/json
+
+###
+
+### ===========================================
+### TESTS DE VALIDACIÓN (casos de error)
+### ===========================================
+
+### Intentar registrar movimiento con cantidad 0 (debe fallar)
+# @name InvalidQuantityZero
+POST {{baseUrl}}/movement
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "type": "Entrada",
+    "quantity": 0,
+    "reason": "Test cantidad inválida",
+    "performedByUserId": 1
+}
+
+###
+
+### Intentar registrar movimiento con tipo inválido (debe fallar)
+# @name InvalidMovementType
+POST {{baseUrl}}/movement
+Content-Type: application/json
+
+{
+    "productId": 1,
+    "type": "TipoInvalido",
+    "quantity": 10,
+    "reason": "Test tipo inválido",
+    "performedByUserId": 1
+}
+
+###
+
+### Intentar consultar producto inexistente (debe fallar)
+# @name ProductNotFound
+GET {{baseUrl}}/availability/99999
+Accept: application/json
+
+###
