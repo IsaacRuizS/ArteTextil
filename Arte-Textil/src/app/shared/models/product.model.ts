@@ -26,7 +26,7 @@ export class ProductModel {
         }
     }
 
-    productId!: number;
+    productId: number = 0;
     name!: string;
     description?: string;
     productCode?: string;
@@ -36,7 +36,7 @@ export class ProductModel {
     status?: string;
     categoryId!: number;
     supplierId!: number;
-    isActive!: boolean;
+    isActive!: boolean; 
 
     productImages?: ProductImageModel[];
     promotions?: PromotionModel[];
@@ -44,6 +44,10 @@ export class ProductModel {
     createdAt?: Date;
     updatedAt?: Date;
     deletedAt?: Date;
+
+    quantitySelected: number = 1;
+    categoryName = '';
+    supplierName = '';
 
     get bestPromotion(): PromotionModel | null {
 

@@ -1,4 +1,4 @@
-<div class="carrito-container">
+<div class="carrito-container container">
 
     <h2 class="fw-bold mb-4">Carrito de Cotización</h2>
 
@@ -13,8 +13,10 @@
     <!-- CARRITO VACÍO -->
     @if (cart.length === 0) {
     <div class="text-center mt-5">
-        <h4 class="text-muted">Tu carrito está vacío</h4>
-        <a routerLink="/catalogo" class="btn btn-primary mt-3">Ir al catálogo</a>
+        <h4 class="text-muted">Aún no has agregado items al carrito</h4>
+        <a routerLink="/marketplace" class="btn btn-primary mt-3">
+            Ir al marketplace
+        </a>
     </div>
     }
 
@@ -34,12 +36,12 @@
             </thead>
 
             <tbody>
-                @for (item of cart; track item.id) {
+                @for (item of cart; track item.productId) {
 
                 <tr>
                     <td width="35%">
                         <div class="d-flex gap-3 align-items-center">
-                            <img [src]="item.image" class="thumb">
+                            <img [src]="item.mainImageUrl" class="thumb">
 
                             <div>
                                 <h6 class="fw-bold mb-1">{{ item.name }}</h6>
@@ -48,9 +50,9 @@
                                 <span class="badge bg-danger">Sin stock</span>
                                 }
 
-                                @if (item.promotion) {
+                                @if (item.bestPromotion) {
                                 <span class="badge bg-success ms-2">
-                                    -{{ item.promotion.percentage }}%
+                                    -{{ item.bestPromotion.discountPercent }}%
                                 </span>
                                 }
                             </div>
@@ -62,16 +64,19 @@
                     </td>
 
                     <td width="180">
-                        <div class="qty-box">
+                        <div class="qty-box d-flex align-items-center gap-2">
+                            <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">
+                                -
+                            </button>
 
-                            <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">-</button>
+                            <span class="qty">{{ item.quantitySelected }}</span>
 
-                            <span class="qty">{{ item.qty }}</span>
-
-                            <button class="btn btn-light btn-sm" (click)="increaseQty(item)">+</button>
+                            <button class="btn btn-light btn-sm" (click)="increaseQty(item)">
+                                +
+                            </button>
                         </div>
 
-                        @if (item.qty > item.stock) {
+                        @if (item.quantitySelected! > item.stock) {
                         <small class="text-danger">Stock insuficiente</small>
                         }
                     </td>
@@ -82,7 +87,7 @@
 
                     <td>
                         <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                            <i class="fa fa-trash"></i>
+                            <i class="mdi mdi-delete"></i>
                         </button>
                     </td>
                 </tr>
@@ -99,15 +104,13 @@
 
     <!-- ACCIONES -->
     <div class="d-flex justify-content-between mt-4">
-
         <a routerLink="/marketplace" class="btn btn-outline-secondary">
             Seguir viendo productos
         </a>
 
-        <a routerLink="/quoate" class="btn btn-primary">
+        <a routerLink="/quote" class="btn btn-primary">
             Continuar a cotización
         </a>
-
     </div>
 
     }
