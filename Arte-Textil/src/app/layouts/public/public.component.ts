@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 // componentes
@@ -7,6 +7,7 @@ import { PublicHeaderComponent } from '../../components/public-header/public-hea
 @Component({
     selector: 'app-public',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Default,
     templateUrl: './public.component.html',
     styleUrls: ['./public.component.scss'],
 

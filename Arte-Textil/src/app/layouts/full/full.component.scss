@@ -1,8 +1,10 @@
-#main-wrapper {
+.main-wrapper {
     display: flex;
+    height: calc(100vh - 60px);
 }
 
 .content-area {
+    height: calc(100vh - 60px);
     margin-left: 240px;
     padding: 20px;
     width: calc(100% - 240px);

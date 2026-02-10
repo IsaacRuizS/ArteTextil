@@ -1,4 +1,4 @@
-<div class="product-detail-wrapper container">  
+<div class="product-detail-wrapper container">
 
     <div class="mb-3" (click)="onBackToMarketplace()">
         <a routerLink="/marketplace" class="btn btn-outline-secondary d-inline-flex align-items-center">
@@ -7,6 +7,7 @@
         </a>
     </div>
 
+    @if(product.productId > 0) {
     <div class="row g-4">
 
         <!-- GALERÍA DE IMÁGENES -->
@@ -20,9 +21,9 @@
             <!-- Miniaturas -->
             <div class="thumbs d-flex gap-2 mt-3">
 
-                @for (img of product.images; track img) {
-                <img [src]="img" class="thumb-img rounded" [class.active]="img === selectedImage"
-                    (click)="changeImage(img)">
+                @for (img of product.productImages; track img) {
+                <img [src]="img.imageUrl" class="thumb-img rounded" [class.active]="img.imageUrl === selectedImage"
+                    (click)="changeImage(img.imageUrl)">
                 }
             </div>
 
@@ -33,9 +34,17 @@
 
             <h2 class="fw-bold">{{ product.name }}</h2>
 
+            @if(product.categoryName) {
             <p class="text-muted mb-2">
-                Categoría: <strong>{{ product.category }}</strong>
+                Categoría: <strong>{{ product.categoryName }}</strong>
             </p>
+            }
+
+            @if(product.supplierName) {
+            <p class="text-muted mb-2">
+                Proveedor: <strong>{{ product.supplierName }}</strong>
+            </p>
+            }
 
             <!-- Precio -->
             <h3 class="text-primary fw-bold">
@@ -43,9 +52,10 @@
             </h3>
 
             <!-- Promoción -->
-            @if (product.promotion) {
+            @if (product.bestPromotion) {
             <span class="badge bg-warning text-dark">
-                -{{ product.promotion.percentage }}% hasta {{ product.promotion.until }}
+                -{{ product.bestPromotion.discountPercent }}% hasta {{ product.bestPromotion.endDate |
+                date:'dd/MM/yyyy'}}
             </span>
             }
 
@@ -63,24 +73,28 @@
                 <label class="fw-semibold">Cantidad</label>
 
                 <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-secondary" (click)="decreaseQty()" [disabled]="qty === 1">-</button>
+                    <button class="btn btn-outline-secondary" (click)="decreaseQty()"
+                        [disabled]="product.quantitySelected === 1">-</button>
 
-                    <input type="number" class="form-control qty-input" [(ngModel)]="qty" [max]="product.stock" min="1">
+                    <input type="number" class="form-control qty-input" [(ngModel)]="product.quantitySelected"
+                        [max]="product.stock" min="1">
 
                     <button class="btn btn-outline-secondary" (click)="increaseQty()"
-                        [disabled]="qty >= product.stock">+</button>
+                        [disabled]="product.quantitySelected >= product.stock">+</button>
                 </div>
             </div>
 
 
             <!-- BOTÓN AGREGAR AL CARRITO -->
-            <button class="btn btn-primary btn-lg mt-4" [disabled]="product.stock === 0" (click)="addToCart()">
+            <button class="btn btn-primary btn-lg mt-4" [class.btn-success]="added" (click)="addToCart()">
 
-                <i class="mdi mdi-cart-plus me-1"></i>
-                Agregar al carrito
+                <i class="mdi" [class.mdi-cart-plus]="!added" [class.mdi-check]="added"></i>
+                {{ added ? 'Agregado' : 'Agregar al carrito' }}
             </button>
+
 
         </div>
 
     </div>
+    }
 </div>

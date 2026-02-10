@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ProductModel } from '../../../shared/models/product.model';
+import { finalize } from 'rxjs';
+import { ApiProductService } from '../../../services/api-product.service';
+import { SharedService } from '../../../services/shared.service';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
     selector: 'app-product-detail',
@@ -16,36 +21,29 @@ import { CommonModule } from '@angular/common';
     styleUrl: './product-detail.component.scss',
 })
 export class ProductDetailComponent {
-    productId!: number;
 
-    // Producto de prueba (no usamos modelos)
-    product: any = {
-        id: 1,
-        name: 'Camisa Azul Premium',
-        description: 'Camisa de algodón suave, perfecta para uso diario.',
-        price: 8500,
-        category: 'Camisas',
-        stock: 10,
-        images: [
-            'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000',
-            'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000/1',
-            'https://tommycostarica.vtexassets.com/arquivos/ids/306245/Camisa-Heritage-de-manga-corta.jpg?v=638842935963770000/2',
-        ],
-        promotion: {
-            percentage: 20,
-            until: '2025-12-30'
-        }
-    };
+    productId?: number;
+    product: ProductModel = new ProductModel();
 
     selectedImage = '';
-    qty = 1;
 
-    constructor(private route: ActivatedRoute) {
+    added = false;
+
+    constructor(private route: ActivatedRoute,
+        private apiProductService: ApiProductService,
+        private sharedService: SharedService,
+        private cartService: CartService,
+        private cdr: ChangeDetectorRef,
+    ) {
+    }
+
+    ngOnInit() {
+
         // Simular cargar el id
         this.productId = Number(this.route.snapshot.paramMap.get('id'));
 
-        // Imagen principal
-        this.selectedImage = this.product.images[0];
+        this._loadProduct();
+
     }
 
     changeImage(img: string) {
@@ -53,22 +51,87 @@ export class ProductDetailComponent {
     }
 
     increaseQty() {
-        if (this.qty < this.product.stock) {
-            this.qty++;
+
+        if (this.product!.quantitySelected < this.product!.stock) {
+            this.product!.quantitySelected++;
         }
     }
 
     decreaseQty() {
-        if (this.qty > 1) {
-            this.qty--;
+
+        if (this.product!.quantitySelected > 1) {
+            this.product!.quantitySelected--;
         }
     }
 
     addToCart() {
-        window.location.href = '/cart';
+
+        this.cartService.addProduct(this.product);
+
+        this.added = true;
+
+        setTimeout(() => {
+            this.added = false;
+            this.cdr.markForCheck();
+        }, 1500);
+
+        this.cartService.addProduct(this.product);
+
+        const img = document.querySelector('.image-main img') as HTMLElement;
+        const cartIcon = document.querySelector('.cart-icon') as HTMLElement;
+
+        if (!img || !cartIcon) return;
+
+        const clone = img.cloneNode(true) as HTMLElement;
+        const imgRect = img.getBoundingClientRect();
+        const cartRect = cartIcon.getBoundingClientRect();
+
+        clone.style.position = 'fixed';
+        clone.style.left = imgRect.left + 'px';
+        clone.style.top = imgRect.top + 'px';
+        clone.style.width = imgRect.width + 'px';
+        clone.style.transition = 'all 0.7s ease-in-out';
+        clone.style.zIndex = '1000';
+
+        document.body.appendChild(clone);
+
+        setTimeout(() => {
+            clone.style.left = cartRect.left + 'px';
+            clone.style.top = cartRect.top + 'px';
+            clone.style.width = '40px';
+            clone.style.opacity = '0';
+        }, 10);
+
+        setTimeout(() => {
+            clone.remove();
+        }, 800);
     }
 
-    onBackToMarketplace(){
+    onBackToMarketplace() {
         window.location.href = '/marketplace';
+    }
+
+    private _loadProduct() {
+
+        // DATA LOAD
+
+        this.sharedService.setLoading(true);
+
+        this.apiProductService.getById(this.productId!)
+            .pipe(finalize(() => this.sharedService.setLoading(false)))
+            .subscribe({
+                next: (product: ProductModel) => {
+
+                    this.product = product;
+
+                    // Imagen principal
+                    this.selectedImage = this.product?.mainImageUrl ?? '';
+
+                    this.cdr.markForCheck();
+                },
+                error: (err) => {
+                    // manejar error
+                }
+            });
     }
 }

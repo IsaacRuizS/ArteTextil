@@ -11,16 +11,19 @@ export class LeftSidebarComponent {
     @Input() isClosed = false;
 
     menu: any[] = [
-        { label: 'Inventario', link: '/inventory' },
-        { label: 'Categorías', link: '/categories' },
-        { label: 'Promociones', link: '/promotions' },
-        { label: 'Analítica', link: '/analytics' },
-        { label: 'Analítica Clientes', link: '/customer-analytics' },
-        { label: 'Marketplace', link: '/marketplace' },
-        { label: 'Dashboard', link: '/dashboard' },
-        { label: 'Pedidos', link: '/orders-management' },
-        { label: 'Reportes', link: '/reports' },
-        { label: 'Producción', link: '/production' },
+        { label: 'Marketplace', link: '/marketplace' }, 
+        {
+            label: 'Configuración de Catálogo',
+            collapsed: true,
+            children: [
+                { label: 'Proveedores', link: '/admin/suppliers' },
+                { label: 'Categorías', link: '/categories' },
+                { label: 'Inventario', link: '/inventory' },
+                { label: 'Productos', link: '/admin/products' },
+                { label: 'Promociones', link: '/promotions' },
+                { label: 'Pedidos', link: '/orders-management' },
+            ]
+        },
 
         {
             label: 'Administración General',
@@ -39,6 +42,17 @@ export class LeftSidebarComponent {
                 { label: 'Asistencia', link: '/hr/attendance' },
                 { label: 'Vacaciones', link: '/hr/vacations' },
                 { label: 'Planillas', link: '/hr/payroll' }
+            ]
+        },
+        {
+            label: 'Analítica',
+            collapsed: true,
+            children: [
+                { label: 'Analítica', link: '/analytics' },
+                { label: 'Analítica Clientes', link: '/customer-analytics' },
+                { label: 'Dashboard', link: '/dashboard' },
+                { label: 'Reportes', link: '/reports' },
+                { label: 'Producción', link: '/production' }
             ]
         }
     ];
