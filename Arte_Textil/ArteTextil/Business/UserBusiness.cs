@@ -15,15 +15,18 @@ namespace ArteTextil.Business
         private readonly IRepositoryUser _repositoryUser;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
+        private readonly JwtHelper _jwtHelper;
 
         public UserBusiness(
             ArteTextilDbContext context,
             IMapper mapper,
-            ISystemLogHelper logHelper)
+            ISystemLogHelper logHelper,
+            JwtHelper jwtHelper)
         {
             _repositoryUser = new RepositoryUser(context);
             _mapper = mapper;
             _logHelper = logHelper;
+            _jwtHelper = jwtHelper;
         }
 
         // GET ALL
@@ -247,9 +250,9 @@ namespace ArteTextil.Business
             return response;
         }
         // LOGIN
-        public async Task<ApiResponse<UserDto>> Login(LoginDto dto)
+        public async Task<ApiResponse<AuthResponseDto>> Login(LoginDto dto)
         {
-            var response = new ApiResponse<UserDto>();
+            var response = new ApiResponse<AuthResponseDto>();
 
             try
             {
@@ -284,8 +287,13 @@ namespace ArteTextil.Business
                 _repositoryUser.Update(user);
                 await _repositoryUser.SaveAsync();
 
+                var token = _jwtHelper.GenerateToken(user);
 
-                response.Data = _mapper.Map<UserDto>(user);
+                response.Data = new AuthResponseDto
+                {
+                    User = _mapper.Map<UserDto>(user),
+                    Token = token
+                };
                 response.Message = "Login exitoso";
             }
             catch (Exception ex)

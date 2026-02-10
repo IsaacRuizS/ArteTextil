@@ -3,6 +3,9 @@ using ArteTextil.Business;
 using ArteTextil.Helpers;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,15 +63,34 @@ builder.Services.AddScoped<CategoryBusiness>();
 builder.Services.AddScoped<AttendanceBusiness>();
 builder.Services.AddScoped<VacationBusiness>();
 builder.Services.AddScoped<PayrollAdjustmentBusiness>();
+// Register JwtHelper
+builder.Services.AddScoped<JwtHelper>();
 
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
+// Configuration del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -76,12 +98,11 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-// uso del CORS aquí
+// uso del CORS aqu
 app.UseCors(corsPolicy);
 
-// NO usamos Auth todavía
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
