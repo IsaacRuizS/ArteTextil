@@ -12,6 +12,8 @@ namespace ArteTextil.Business
     public class ProductBusiness
     {
         private readonly IRepositoryProduct _repositoryProduct;
+        private readonly IRepositoryCategory _repositoryCategory;
+        private readonly IRepositorySupplier _repositorySupplier;
         private readonly IRepositoryProductImage _repositoryProductImage;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
@@ -23,6 +25,9 @@ namespace ArteTextil.Business
         {
             _repositoryProduct = new RepositoryProduct(context);
             _repositoryProductImage = new RepositoryProductImage(context);
+            _repositoryCategory = new RepositoryCategory(context);
+            _repositorySupplier = new RepositorySupplier(context);
+
             _mapper = mapper;
             _logHelper = logHelper;
         }
@@ -69,7 +74,20 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                response.Data = _mapper.Map<ProductDto>(product);
+                var productDto = _mapper.Map<ProductDto>(product);
+
+                var category = await _repositoryCategory.Query().FirstOrDefaultAsync(c => c.CategoryId == product.CategoryId && c.DeletedAt == null);
+                if(category != null)
+                {
+                    productDto.categoryName = category.Name;
+                }
+                var supplier = await _repositorySupplier.Query().FirstOrDefaultAsync(s => s.SupplierId == product.SupplierId && s.DeletedAt == null);
+                if (supplier != null)
+                {
+                    productDto.supplierName = supplier.Name;
+                }
+
+                response.Data = productDto;
                 response.Message = "Producto obtenido correctamente";
             }
             catch (Exception ex)

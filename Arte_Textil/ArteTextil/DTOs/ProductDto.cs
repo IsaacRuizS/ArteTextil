@@ -14,6 +14,10 @@ namespace ArteTextil.DTOs
         public int supplierId { get; set; }
         public bool isActive { get; set; }
 
+        public string? categoryName { get; set; }
+        public string? supplierName { get; set; }
+
+
         // Relacionado
         public List<ProductImageDto>? productImages { get; set; }
         public List<PromotionDto>? promotions { get; set; }
