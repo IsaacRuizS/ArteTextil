@@ -60,6 +60,9 @@ builder.Services.AddScoped<CategoryBusiness>();
 builder.Services.AddScoped<AttendanceBusiness>();
 builder.Services.AddScoped<VacationBusiness>();
 builder.Services.AddScoped<PayrollAdjustmentBusiness>();
+builder.Services.AddScoped<QuoteBusiness>();
+builder.Services.AddScoped<CustomerBusiness>();
+
 
 // Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();

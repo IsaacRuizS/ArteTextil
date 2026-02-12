@@ -63,9 +63,19 @@ namespace ArteTextil.Business
 
             try
             {
+                var now = DateTime.UtcNow;
+
                 var product = await _repositoryProduct.Query()
+                    .Where(p => p.DeletedAt == null && p.IsActive)
                     .Include(p => p.ProductImages)
-                    .FirstOrDefaultAsync(p => p.ProductId == id && p.DeletedAt == null);
+                    .Include(p => p.Promotions
+                        .Where(pr =>
+                            pr.IsActive &&
+                            pr.DeletedAt == null &&
+                            pr.StartDate <= now &&
+                            (pr.EndDate == null || pr.EndDate >= now)
+                        )
+                    ).FirstOrDefaultAsync(p => p.ProductId == id && p.DeletedAt == null);
 
                 if (product == null)
                 {
