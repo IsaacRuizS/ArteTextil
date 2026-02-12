@@ -58,8 +58,6 @@ export class CartService {
 
     addProduct(product: ProductModel) {
 
-        if (!this.isBrowser()) return;
-
         const cart = this.getCart();
 
         const existing = cart.find(p => p.productId === product.productId);

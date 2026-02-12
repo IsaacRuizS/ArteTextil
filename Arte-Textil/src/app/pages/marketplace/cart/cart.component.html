@@ -104,11 +104,11 @@
 
     <!-- ACCIONES -->
     <div class="d-flex justify-content-between mt-4">
-        <a routerLink="/marketplace" class="btn btn-outline-secondary">
+        <a class="btn btn-outline-secondary" (click)="onBackToMarketplace()">
             Seguir viendo productos
         </a>
 
-        <a routerLink="/quote" class="btn btn-primary">
+        <a class="btn btn-primary" (click)="onOpenCart()">
             Continuar a cotización
         </a>
     </div>
