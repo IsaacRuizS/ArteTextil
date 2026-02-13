@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
 import { ProductModel } from '../../../shared/models/product.model';
@@ -15,7 +15,7 @@ import { ApiSupplierService } from '../../../services/api-supplier.service';
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule],
     providers: [FormBuilder],
     templateUrl: './products.component.html',
     styleUrls: ['./products.component.scss']
@@ -37,6 +37,13 @@ export class ProductsComponent implements OnInit {
     isEditing = false;
     productToDelete: ProductModel | null = null;
     searchTerm = '';
+
+    // Filters RF-04-006
+    filterCategory: number | null = null;
+    filterPriceMin: number | null = null;
+    filterPriceMax: number | null = null;
+    filterDateFrom: string = '';
+    filterDateTo: string = '';
 
     constructor(
         private apiProductService: ApiProductService,
@@ -131,29 +138,76 @@ export class ProductsComponent implements OnInit {
     // FILTERS
     onSearch(event: any) {
         this.searchTerm = (event?.target?.value ?? '').toString();
-        this.onFilterInfo();
+        this.applyFilters();
     }
 
-    onFilterInfo() {
-        this.products = this.productsOrigins;
+    onFilterChange() {
+        this.applyFilters();
+    }
 
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+    clearFilters() {
+        this.searchTerm = '';
+        this.filterCategory = null;
+        this.filterPriceMin = null;
+        this.filterPriceMax = null;
+        this.filterDateFrom = '';
+        this.filterDateTo = '';
+        this.applyFilters();
+    }
 
-        const term = this.searchTerm.toLowerCase();
+    applyFilters() {
+        let filtered = [...this.productsOrigins];
 
-        this.products = this.products.filter(p =>
-            (p.name ?? '').toLowerCase().includes(term) ||
-            (p.productCode ?? '').toLowerCase().includes(term)
-        );
+        // Filtro por término de búsqueda
+        if (this.searchTerm && this.searchTerm.trim() !== '') {
+            const term = this.searchTerm.toLowerCase();
+            filtered = filtered.filter(p =>
+                (p.name ?? '').toLowerCase().includes(term) ||
+                (p.productCode ?? '').toLowerCase().includes(term)
+            );
+        }
+
+        // Filtro por categoría (RF-04-006)
+        if (this.filterCategory) {
+            filtered = filtered.filter(p => p.categoryId === this.filterCategory);
+        }
+
+        // Filtro por precio (RF-04-006)
+        if (this.filterPriceMin !== null && this.filterPriceMin > 0) {
+            filtered = filtered.filter(p => (p.price ?? 0) >= this.filterPriceMin!);
+        }
+        if (this.filterPriceMax !== null && this.filterPriceMax > 0) {
+            filtered = filtered.filter(p => (p.price ?? 0) <= this.filterPriceMax!);
+        }
+
+        // Filtro por fecha de creación (RF-04-006)
+        if (this.filterDateFrom) {
+            const dateFrom = new Date(this.filterDateFrom);
+            filtered = filtered.filter(p => {
+                if (!p.createdAt) return true;
+                const created = new Date(p.createdAt);
+                return created >= dateFrom;
+            });
+        }
+        if (this.filterDateTo) {
+            const dateTo = new Date(this.filterDateTo);
+            dateTo.setHours(23, 59, 59, 999); // Incluir todo el día
+            filtered = filtered.filter(p => {
+                if (!p.createdAt) return true;
+                const created = new Date(p.createdAt);
+                return created <= dateTo;
+            });
+        }
+
+        this.products = filtered;
     }
 
     get filteredProducts(): ProductModel[] {
-        if (!this.searchTerm || this.searchTerm.trim() === '') return this.products;
-        const term = this.searchTerm.toLowerCase();
-        return this.products.filter(p =>
-            (p.name ?? '').toLowerCase().includes(term) ||
-            (p.productCode ?? '').toLowerCase().includes(term)
-        );
+        return this.products;
+    }
+
+    onFilterInfo() {
+        this.applyFilters();
     }
 
     getCategoryName(categoryId: number | null | undefined): string {

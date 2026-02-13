@@ -17,22 +17,25 @@
                 <label class="form-label fw-semibold">Nombre *</label>
                 <input class="form-control mb-3" [(ngModel)]="form.name">
 
+                <label class="form-label fw-semibold">Descripción</label>
+                <textarea class="form-control mb-3" [(ngModel)]="form.description" rows="2"></textarea>
+
                 <label class="form-label fw-semibold">Producto *</label>
                 <select class="form-select mb-3" [(ngModel)]="form.productId">
-                    <option value="">Seleccione</option>
-                    @for (p of products; track p.id) {
-                    <option [value]="p.id">{{ p.name }}</option>
+                    <option [value]="0">Seleccione</option>
+                    @for (p of products; track p.productId) {
+                    <option [value]="p.productId">{{ p.name }}</option>
                     }
                 </select>
 
                 <label class="form-label fw-semibold">Descuento (%) *</label>
-                <input type="number" class="form-control mb-3" [(ngModel)]="form.percent">
+                <input type="number" class="form-control mb-3" [(ngModel)]="form.discountPercent" min="1" max="100">
 
                 <label class="form-label fw-semibold">Fecha inicio *</label>
-                <input type="date" class="form-control mb-3" [(ngModel)]="form.start">
+                <input type="date" class="form-control mb-3" [(ngModel)]="form.startDate">
 
                 <label class="form-label fw-semibold">Fecha fin *</label>
-                <input type="date" class="form-control mb-3" [(ngModel)]="form.end">
+                <input type="date" class="form-control mb-3" [(ngModel)]="form.endDate">
 
             </div>
 

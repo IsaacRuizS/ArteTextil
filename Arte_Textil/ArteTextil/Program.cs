@@ -62,6 +62,7 @@ builder.Services.AddScoped<VacationBusiness>();
 builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
+builder.Services.AddScoped<PromotionBusiness>();
 
 
 // Agregar servicios de controladores y Swagger
@@ -71,7 +72,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configuración del pipeline HTTP
+// Configuraciï¿½n del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -79,10 +80,10 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-// uso del CORS aquí
+// uso del CORS aquï¿½
 app.UseCors(corsPolicy);
 
-// NO usamos Auth todavía
+// NO usamos Auth todavï¿½a
 // app.UseAuthentication();
 // app.UseAuthorization();
 

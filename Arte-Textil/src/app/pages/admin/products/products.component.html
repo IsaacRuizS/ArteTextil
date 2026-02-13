@@ -14,12 +14,63 @@
 
     <!-- FILTER -->
     <div class="mb-4">
-        <div class="input-group">
+        <div class="input-group mb-3">
             <span class="input-group-text bg-white">
                 <i class="mdi mdi-magnify"></i>
             </span>
             <input type="text" class="form-control" placeholder="Buscar por nombre o código..."
                 (input)="onSearch($event)">
+        </div>
+
+        <!-- Filtros adicionales RF-04-006 -->
+        <div class="card shadow-sm border-0 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0 fw-semibold">Filtros avanzados</h6>
+                <button class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">
+                    <i class="mdi mdi-filter-remove-outline me-1"></i>Limpiar
+                </button>
+            </div>
+
+            <div class="row g-2">
+                <!-- Filtro por categoría -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Categoría</label>
+                    <select class="form-select" [(ngModel)]="filterCategory" (change)="onFilterChange()">
+                        <option [value]="null">Todas las categorías</option>
+                        @for (cat of categories; track cat.categoryId) {
+                        <option [value]="cat.categoryId">{{ cat.name }}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Filtro por precio mínimo -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Precio mínimo</label>
+                    <input type="number" class="form-control" placeholder="₡ 0"
+                        [(ngModel)]="filterPriceMin" (input)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por precio máximo -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Precio máximo</label>
+                    <input type="number" class="form-control" placeholder="₡ 0"
+                        [(ngModel)]="filterPriceMax" (input)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por fecha desde -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Creado desde</label>
+                    <input type="date" class="form-control"
+                        [(ngModel)]="filterDateFrom" (change)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por fecha hasta -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Creado hasta</label>
+                    <input type="date" class="form-control"
+                        [(ngModel)]="filterDateTo" (change)="onFilterChange()">
+                </div>
+            </div>
         </div>
     </div>
 

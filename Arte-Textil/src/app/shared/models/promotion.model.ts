@@ -34,6 +34,9 @@ export class PromotionModel {
     productId?: number;
     isActive!: boolean;
 
+    // Relación
+    productName?: string;
+
     createdAt?: Date;
     updatedAt?: Date;
     deletedAt?: Date;

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { PromotionModel } from '../../../shared/models/promotion.model';
 
 @Component({
     selector: 'app-promotion-delete-modal',
@@ -7,7 +8,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     styleUrl: '../promotion.component.scss',
 })
 export class PromotionDeleteModal {
-    @Input() promotion: any;
+    @Input() promotion: PromotionModel | null = null;
     @Output() close = new EventEmitter();
     @Output() confirm = new EventEmitter();
 }

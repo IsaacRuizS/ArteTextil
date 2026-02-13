@@ -26,18 +26,18 @@
             </thead>
 
             <tbody>
-                @for (p of promotions; track p.id) {
+                @for (p of promotions; track p.promotionId) {
                 <tr>
 
                     <td>{{ p.name }}</td>
-                    <td>{{ getProductName(p.productId) }}</td>
-                    <td>{{ p.percent }}%</td>
-                    <td>{{ p.start }} → {{ p.end }}</td>
+                    <td>{{ p.productName || getProductName(p.productId) }}</td>
+                    <td>{{ p.discountPercent }}%</td>
+                    <td>{{ (p.startDate | date:'dd/MM/yyyy') || 'N/A' }} → {{ (p.endDate | date:'dd/MM/yyyy') || 'N/A' }}</td>
 
                     <td>
-                        <span class="badge state cursor-pointer" [class.bg-success]="p.status === 'Activa'"
-                            [class.bg-secondary]="p.status === 'Inactiva'" [class.bg-warning]="p.status === 'Vencida'" (click)="onChangeStatus(p)">
-                            {{ p.status }}
+                        <span class="badge state cursor-pointer" [class.bg-success]="p.isActive"
+                            [class.bg-secondary]="!p.isActive" (click)="onChangeStatus(p)">
+                            {{ p.isActive ? 'Activa' : 'Inactiva' }}
                         </span>
                     </td>
 
