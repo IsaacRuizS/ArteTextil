@@ -1,6 +1,7 @@
-using ArteTextil.Data;
 using ArteTextil.Business;
+using ArteTextil.Data;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,6 +64,7 @@ builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 // Agregar servicios de controladores y Swagger
