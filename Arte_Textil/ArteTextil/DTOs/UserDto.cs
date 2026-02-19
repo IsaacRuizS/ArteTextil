@@ -1,26 +1,13 @@
 namespace ArteTextil.DTOs;
 
-public class PromotionDto : DtoBase
+public class UserDto : DtoBase
 {
-    public long promotionId { get; set; }
-
-    public required string name { get; set; }
-
-    public string? description { get; set; }
-
-    public decimal? discountPercent { get; set; }
-
-    public DateTime? startDate { get; set; }
-
-    public DateTime? endDate { get; set; }
-
-    public long? productId { get; set; }
-
+    public int userId { get; set; }
+    public required string fullName { get; set; }
+    public required string email { get; set; }
+    public string? passwordHash { get; set; }
+    public required string phone { get; set; }
+    public required DateTime? lastLoginAt { get; set; }
+    public required int roleId { get; set; }
     public bool isActive { get; set; }
-
-    public DateTime? createdAt { get; set; }
-
-    public DateTime? updatedAt { get; set; }
-
-    public DateTime? deletedAt { get; set; }
 }

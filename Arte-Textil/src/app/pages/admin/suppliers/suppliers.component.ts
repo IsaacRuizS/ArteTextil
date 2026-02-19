@@ -167,7 +167,9 @@ export class SuppliersComponent implements OnInit {
 
     private _deleteSupplier(supplierId: number) {
 
-        this.apiSupplierService.delete(supplierId).subscribe({
+        let supplier = this.suppliersOrigins.find(s => s.supplierId === supplierId)?.isActive;
+        
+        this.apiSupplierService.updateStatus(supplierId, !supplier).subscribe({
             next: () => {
 
                 this.showDeleteModal = false;

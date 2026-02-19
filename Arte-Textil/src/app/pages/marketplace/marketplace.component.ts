@@ -11,6 +11,7 @@ import { CategoryModel } from '../../shared/models/category.model';
 import { ProductModel } from '../../shared/models/product.model';
 import { SupplierModel } from '../../shared/models/supplier.model';
 import { TruncatePipe } from "../../shared/pipes/truncate.pipe";
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -42,7 +43,9 @@ export class MarketplaceComponent {
     };
 
 
-    constructor(private apiProductService: ApiProductService,
+    constructor(
+        public router: Router,
+        private apiProductService: ApiProductService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
         private apiSupplierService: ApiSupplierService,
@@ -114,7 +117,7 @@ export class MarketplaceComponent {
     }
 
     onOpenProduct(p: any) {
-        window.location.href = `/product/${p.productId}`;
+        this.router.navigate(['/product', p.productId]);
     }
 
     categoryName(categoryId: number): string {

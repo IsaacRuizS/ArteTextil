@@ -77,6 +77,23 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<PromotionDto, Promotion>()
                 .ForMember(d => d.PromotionId, o => o.MapFrom(s => s.promotionId));
 
+            cfg.CreateMap<Quote, QuoteDto>()
+                .ForMember(d => d.quoteId, o => o.MapFrom(s => s.QuoteId));
+
+            cfg.CreateMap<QuoteDto, Quote>()
+                .ForMember(d => d.QuoteId, o => o.MapFrom(s => s.quoteId));
+
+            cfg.CreateMap<QuoteItem, QuoteItemDto>()
+                .ForMember(d => d.quoteItemId, o => o.MapFrom(s => s.QuoteItemId));
+
+            cfg.CreateMap<QuoteItemDto, QuoteItem>()
+                .ForMember(d => d.QuoteItemId, o => o.MapFrom(s => s.quoteItemId));
+
+            cfg.CreateMap<Customer, CustomerDto>()
+                .ForMember(d => d.customerId, o => o.MapFrom(s => s.CustomerId));
+
+            cfg.CreateMap<CustomerDto, Customer>()
+                .ForMember(d => d.CustomerId, o => o.MapFrom(s => s.customerId));
 
         }
     }

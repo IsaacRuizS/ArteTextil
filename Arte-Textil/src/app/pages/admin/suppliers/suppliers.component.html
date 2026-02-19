@@ -27,7 +27,7 @@
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
-                <tbody >
+                <tbody>
                     <tr *ngFor="let s of suppliers;">
                         <td class="ps-4 fw-semibold">{{ s.name }}</td>
                         <td>{{ s.contactPerson }}</td>
@@ -44,11 +44,13 @@
                             <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(s)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>
-                            @if(s.isActive) {
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(s)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(s)">
+                                @if (s.isActive) {
+                                <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                <i class="mdi mdi-eye-outline"></i>
+                                }
                             </button>
-                            }
                         </td>
                     </tr>
                 </tbody>
@@ -109,11 +111,11 @@
         <div class="modal-content text-center p-3">
             <div class="modal-body">
                 <div class="mb-3 text-danger display-4"><i class="mdi mdi-alert-circle-outline"></i></div>
-                <h5 class="mb-2 fw-bold">¿Desactivar?</h5>
-                <p class="text-muted small">El proveedor no podrá ser utilizado en nuevas operaciones.</p>
+                <h5 class="mb-2 fw-bold">¿Modificar?</h5>
+                <p class="text-muted small">¿Estás seguro de que deseas modificar el estado del proveedor?</p>
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Modificar</button>
                 </div>
             </div>
         </div>

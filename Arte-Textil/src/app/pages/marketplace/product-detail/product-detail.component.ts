@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -29,7 +29,8 @@ export class ProductDetailComponent {
 
     added = false;
 
-    constructor(private route: ActivatedRoute,
+    constructor(public router: Router,
+        private route: ActivatedRoute,
         private apiProductService: ApiProductService,
         private sharedService: SharedService,
         private cartService: CartService,
@@ -75,8 +76,6 @@ export class ProductDetailComponent {
             this.cdr.markForCheck();
         }, 1500);
 
-        this.cartService.addProduct(this.product);
-
         const img = document.querySelector('.image-main img') as HTMLElement;
         const cartIcon = document.querySelector('.cart-icon') as HTMLElement;
 
@@ -108,8 +107,8 @@ export class ProductDetailComponent {
     }
 
     onBackToMarketplace() {
-        window.location.href = '/marketplace';
-    }
+        this.router.navigate(['/marketplace']);
+    } 
 
     private _loadProduct() {
 

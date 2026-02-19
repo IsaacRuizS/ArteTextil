@@ -1,6 +1,7 @@
-using ArteTextil.Data;
 using ArteTextil.Business;
+using ArteTextil.Data;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -63,6 +64,14 @@ builder.Services.AddScoped<CategoryBusiness>();
 builder.Services.AddScoped<AttendanceBusiness>();
 builder.Services.AddScoped<VacationBusiness>();
 builder.Services.AddScoped<PayrollAdjustmentBusiness>();
+<<<<<<< HEAD
+=======
+builder.Services.AddScoped<QuoteBusiness>();
+builder.Services.AddScoped<CustomerBusiness>();
+builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+>>>>>>> HEAD@{1}
 // Register JwtHelper
 builder.Services.AddScoped<JwtHelper>();
 

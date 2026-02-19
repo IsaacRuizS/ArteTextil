@@ -167,14 +167,15 @@ namespace ArteTextil.Business
             return response;
         }
 
-        // DELETE LÓGICO
-        public async Task<ApiResponse<bool>> Delete(int id)
+        // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+        public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                var category = await _repositoryCategory.FirstOrDefaultAsync(c => c.CategoryId == id && c.DeletedAt == null);
+                var category = await _repositoryCategory
+                    .FirstOrDefaultAsync(c => c.CategoryId == id);
 
                 if (category == null)
                 {
@@ -185,21 +186,27 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(category);
 
-                category.IsActive = false;
-                category.DeletedAt = DateTime.UtcNow;
+                category.IsActive = isActive;
 
                 _repositoryCategory.Update(category);
                 await _repositoryCategory.SaveAsync();
 
-                await _logHelper.LogDelete("Categories", category.CategoryId, previousSnapshot);
+                await _logHelper.LogUpdate(
+                    "Categories",
+                    category.CategoryId,
+                    previousSnapshot,
+                    JsonSerializer.Serialize(category)
+                );
 
                 response.Data = true;
-                response.Message = "Categoría eliminada correctamente";
+                response.Message = isActive
+                    ? "Categoría activada correctamente"
+                    : "Categoría desactivada correctamente";
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"Error al eliminar categoría: {ex.Message}";
+                response.Message = $"Error al actualizar estado de la categoría: {ex.Message}";
             }
 
             return response;

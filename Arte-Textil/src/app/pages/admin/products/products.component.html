@@ -14,12 +14,61 @@
 
     <!-- FILTER -->
     <div class="mb-4">
-        <div class="input-group">
+        <div class="input-group mb-3">
             <span class="input-group-text bg-white">
                 <i class="mdi mdi-magnify"></i>
             </span>
             <input type="text" class="form-control" placeholder="Buscar por nombre o código..."
                 (input)="onSearch($event)">
+        </div>
+
+        <!-- Filtros adicionales RF-04-006 -->
+        <div class="card shadow-sm border-0 p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0 fw-semibold">Filtros avanzados</h6>
+                <button class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">
+                    <i class="mdi mdi-filter-remove-outline me-1"></i>Limpiar
+                </button>
+            </div>
+
+            <div class="row g-2">
+                <!-- Filtro por categoría -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Categoría</label>
+                    <select class="form-select" [(ngModel)]="filterCategory" (change)="onFilterChange()">
+                        <option [value]="null">Todas las categorías</option>
+                        @for (cat of categories; track cat.categoryId) {
+                        <option [value]="cat.categoryId">{{ cat.name }}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Filtro por precio mínimo -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Precio mínimo</label>
+                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMin"
+                        (input)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por precio máximo -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Precio máximo</label>
+                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMax"
+                        (input)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por fecha desde -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Creado desde</label>
+                    <input type="date" class="form-control" [(ngModel)]="filterDateFrom" (change)="onFilterChange()">
+                </div>
+
+                <!-- Filtro por fecha hasta -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Creado hasta</label>
+                    <input type="date" class="form-control" [(ngModel)]="filterDateTo" (change)="onFilterChange()">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -95,8 +144,12 @@
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(p)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(p)">
+                                @if (p.isActive) {
+                                <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                <i class="mdi mdi-eye-outline"></i>
+                                }
                             </button>
                         </td>
                     </tr>
@@ -243,14 +296,15 @@
                     <i class="mdi mdi-package-variant-closed-remove"></i>
                 </div>
 
-                <h5 class="mb-2 fw-bold">¿Desactivar Producto?</h5>
+                <h5 class="mb-2 fw-bold">¿Modificar Estado del Producto?</h5>
                 <p class="text-muted small mb-0">
-                    El producto no aparecerá disponible para ventas ni movimientos.
+                    ¿Estas seguro que quieres cambiar el estado del producto?. No se eliminará, solo se modificará en el
+                    catálogo.
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Sí, desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Sí, modificar</button>
                 </div>
             </div>
         </div>

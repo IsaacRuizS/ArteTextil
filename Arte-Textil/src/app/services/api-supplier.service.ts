@@ -92,24 +92,26 @@ export class ApiSupplierService extends ApiBaseService {
             );
     }
 
-    // DELETE: api/supplier/{id}
-    delete(id: number): Observable<boolean> {
-
-        return this.http.delete<any>(`${this.baseUrl}/api/supplier/${id}`, this.getHttpOptions())
+    // PATCH: api/supplier/{id}/status
+    updateStatus(id: number, isActive: boolean): Observable<boolean> {
+        return this.http
+            .patch<any>(
+                `${this.baseUrl}/api/supplier/${id}/status`,
+                isActive,
+                this.getHttpOptions()
+            )
             .pipe(
                 map((res: any) => {
-
                     if (!res?.success) {
-                        throw new Error(res?.message || 'Error al eliminar proveedor.');
+                        throw new Error(res?.message || 'Error al actualizar estado del proveedor.');
                     }
 
                     return res.data === true;
                 }),
-                catchError(err => {
-                    return throwError(() => err);
-                })
+                catchError(err => throwError(() => err))
             );
     }
+
 
     // GET: api/supplier/all-active
     getAllActive(): Observable<SupplierModel[]> {

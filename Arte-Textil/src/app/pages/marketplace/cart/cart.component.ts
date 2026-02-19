@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { ProductModel } from '../../../shared/models/product.model';
 import { CartService } from '../../../services/cart.service';
@@ -16,7 +16,7 @@ export class CartComponent implements OnInit {
     cart: ProductModel[] = [];
     alertMsg: string | null = null;
 
-    constructor(private cartService: CartService) { }
+    constructor(private cartService: CartService, public router: Router) { }
 
     ngOnInit() {
         this.loadCart();
@@ -24,6 +24,15 @@ export class CartComponent implements OnInit {
 
     loadCart() {
         this.cart = this.cartService.getCart();
+    }
+
+
+    onOpenCart() {
+        this.router.navigate(['/quoate']);
+    }
+
+    onBackToMarketplace() {
+        this.router.navigate(['/marketplace']);
     }
 
     increaseQty(item: ProductModel) {

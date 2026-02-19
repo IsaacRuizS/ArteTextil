@@ -1,80 +1,129 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
+import { CartService } from '../../../services/cart.service';
+import { ProductModel } from '../../../shared/models/product.model';
+import { QuoteModel } from '../../../shared/models/quote.model';
+import { QuoteItemModel } from '../../../shared/models/quote-item.model';
+import { CustomerModel } from '../../../shared/models/customer.model';
+import { ApiQuoteService } from '../../../services/api-quote.service';
+import { finalize } from 'rxjs';
+import { SharedService } from '../../../services/shared.service';
 
 @Component({
     selector: 'app-quote',
     standalone: true,
-    imports: [FormsModule, CustomCurrencyPipe],
+    imports: [ReactiveFormsModule, CustomCurrencyPipe],
     templateUrl: './quote.component.html',
     styleUrl: './quote.component.scss',
 })
-export class QuoteComponent {
+export class QuoteComponent implements OnInit {
 
-    cart = [
-        { id: 1, name: 'Camisa Azul', qty: 2, price: 8500 },
-        { id: 2, name: 'Pantalón Negro', qty: 1, price: 12500 }
-    ];
-
-    // Formulario
-    form = {
-        nombre: '',
-        correo: '',
-        mensaje: '',
-        whatsapp: '',
-    };
+    cart: ProductModel[] = [];
+    quoteForm!: FormGroup;
 
     errorMsg = '';
     successMsg = '';
 
-    // Total
-    get total() {
-        return this.cart.reduce((s, p) => s + (p.qty * p.price), 0);
+    constructor(
+        private fb: FormBuilder,
+        private cartService: CartService,
+        private sharedService: SharedService,
+        private apiQuoteService: ApiQuoteService
+    ) { }
+
+    ngOnInit() {
+
+        this.cart = this.cartService.getCart();
+
+        this.quoteForm = this.fb.group({
+            nombre: ['', [Validators.required, Validators.minLength(3)]],
+            correo: ['', [Validators.required, Validators.email]],
+            whatsapp: ['', [Validators.pattern(/^[0-9+\s-]{8,15}$/)]],
+            mensaje: ['', [Validators.required, Validators.minLength(5)]],
+        });
     }
 
-    // Validar el email
-    isValidEmail(email: string): boolean {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // TOTAL CON PROMOCIONES
+
+    getSubtotal(item: ProductModel): number {
+
+        const promo = item.bestPromotion;
+
+        const price = promo
+            ? item.price - (item.price * promo.discountPercent! / 100)
+            : item.price;
+
+        return price * (item.quantitySelected ?? 1);
     }
 
-    enviar() {
+    get total(): number {
+        return this.cart.reduce((sum, item) => sum + this.getSubtotal(item), 0);
+    }
+
+    // ENVÍO
+
+    onSend() {
+
         this.errorMsg = '';
         this.successMsg = '';
 
-        // Validaciones obligatorias
-        if (!this.form.nombre.trim() || !this.form.correo.trim() || !this.form.mensaje.trim()) {
-            this.errorMsg = 'Todos los campos obligatorios deben completarse.';
+        if (this.quoteForm.invalid) {
+            this.quoteForm.markAllAsTouched();
+            this.errorMsg = 'Por favor completa correctamente el formulario.';
             return;
-        }
-
-        if (!this.isValidEmail(this.form.correo)) {
-            this.errorMsg = 'El correo ingresado no es válido.';
-            return;
-        }
-
-        // Validación opcional de WhatsApp si se llena
-        if (this.form.whatsapp.trim().length > 0) {
-            if (!/^[0-9+\s-]{8,15}$/.test(this.form.whatsapp)) {
-                this.errorMsg = 'El número de WhatsApp no es válido.';
-                return;
-            }
         }
 
         if (this.cart.length === 0) {
-            this.errorMsg = 'Tu carrito está vacío, no puedes enviar una cotización.';
+            this.errorMsg = 'Tu carrito está vacío.';
             return;
         }
 
-        // Simulación de envío
-        this.successMsg = 'Tu cotización ha sido enviada correctamente. Muy pronto nos pondremos en contacto contigo.';
+        const customer = new CustomerModel({
+            customerId: 0,
+            fullName: this.quoteForm.value.nombre,
+            email: this.quoteForm.value.correo,
+            phone: this.quoteForm.value.whatsapp,
+            isActive: true
+        });
 
-        // Reset visual
-        this.form = { nombre: '', correo: '', whatsapp: '', mensaje: '' };
+        const quote = new QuoteModel({
+            customerId: 0, // backend resolverá esto, o si hay login, se asignará el userId
+            status: 'Pendiente',
+            total: this.total,
+            notes: this.quoteForm.value.mensaje,
+            createdByUserId: 0, // usado solo si el admin crea la cotización
+            sentToEmail: this.quoteForm.value.correo,
+            isActive: true,
+            customer: customer,
+            items: this.cart.map(p => ({
+                productId: p.productId,
+                quantity: p.quantitySelected ?? 1,
+                price: p.price
+            }))
+        });
+
+        this.sharedService.setLoading(true);
+
+        this.apiQuoteService.create(quote)
+        .pipe(finalize(() => this.sharedService.setLoading(false)))
+        .subscribe({
+            next: () => {
+
+                this.successMsg = 'Tu cotización fue enviada correctamente.';
+                this.cartService.clearCart();
+                this.cart = [];
+                this.quoteForm.reset();
+            },
+            error: (err) => {
+                // manejar error
+                console.log('COTIZACIÓN ENVIADA (ERROR):', err);
+
+            }
+        });
     }
 
     goBack() {
         window.history.back();
     }
-
 }
