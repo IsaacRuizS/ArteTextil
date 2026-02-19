@@ -10,7 +10,7 @@ export const routes: Routes = [
     {
         path: '',
         component: FullComponent,
-        //canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         children: [
             // HR Routes
             {

@@ -132,4 +132,42 @@ export class ApiUserService extends ApiBaseService {
                 return Promise.reject(new Error(`Error al eliminar usuario: ${errMsg}`));
             });
     }
+
+    // POST: api/user/refresh-token
+    refreshToken(refreshToken: string): Promise<any> {
+        return this.http.post(`${this.baseUrl}/api/user/refresh-token`, { refreshToken }, this.getHttpOptions())
+            .toPromise()
+            .then((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al renovar la sesión.');
+                }
+                return res.data; // AuthResponseDto: { user, token, refreshToken, refreshTokenExpiry }
+            })
+            .catch((err: HttpErrorResponse | Error) => {
+                const errMsg = err instanceof HttpErrorResponse
+                    ? this.getErrorMsg(err)
+                    : err.message;
+
+                return Promise.reject(new Error(`Error al renovar sesión: ${errMsg}`));
+            });
+    }
+
+    // POST: api/user/logout
+    logout(refreshToken: string): Promise<boolean> {
+        return this.http.post(`${this.baseUrl}/api/user/logout`, { refreshToken }, this.getHttpOptions())
+            .toPromise()
+            .then((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al cerrar sesión.');
+                }
+                return true;
+            })
+            .catch((err: HttpErrorResponse | Error) => {
+                const errMsg = err instanceof HttpErrorResponse
+                    ? this.getErrorMsg(err)
+                    : err.message;
+
+                return Promise.reject(new Error(`Error al cerrar sesión: ${errMsg}`));
+            });
+    }
 }
