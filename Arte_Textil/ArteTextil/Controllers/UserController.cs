@@ -104,6 +104,7 @@ namespace ArteTextil.Controllers
         }
 
         // POST: api/user/logout
+        [AllowAnonymous]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto dto)
         {

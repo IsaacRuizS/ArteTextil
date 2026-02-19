@@ -365,7 +365,7 @@ namespace ArteTextil.Business
                 if (!user.IsActive)
                 {
                     response.Success = false;
-                    response.Message = "El usuario se encuentra inactivo.";
+                    response.Message = "Credenciales incorrectas.";
                     return response;
                 }
 

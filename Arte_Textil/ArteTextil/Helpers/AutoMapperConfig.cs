@@ -16,7 +16,8 @@ namespace ArteTextil.Helpers
                 .ForMember(dest => dest.RoleId, src => src.MapFrom(i => i.roleId));
 
             cfg.CreateMap<User, UserDto>()
-                .ForMember(dest => dest.userId, src => src.MapFrom(i => i.UserId));
+                .ForMember(dest => dest.userId, src => src.MapFrom(i => i.UserId))
+                .ForMember(dest => dest.passwordHash, src => src.Ignore());
 
             cfg.CreateMap<UserDto, User>()
                 .ForMember(dest => dest.UserId, src => src.MapFrom(i => i.userId));
