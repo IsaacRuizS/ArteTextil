@@ -1,11 +1,13 @@
 using ArteTextil.Business;
 using ArteTextil.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly UserBusiness _userBusiness;
@@ -51,7 +53,7 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
-        // PUT: api/user
+        // PUT: api/user/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto dto)
         {
@@ -74,19 +76,41 @@ namespace ArteTextil.Controllers
 
             return Ok(result);
         }
+
         // POST: api/user/login
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var result = await _userBusiness.Login(dto);
 
             if (!result.Success)
-            {
-                // Return generic 401/400 or just OK with success=false depending on preference, 
-                // but usually for security generic message is better.
-                // Here we return existing structure
+                return Unauthorized(result);
+
+            return Ok(result);
+        }
+
+        // POST: api/user/refresh-token
+        [AllowAnonymous]
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+        {
+            var result = await _userBusiness.RefreshToken(dto.RefreshToken);
+
+            if (!result.Success)
+                return Unauthorized(result);
+
+            return Ok(result);
+        }
+
+        // POST: api/user/logout
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDto dto)
+        {
+            var result = await _userBusiness.Logout(dto.RefreshToken);
+
+            if (!result.Success)
                 return BadRequest(result);
-            }
 
             return Ok(result);
         }

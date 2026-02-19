@@ -260,10 +260,13 @@ public class QuoteBusiness
             {
                 var customer = await _repositoryCustomer.GetByIdAsync(dto.customerId);
 
-                await _emailService.SendQuoteCreatedAsync(
-                    quote,
-                    customer
-                );
+                if (customer != null)
+                {
+                    await _emailService.SendQuoteCreatedAsync(
+                        quote,
+                        customer
+                    );
+                }
             }
             catch (Exception ex)
             {

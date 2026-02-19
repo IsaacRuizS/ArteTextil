@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ArteTextil.Helpers
@@ -16,9 +17,9 @@ namespace ArteTextil.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateToken(User user)
+        public string GenerateAccessToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -33,11 +34,24 @@ namespace ArteTextil.Helpers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(1), // Token vlido por 1 da
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Mantener alias para no romper código existente
+        public string GenerateToken(User user) => GenerateAccessToken(user);
+
+        public (string token, DateTime expiresAt) GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            var token = Convert.ToBase64String(randomBytes);
+            var expiresAt = DateTime.UtcNow.AddDays(7);
+            return (token, expiresAt);
         }
     }
 }
