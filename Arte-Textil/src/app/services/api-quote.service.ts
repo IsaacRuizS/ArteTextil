@@ -64,16 +64,23 @@ export class ApiQuoteService extends ApiBaseService {
             );
     }
 
-    // DELETE
-    delete(id: number): Observable<boolean> {
+    // PATCH: api/quote/{id}/status
+    updateStatus(id: number, isActive: boolean): Observable<boolean> {
         return this.http
-            .delete<any>(`${this.baseUrl}/api/quote/${id}`, this.getHttpOptions())
+            .patch<any>(
+                `${this.baseUrl}/api/quote/${id}/status`,
+                isActive,
+                this.getHttpOptions()
+            )
             .pipe(
                 map((res: any) => {
-                    if (!res?.success) throw new Error(res.message);
-                    return res.data;
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al actualizar estado de la cotización.');
+                    }
+                    return res.data === true;
                 }),
                 catchError(err => throwError(() => err))
             );
     }
+
 }

@@ -85,22 +85,25 @@ export class ApiProductService extends ApiBaseService {
             );
     }
 
-    // DELETE: api/product/{id}
-    delete(id: number): Observable<boolean> {
-
-        return this.http.delete<any>(`${this.baseUrl}/api/product/${id}`, this.getHttpOptions())
+    // PATCH: api/product/{id}/status
+    updateStatus(id: number, isActive: boolean): Observable<boolean> {
+        return this.http
+            .patch<any>(
+                `${this.baseUrl}/api/product/${id}/status`,
+                isActive,
+                this.getHttpOptions()
+            )
             .pipe(
                 map((res: any) => {
-
                     if (!res?.success) {
-                        throw new Error(res?.message || 'Error al eliminar el producto.');
+                        throw new Error(res?.message || 'Error al actualizar estado del producto.');
                     }
-
                     return res.data === true;
                 }),
                 catchError(err => throwError(() => err))
             );
     }
+
 
     // GET: api/product/market-all
     getAllForMarket(): Observable<ProductModel[]> {

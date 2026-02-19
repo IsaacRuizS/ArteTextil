@@ -47,8 +47,12 @@
                             Editar
                         </button>
 
-                        <button class="btn btn-danger btn-sm" (click)="openDeleteModal(p)">
-                            Eliminar
+                        <button class="btn btn-sm btn-light" (click)="openDeleteModal(p)">
+                            @if (p.isActive) {
+                                <i class="mdi mdi-eye-off"></i>
+                            }@else {
+                                <i class="mdi mdi-eye-outline"></i>
+                            }
                         </button>
 
                     </td>

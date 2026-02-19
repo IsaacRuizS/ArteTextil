@@ -314,7 +314,7 @@ export class ProductsComponent implements OnInit {
 
         this.sharedService.setLoading(true);
 
-        this.apiProductService.delete(this.productToDelete.productId)
+        this.apiProductService.updateStatus(this.productToDelete.productId, !(this.productToDelete.isActive ?? true))
             .pipe(finalize(() => this.sharedService.setLoading(false)))
             .subscribe({
                 next: () => {

@@ -156,7 +156,9 @@ export class PromotionComponent implements OnInit {
     deletePromotionLogic() {
         if (!this.deletePromotion) return;
 
-        this.apiPromotionService.delete(this.deletePromotion.promotionId).subscribe({
+        var status = this.promotions.find(p => p.promotionId === this.deletePromotion?.promotionId)?.isActive;
+
+        this.apiPromotionService.changeStatus(this.deletePromotion.promotionId, !status).subscribe({
             next: () => {
                 this.promotions = this.promotions.filter(p => p.promotionId !== this.deletePromotion?.promotionId);
                 Swal.fire('Éxito', 'Promoción eliminada correctamente', 'success');

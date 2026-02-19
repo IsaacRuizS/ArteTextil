@@ -161,7 +161,9 @@ export class RolesComponent implements OnInit {
 
     private _deleteRol(RolId: number) {
 
-        this.apiRolService.delete(RolId).then(
+        let status = this.rolesOrigins.find(c => c.roleId === RolId)?.isActive;
+
+        this.apiRolService.updateStatus(RolId, !status).then(
             (deleted: boolean) => {
                 
                 this.showDeleteModal = false;

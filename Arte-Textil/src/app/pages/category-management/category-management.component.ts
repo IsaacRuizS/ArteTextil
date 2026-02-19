@@ -152,7 +152,9 @@ export class CategoryManagementComponent implements OnInit {
     // DELETE
     private _deleteCategory(categoryId: number) {
 
-        this.apiCategoryService.delete(categoryId).subscribe({
+        var status = this.categoriesOrigins.find(c => c.categoryId === categoryId)?.isActive;
+
+        this.apiCategoryService.updateStatus(categoryId, !status).subscribe({
             next: () => {
                 this.showDeleteModal = false;
                 this.categoryToDelete = null;

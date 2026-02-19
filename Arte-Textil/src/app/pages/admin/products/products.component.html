@@ -46,29 +46,27 @@
                 <!-- Filtro por precio mínimo -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Precio mínimo</label>
-                    <input type="number" class="form-control" placeholder="₡ 0"
-                        [(ngModel)]="filterPriceMin" (input)="onFilterChange()">
+                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMin"
+                        (input)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por precio máximo -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Precio máximo</label>
-                    <input type="number" class="form-control" placeholder="₡ 0"
-                        [(ngModel)]="filterPriceMax" (input)="onFilterChange()">
+                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMax"
+                        (input)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por fecha desde -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Creado desde</label>
-                    <input type="date" class="form-control"
-                        [(ngModel)]="filterDateFrom" (change)="onFilterChange()">
+                    <input type="date" class="form-control" [(ngModel)]="filterDateFrom" (change)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por fecha hasta -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Creado hasta</label>
-                    <input type="date" class="form-control"
-                        [(ngModel)]="filterDateTo" (change)="onFilterChange()">
+                    <input type="date" class="form-control" [(ngModel)]="filterDateTo" (change)="onFilterChange()">
                 </div>
             </div>
         </div>
@@ -146,8 +144,12 @@
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(p)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(p)">
+                                @if (p.isActive) {
+                                <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                <i class="mdi mdi-eye-outline"></i>
+                                }
                             </button>
                         </td>
                     </tr>
@@ -294,14 +296,15 @@
                     <i class="mdi mdi-package-variant-closed-remove"></i>
                 </div>
 
-                <h5 class="mb-2 fw-bold">¿Desactivar Producto?</h5>
+                <h5 class="mb-2 fw-bold">¿Modificar Estado del Producto?</h5>
                 <p class="text-muted small mb-0">
-                    El producto no aparecerá disponible para ventas ni movimientos.
+                    ¿Estas seguro que quieres cambiar el estado del producto?. No se eliminará, solo se modificará en el
+                    catálogo.
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Sí, desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Sí, modificar</button>
                 </div>
             </div>
         </div>

@@ -43,8 +43,12 @@
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(c)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)">
+                                @if (c.isActive) {
+                                    <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                    <i class="mdi mdi-eye-outline"></i>
+                                }
                             </button>
                         </td>
                     </tr>
@@ -110,14 +114,14 @@
                     <i class="mdi mdi-alert-circle-outline"></i>
                 </div>
 
-                <h5 class="mb-2 fw-bold">¿Desactivar?</h5>
+                <h5 class="mb-2 fw-bold">¿Cambiar de estado?</h5>
                 <p class="text-muted small">
-                    La categoría no podrá utilizarse en productos.
+                    ¿Estas seguro que quieres cambiar el estado?.
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Confirmar</button>
                 </div>
             </div>
         </div>

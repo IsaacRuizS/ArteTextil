@@ -120,21 +120,4 @@ export class ApiPromotionService extends ApiBaseService {
                 catchError(err => throwError(() => err))
             );
     }
-
-    // DELETE: api/promotion/{id}
-    delete(id: number): Observable<boolean> {
-
-        return this.http.delete<any>(`${this.baseUrl}/api/promotion/${id}`, this.getHttpOptions())
-            .pipe(
-                map((res: any) => {
-
-                    if (!res?.success) {
-                        throw new Error(res?.message || 'Error al eliminar la promoción.');
-                    }
-
-                    return res.data === true;
-                }),
-                catchError(err => throwError(() => err))
-            );
-    }
 }
