@@ -215,14 +215,15 @@ namespace ArteTextil.Business
             return response;
         }
 
-        // DELETE LÓGICO
-        public async Task<ApiResponse<bool>> Delete(int id)
+        // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+        public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                var promotion = await _repositoryPromotion.FirstOrDefaultAsync(p => p.PromotionId == id && p.DeletedAt == null);
+                var promotion = await _repositoryPromotion
+                    .FirstOrDefaultAsync(p => p.PromotionId == id);
 
                 if (promotion == null)
                 {
@@ -233,21 +234,27 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(promotion);
 
-                promotion.IsActive = false;
-                promotion.DeletedAt = DateTime.UtcNow;
+                promotion.IsActive = isActive;
 
                 _repositoryPromotion.Update(promotion);
                 await _repositoryPromotion.SaveAsync();
 
-                await _logHelper.LogDelete("Promotions", promotion.PromotionId, previousSnapshot);
+                await _logHelper.LogUpdate(
+                    tableName: "Promotions",
+                    recordId: promotion.PromotionId,
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(promotion)
+                );
 
                 response.Data = true;
-                response.Message = "Promoción eliminada correctamente";
+                response.Message = isActive
+                    ? "Promoción activada correctamente"
+                    : "Promoción desactivada correctamente";
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"Error al eliminar promoción: {ex.Message}";
+                response.Message = $"Error al actualizar estado de la promoción: {ex.Message}";
             }
 
             return response;

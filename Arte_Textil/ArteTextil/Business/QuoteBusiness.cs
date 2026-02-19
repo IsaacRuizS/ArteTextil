@@ -368,14 +368,15 @@ public class QuoteBusiness
         return response;
     }
 
-    // DELETE (SOFT)
-    public async Task<ApiResponse<bool>> Delete(int id)
+    // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+    public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
     {
         var response = new ApiResponse<bool>();
 
         try
         {
-            var quote = await _repositoryQuote.FirstOrDefaultAsync(q => q.QuoteId == id && q.DeletedAt == null);
+            var quote = await _repositoryQuote
+                .FirstOrDefaultAsync(q => q.QuoteId == id);
 
             if (quote == null)
             {
@@ -386,27 +387,30 @@ public class QuoteBusiness
 
             var previousSnapshot = JsonSerializer.Serialize(quote);
 
-            quote.DeletedAt = DateTime.UtcNow;
-            quote.IsActive = false;
+            quote.IsActive = isActive;
 
             _repositoryQuote.Update(quote);
             await _repositoryQuote.SaveAsync();
 
-            await _logHelper.LogDelete(
+            await _logHelper.LogUpdate(
                 tableName: "Quotes",
-                recordId: id,
-                previousValue: previousSnapshot
+                recordId: quote.QuoteId,
+                previousValue: previousSnapshot,
+                newValue: JsonSerializer.Serialize(quote)
             );
 
             response.Data = true;
-            response.Message = "Cotización eliminada correctamente";
+            response.Message = isActive
+                ? "Cotización activada correctamente"
+                : "Cotización desactivada correctamente";
         }
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = $"Error al eliminar cotización: {ex.Message}";
+            response.Message = $"Error al actualizar estado de la cotización: {ex.Message}";
         }
 
         return response;
     }
+
 }

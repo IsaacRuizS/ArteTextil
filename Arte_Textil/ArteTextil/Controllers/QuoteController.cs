@@ -59,15 +59,17 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        // PATCH: api/quote/{id}/status
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] bool isActive)
         {
-            var result = await _quoteBusiness.Delete(id);
+            var result = await _quoteBusiness.UpdateIsActive(id, isActive);
 
             if (!result.Success)
                 return NotFound(result);
 
             return Ok(result);
         }
+
     }
 }
