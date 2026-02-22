@@ -68,6 +68,13 @@ builder.Services.AddScoped<PromotionBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtHelper>();
 
+builder.Services.AddAuthorization(options =>
+{
+    // Solo roles 1 y 2 (Admin / Empleado). RoleId 3 = Customer queda excluido.
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("roleId", "1", "2"));
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

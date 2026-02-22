@@ -61,7 +61,11 @@ export class AuthService {
             localStorage.setItem(this.USER_KEY, JSON.stringify(user));
         }
         this.currentUserSubject.next(user);
-        this.router.navigate(['/dashboard']);
+        if (user.roleId === 3) {
+            this.router.navigate(['/marketplace']);
+        } else {
+            this.router.navigate(['/dashboard']);
+        }
     }
 
     async refreshAccessToken(): Promise<string> {
@@ -98,5 +102,9 @@ export class AuthService {
 
     isAuthenticated(): boolean {
         return !!this.token && !!this.currentUserValue;
+    }
+
+    isCustomer(): boolean {
+        return this.currentUserValue?.roleId === 3;
     }
 }

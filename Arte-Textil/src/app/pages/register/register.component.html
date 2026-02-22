@@ -1,0 +1,91 @@
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div class="card shadow-sm p-4" style="max-width: 440px; width: 100%;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-1">Crear cuenta</h3>
+            <p class="text-center text-muted mb-4" style="font-size: 14px;">
+                Regístrate para acceder al marketplace
+            </p>
+
+            <!-- Mensaje de éxito -->
+            <div *ngIf="success" class="alert alert-success text-center">
+                <strong>¡Cuenta creada exitosamente!</strong><br>
+                Revisa tu correo para confirmar el registro.<br>
+                <small class="text-muted">Serás redirigido al inicio de sesión en unos segundos...</small>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!success" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+                <div class="mb-3">
+                    <label for="fullName" class="form-label">Nombre completo</label>
+                    <input type="text" id="fullName" class="form-control" formControlName="fullName"
+                        [ngClass]="{ 'is-invalid': submitted && f['fullName'].errors }"
+                        placeholder="Juan Pérez">
+                    <div *ngIf="submitted && f['fullName'].errors" class="invalid-feedback">
+                        <div *ngIf="f['fullName'].errors['required']">El nombre es requerido</div>
+                        <div *ngIf="f['fullName'].errors['minlength']">Mínimo 3 caracteres</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input type="email" id="email" class="form-control" formControlName="email"
+                        [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
+                        placeholder="nombre@ejemplo.com">
+                    <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                        <div *ngIf="f['email'].errors['required']">El correo es requerido</div>
+                        <div *ngIf="f['email'].errors['email']">Correo inválido</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Teléfono</label>
+                    <input type="tel" id="phone" class="form-control" formControlName="phone"
+                        [ngClass]="{ 'is-invalid': submitted && f['phone'].errors }"
+                        placeholder="88887777">
+                    <div *ngIf="submitted && f['phone'].errors" class="invalid-feedback">
+                        <div *ngIf="f['phone'].errors['required']">El teléfono es requerido</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" id="password" class="form-control" formControlName="password"
+                        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
+                        placeholder="••••••••">
+                    <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                        <div *ngIf="f['password'].errors['required']">La contraseña es requerida</div>
+                        <div *ngIf="f['password'].errors['minlength']">Mínimo 6 caracteres</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+                    <input type="password" id="confirmPassword" class="form-control"
+                        formControlName="confirmPassword"
+                        [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }"
+                        placeholder="••••••••">
+                    <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
+                        <div *ngIf="f['confirmPassword'].errors['required']">Confirma tu contraseña</div>
+                        <div *ngIf="f['confirmPassword'].errors['mismatch']">Las contraseñas no coinciden</div>
+                    </div>
+                </div>
+
+                <div *ngIf="error" class="alert alert-danger mt-2 mb-0">{{ error }}</div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" [disabled]="loading">
+                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"
+                            role="status" aria-hidden="true"></span>
+                        Crear cuenta
+                    </button>
+                </div>
+
+                <p class="text-center mt-3 mb-0" style="font-size: 14px;">
+                    ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+                </p>
+
+            </form>
+        </div>
+    </div>
+</div>

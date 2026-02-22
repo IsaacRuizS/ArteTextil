@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers;
 
-[Authorize]
+[Authorize(Policy = "AdminOnly")]
 [ApiController]
 [Route("api/[controller]")]
 public class AttendanceController : ControllerBase

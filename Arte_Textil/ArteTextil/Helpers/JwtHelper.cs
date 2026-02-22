@@ -27,7 +27,8 @@ namespace ArteTextil.Helpers
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim("id", user.UserId.ToString()),
-                new Claim("roleId", user.RoleId.ToString())
+                new Claim("roleId", user.RoleId.ToString()),
+                new Claim(ClaimTypes.Role, user.RoleId.ToString())
             };
 
             var token = new JwtSecurityToken(

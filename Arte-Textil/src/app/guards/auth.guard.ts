@@ -18,6 +18,10 @@ export class AuthGuard implements CanActivate {
         }
 
         if (this.authService.isAuthenticated()) {
+            if (this.authService.isCustomer()) {
+                this.router.navigate(['/marketplace']);
+                return false;
+            }
             return true;
         }
 

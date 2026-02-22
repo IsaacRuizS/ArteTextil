@@ -7,7 +7,7 @@ namespace ArteTextil.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public class UserController : ControllerBase
     {
         private readonly UserBusiness _userBusiness;
