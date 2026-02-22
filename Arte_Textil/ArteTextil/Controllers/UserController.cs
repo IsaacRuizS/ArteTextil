@@ -77,6 +77,19 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
+        // POST: api/user/register
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            var result = await _userBusiness.Register(dto);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         // POST: api/user/login
         [AllowAnonymous]
         [HttpPost("login")]

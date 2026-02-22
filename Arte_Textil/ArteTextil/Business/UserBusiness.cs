@@ -3,8 +3,10 @@ using ArteTextil.Data.Entities;
 using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
@@ -13,22 +15,29 @@ namespace ArteTextil.Business
     public class UserBusiness
     {
         private readonly IRepositoryUser _repositoryUser;
+        private readonly IRepositoryCustomer _repositoryCustomer;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
         private readonly JwtHelper _jwtHelper;
+        private readonly IEmailService _emailService;
+        private readonly ArteTextilDbContext _context;
 
         public UserBusiness(
             ArteTextilDbContext context,
             IMapper mapper,
             ISystemLogHelper logHelper,
-            JwtHelper jwtHelper)
+            JwtHelper jwtHelper,
+            IEmailService emailService)
         {
+            _context = context;
             _repositoryUser = new RepositoryUser(context);
+            _repositoryCustomer = new RepositoryCustomer(context);
             _refreshTokenRepository = new RefreshTokenRepository(context);
             _mapper = mapper;
             _logHelper = logHelper;
             _jwtHelper = jwtHelper;
+            _emailService = emailService;
         }
 
         // GET ALL
@@ -75,6 +84,107 @@ namespace ArteTextil.Business
             {
                 response.Success = false;
                 response.Message = $"Error al obtener usuario: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // REGISTER (público, siempre crea un Customer con RoleId = 3)
+        public async Task<ApiResponse<UserDto>> Register(RegisterDto dto)
+        {
+            var response = new ApiResponse<UserDto>();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.fullName) || string.IsNullOrWhiteSpace(dto.email) ||
+                    string.IsNullOrWhiteSpace(dto.password) || string.IsNullOrWhiteSpace(dto.phone))
+                {
+                    response.Success = false;
+                    response.Message = "Todos los campos son obligatorios.";
+                    return response;
+                }
+
+                if (!new EmailAddressAttribute().IsValid(dto.email))
+                {
+                    response.Success = false;
+                    response.Message = "El correo no tiene un formato válido.";
+                    return response;
+                }
+
+                var emailUsedInUsers = await _repositoryUser.AnyAsync(
+                    u => u.Email == dto.email && u.DeletedAt == null);
+
+                if (emailUsedInUsers)
+                {
+                    response.Success = false;
+                    response.Message = "Ya existe una cuenta registrada con ese correo.";
+                    return response;
+                }
+
+                var emailUsedInCustomers = await _repositoryCustomer.AnyAsync(
+                    c => c.Email == dto.email && c.DeletedAt == null);
+
+                if (emailUsedInCustomers)
+                {
+                    response.Success = false;
+                    response.Message = "Ya existe una cuenta registrada con ese correo.";
+                    return response;
+                }
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    var hasher = new PasswordHasher<User>();
+                    var user = new User
+                    {
+                        FullName = dto.fullName,
+                        Email = dto.email,
+                        Phone = dto.phone,
+                        PasswordHash = "temp",
+                        RoleId = 3,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    user.PasswordHash = hasher.HashPassword(user, dto.password);
+
+                    await _repositoryUser.AddAsync(user);
+
+                    var customer = new Customer
+                    {
+                        FullName = dto.fullName,
+                        Email = dto.email,
+                        Phone = dto.phone,
+                        IsActive = true,
+                        UserId = user.UserId,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _repositoryCustomer.AddAsync(customer);
+
+                    await transaction.CommitAsync();
+
+                    await _logHelper.LogCreate(
+                        tableName: "Users",
+                        recordId: user.UserId,
+                        newValue: JsonSerializer.Serialize(user)
+                    );
+
+                    await _emailService.SendRegistrationConfirmationAsync(user.FullName, user.Email);
+
+                    response.Data = _mapper.Map<UserDto>(user);
+                    response.Message = "Cuenta creada correctamente. Revisa tu correo para confirmar el registro.";
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al registrar usuario: {ex.Message}";
             }
 
             return response;

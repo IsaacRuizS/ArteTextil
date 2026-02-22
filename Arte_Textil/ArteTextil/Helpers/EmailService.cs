@@ -126,5 +126,70 @@ namespace ArteTextil.Helpers
 
             await _smtp.SendMailAsync(mail);
         }
+
+        public async Task SendRegistrationConfirmationAsync(string fullName, string email)
+        {
+            var body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset='UTF-8'>
+                </head>
+                <body style='font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;'>
+                    <table width='100%' cellpadding='0' cellspacing='0'>
+                        <tr>
+                            <td align='center'>
+                                <table width='600' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td style='background:#111827;color:#ffffff;padding:20px;'>
+                                            <h2 style='margin:0;'>Bienvenido a Arte Textil</h2>
+                                            <p style='margin:5px 0 0;font-size:14px;'>Tu cuenta ha sido creada exitosamente</p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- BODY -->
+                                    <tr>
+                                        <td style='padding:30px;'>
+                                            <p style='font-size:16px;'>Hola, <b>{fullName}</b></p>
+                                            <p style='font-size:14px;color:#374151;'>
+                                                Tu registro en Arte Textil se ha completado correctamente.
+                                                Ya puedes iniciar sesión con tu correo electrónico y contraseña.
+                                            </p>
+                                            <p style='font-size:14px;color:#374151;'>
+                                                <b>Correo registrado:</b> {email}
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td style='background:#f9fafb;padding:15px;text-align:center;font-size:12px;color:#6b7280;'>
+                                            Este correo fue generado automáticamente.<br/>
+                                            © {DateTime.UtcNow.Year} Arte Textil
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+                ";
+
+            var mail = new MailMessage
+            {
+                Subject = "Confirmación de registro - Arte Textil",
+                Body = body,
+                IsBodyHtml = true,
+                From = new MailAddress("no-reply@artetextil.com")
+            };
+
+            mail.To.Add(email);
+
+            await _smtp.SendMailAsync(mail);
+        }
     }
 }

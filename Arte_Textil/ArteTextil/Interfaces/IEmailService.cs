@@ -8,6 +8,8 @@ namespace ArteTextil.Interfaces
             Quote quote,
             Customer customer
         );
+
+        Task SendRegistrationConfirmationAsync(string fullName, string email);
     }
 
 }
