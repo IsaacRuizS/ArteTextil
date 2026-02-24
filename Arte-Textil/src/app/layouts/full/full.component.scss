@@ -4,7 +4,8 @@
 }
 
 .content-area {
-    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
     margin-left: 240px;
     padding: 20px;
     width: calc(100% - 240px);

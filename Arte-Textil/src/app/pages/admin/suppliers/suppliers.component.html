@@ -8,9 +8,19 @@
     </div>
 
     <!-- FILTER -->
-    <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
-            (input)="onSearch($event)">
+    <div class="row mb-4 g-2">
+        <div class="col-md-8">
+            <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
+                (input)="onSearch($event)">
+        </div>
+
+        <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
+                <option value="0">Todos</option>
+                <option value="1">Activos</option>
+                <option value="2">Inactivos</option>
+            </select>
+        </div>
     </div>
 
     <!-- LIST -->
@@ -28,7 +38,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let s of suppliers;">
+                    <tr *ngFor="let s of suppliers | paginate: { itemsPerPage: 50, currentPage: page }">
                         <td class="ps-4 fw-semibold">{{ s.name }}</td>
                         <td>{{ s.contactPerson }}</td>
                         <td>{{ s.email }}</td>
@@ -55,6 +65,9 @@
                     </tr>
                 </tbody>
             </table>
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
         </div>
     </div>
 

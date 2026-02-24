@@ -3,3 +3,10 @@
 body {
     font-family: 'Poppins', sans-serif;
 }
+
+
+.ngx-pagination .current{
+    background-color: #0b6ffd !important;
+    cursor: pointer !important;
+    border-radius: 4px;
+}
