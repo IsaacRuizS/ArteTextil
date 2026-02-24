@@ -34,7 +34,10 @@ namespace ArteTextil.Data.Repositories
 
         public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _set.Where(predicate).ToListAsync();
+            return await _set
+                .Where(predicate)
+                .OrderByDescending(e => EF.Property<DateTime>(e, "CreatedAt"))
+                .ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)

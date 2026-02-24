@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\repositories\\repositorybase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\repositories\\repositorybase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\supplierbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\supplierbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\categorybusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\categorybusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\supplierbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\supplierbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\quotebusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -42,73 +46,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 7,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "CategoryController.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CategoryController.cs",
-              "RelativeDocumentMoniker": "Controllers\\CategoryController.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CategoryController.cs",
-              "RelativeToolTip": "Controllers\\CategoryController.cs",
-              "ViewState": "AgIAADUAAAAAAAAAAAAkwEUAAAA/AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:58:58.534Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "PromotionBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PromotionBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\PromotionBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PromotionBusiness.cs",
-              "RelativeToolTip": "Business\\PromotionBusiness.cs",
-              "ViewState": "AgIAANkAAAAAAAAAAAAkwO0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:58:34.97Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ProductBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\ProductBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
-              "RelativeToolTip": "Business\\ProductBusiness.cs",
-              "ViewState": "AgIAAAABAAAAAAAAAAAkwBcBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:58:28.475Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "CustomerBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CustomerBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\CustomerBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CustomerBusiness.cs",
-              "RelativeToolTip": "Business\\CustomerBusiness.cs",
-              "ViewState": "AgIAAKUAAAAAAAAAAAAkwLwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:58:19.579Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "CategoryBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CategoryBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\CategoryBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CategoryBusiness.cs",
-              "RelativeToolTip": "Business\\CategoryBusiness.cs",
-              "ViewState": "AgIAAKoAAAAAAAAAAAAtwK8AAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:58:13.17Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
@@ -118,12 +57,45 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ProductBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\ProductBusiness.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
+              "RelativeToolTip": "Business\\ProductBusiness.cs",
+              "ViewState": "AgIAAAABAAAAAAAAAAAkwBcBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-18T23:58:28.475Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
+              "Title": "CustomerBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CustomerBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\CustomerBusiness.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CustomerBusiness.cs",
+              "RelativeToolTip": "Business\\CustomerBusiness.cs",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAkwLwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-18T23:58:19.579Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CategoryBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CategoryBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\CategoryBusiness.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\CategoryBusiness.cs",
+              "RelativeToolTip": "Business\\CategoryBusiness.cs",
+              "ViewState": "AgIAAKoAAAAAAAAAAIA7wK8AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-18T23:58:13.17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "ProductController.cs",
               "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\ProductController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProductController.cs",
@@ -131,25 +103,61 @@
               "RelativeToolTip": "Controllers\\ProductController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T23:51:04.714Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-18T23:51:04.714Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "SupplierBusiness.cs",
               "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\SupplierBusiness.cs",
               "RelativeDocumentMoniker": "Business\\SupplierBusiness.cs",
               "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\SupplierBusiness.cs",
               "RelativeToolTip": "Business\\SupplierBusiness.cs",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAYwMQAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAABQAAAAAAAAAAAAmwCIAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-18T23:14:11.537Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RepositoryBase.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Repositories\\RepositoryBase.cs",
+              "RelativeDocumentMoniker": "Data\\Repositories\\RepositoryBase.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Repositories\\RepositoryBase.cs*",
+              "RelativeToolTip": "Data\\Repositories\\RepositoryBase.cs*",
+              "ViewState": "AgIAABcAAAAAAAAAAAA7wCYAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-24T00:47:34.134Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "PromotionBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PromotionBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\PromotionBusiness.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PromotionBusiness.cs",
+              "RelativeToolTip": "Business\\PromotionBusiness.cs",
+              "ViewState": "AgIAANkAAAAAAAAAAAAkwO0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-18T23:58:34.97Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CategoryController.cs",
+              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "Controllers\\CategoryController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAkwEUAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-18T23:58:58.534Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "QuoteBusiness.cs",
               "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\QuoteBusiness.cs",
               "RelativeDocumentMoniker": "Business\\QuoteBusiness.cs",
