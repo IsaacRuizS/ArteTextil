@@ -73,9 +73,6 @@ export class SuppliersComponent implements OnInit {
         });
     }
 
-
-
-
     onSearch(event: any) {
         this.searchTerm = event.target.value;
         this.onFilterInfo();

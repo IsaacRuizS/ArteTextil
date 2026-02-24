@@ -14,12 +14,19 @@
 
     <!-- FILTER -->
     <div class="mb-4">
-        <div class="input-group mb-3">
-            <span class="input-group-text bg-white">
-                <i class="mdi mdi-magnify"></i>
-            </span>
-            <input type="text" class="form-control" placeholder="Buscar por nombre o código..."
-                (input)="onSearch($event)">
+        <div class="row mb-4 g-2">
+            <div class="col-md-8">
+                <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
+                    (input)="onSearch($event)">
+            </div>
+
+            <div class="col-md-4">
+                <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
+                    <option value="0">Todos</option>
+                    <option value="1">Activos</option>
+                    <option value="2">Inactivos</option>
+                </select>
+            </div>
         </div>
 
         <!-- Filtros adicionales RF-04-006 -->
@@ -99,8 +106,7 @@
                         </td>
                     </tr>
                     } @else {
-                    @for (p of filteredProducts; track p.productId) {
-                    <tr>
+                    <tr *ngFor="let p of filteredProducts | paginate: { itemsPerPage: 50, currentPage: page }">
                         <td class="ps-3 ps-md-4 fw-bold text-muted">{{ p.productCode }}</td>
 
                         <td class="fw-semibold">
@@ -154,10 +160,11 @@
                         </td>
                     </tr>
                     }
-                    }
                 </tbody>
-
             </table>
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
         </div>
     </div>
 

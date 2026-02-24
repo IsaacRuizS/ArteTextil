@@ -11,11 +11,12 @@ import { ApiCategoryService } from '../../../services/api-category.service';
 import { SharedService } from '../../../services/shared.service';
 import { SupplierModel } from '../../../shared/models/supplier.model';
 import { ApiSupplierService } from '../../../services/api-supplier.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule, FormsModule],
     providers: [FormBuilder],
     templateUrl: './products.component.html',
     styleUrls: ['./products.component.scss']
@@ -44,6 +45,10 @@ export class ProductsComponent implements OnInit {
     filterPriceMax: number | null = null;
     filterDateFrom: string = '';
     filterDateTo: string = '';
+
+    statusFilter: number = 1; // 0: all, 1: active, 2: inactive
+
+    page = 1;
 
     constructor(
         private apiProductService: ApiProductService,
@@ -85,6 +90,9 @@ export class ProductsComponent implements OnInit {
 
                     this.products = [...products];
                     this.productsOrigins = [...products];
+
+                    this.applyFilters();
+
                     this.cdr.markForCheck();
                 },
                 error: (err) => {
@@ -141,6 +149,11 @@ export class ProductsComponent implements OnInit {
         this.applyFilters();
     }
 
+    onStatusChanged() {
+
+        this.applyFilters();
+    }
+
     onFilterChange() {
         this.applyFilters();
     }
@@ -165,6 +178,15 @@ export class ProductsComponent implements OnInit {
                 (p.name ?? '').toLowerCase().includes(term) ||
                 (p.productCode ?? '').toLowerCase().includes(term)
             );
+        }
+
+        if (this.statusFilter > 0) {
+
+            if (this.statusFilter == 1) {
+                filtered = filtered.filter(x => x.isActive);
+            } else if (this.statusFilter == 2) {
+                filtered = filtered.filter(x => !x.isActive);
+            }
         }
 
         // Filtro por categoría (RF-04-006)
