@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 
@@ -29,7 +29,8 @@ export class PromotionComponent implements OnInit {
 
     constructor(
         private apiPromotionService: ApiPromotionService,
-        private apiProductService: ApiProductService
+        private apiProductService: ApiProductService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit() {
@@ -41,6 +42,7 @@ export class PromotionComponent implements OnInit {
         this.apiProductService.getAll().subscribe({
             next: (data) => {
                 this.products = data;
+                this.cdr.markForCheck();
             },
             error: (err) => {
                 console.error('Error al cargar productos:', err);
@@ -52,7 +54,8 @@ export class PromotionComponent implements OnInit {
     loadPromotions() {
         this.apiPromotionService.getAll().subscribe({
             next: (data) => {
-                this.promotions = data;
+                this.promotions = [...data];
+                this.cdr.markForCheck();
             },
             error: (err) => {
                 console.error('Error al cargar promociones:', err);
@@ -71,8 +74,8 @@ export class PromotionComponent implements OnInit {
         const newStatus = !promo.isActive;
 
         this.apiPromotionService.changeStatus(promo.promotionId, newStatus).subscribe({
-            next: (updated) => {
-                promo.isActive = updated.isActive;
+            next: () => {
+                this.loadPromotions();
                 Swal.fire('Éxito', `Promoción ${newStatus ? 'activada' : 'desactivada'} correctamente`, 'success');
             },
             error: (err) => {
@@ -105,16 +108,17 @@ export class PromotionComponent implements OnInit {
         const newPromotion = new PromotionModel({
             name: formData.name,
             description: formData.description || '',
-            discountPercent: formData.discountPercent,
+            discountPercent: Number(formData.discountPercent),
             startDate: new Date(formData.startDate),
             endDate: new Date(formData.endDate),
-            productId: formData.productId,
+            productId: Number(formData.productId),
             isActive: true
         });
 
         this.apiPromotionService.create(newPromotion).subscribe({
-            next: (created) => {
-                this.promotions.push(created);
+            next: () => {
+                this.showFormModal = false;
+                this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción creada correctamente', 'success');
             },
             error: (err) => {
@@ -131,19 +135,17 @@ export class PromotionComponent implements OnInit {
             ...this.editingPromotion,
             name: formData.name,
             description: formData.description,
-            discountPercent: formData.discountPercent,
+            discountPercent: Number(formData.discountPercent),
             startDate: new Date(formData.startDate),
             endDate: new Date(formData.endDate),
-            productId: formData.productId,
+            productId: Number(formData.productId),
             isActive: formData.isActive
         });
 
         this.apiPromotionService.update(updatedPromotion).subscribe({
-            next: (updated) => {
-                const index = this.promotions.findIndex(p => p.promotionId === updated.promotionId);
-                if (index !== -1) {
-                    this.promotions[index] = updated;
-                }
+            next: () => {
+                this.showFormModal = false;
+                this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción actualizada correctamente', 'success');
             },
             error: (err) => {
@@ -158,9 +160,9 @@ export class PromotionComponent implements OnInit {
 
         this.apiPromotionService.delete(this.deletePromotion.promotionId).subscribe({
             next: () => {
-                this.promotions = this.promotions.filter(p => p.promotionId !== this.deletePromotion?.promotionId);
-                Swal.fire('Éxito', 'Promoción eliminada correctamente', 'success');
                 this.showDeleteModal = false;
+                this.loadPromotions();
+                Swal.fire('Éxito', 'Promoción eliminada correctamente', 'success');
             },
             error: (err) => {
                 console.error('Error al eliminar promoción:', err);
