@@ -2,10 +2,11 @@
 using ArteTextil.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ArteTextil.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize]   // tambien tengo que cambiarlo luego
 [ApiController]
 [Route("api/[controller]")]
 public class VacationController : ControllerBase
@@ -17,25 +18,36 @@ public class VacationController : ControllerBase
         _business = business;
     }
 
-    // POST: api/vacation
+    // POST: api/vacation  (COLABORADOR)
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] VacationRequestDto dto)
     {
+        // saca el usuario del token
+        var claim = User.FindFirst("id");
+        if (claim == null) return Unauthorized("Token sin id");
+
+        dto.userId = int.Parse(claim.Value);
+
         var result = await _business.Create(dto);
+
         if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    // GET: api/vacation/user/5
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUser(int userId)
+    // GET: api/vacation/mine  (COLABORADOR)
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine()
     {
-        var result = await _business.GetByUser(userId);
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
+
+        var result = await _business.GetByUser(userId.Value);
         if (!result.Success) return StatusCode(500, result);
         return Ok(result);
     }
 
-    // GET: api/vacation/pending
+    // GET: api/vacation/pending  (ADMIN / GERENTE)
+    [Authorize(Policy = "AdminOnly")]
     [HttpGet("pending")]
     public async Task<IActionResult> GetPending()
     {
@@ -44,21 +56,46 @@ public class VacationController : ControllerBase
         return Ok(result);
     }
 
-    // PUT: api/vacation/approve/3?approvedByUserId=2
+    // APROBAR (ADMIN)
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("approve/{id}")]
-    public async Task<IActionResult> Approve(int id, [FromQuery] int approvedByUserId)
+    public async Task<IActionResult> Approve(int id)
     {
-        var result = await _business.Approve(id, approvedByUserId);
+        var adminId = GetUserIdFromToken();
+        if (adminId == null) return Unauthorized();
+
+        var result = await _business.Approve(id, adminId.Value);
         if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    // PUT: api/vacation/reject/3?approvedByUserId=2
+    // RECHAZAR (ADMIN)
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("reject/{id}")]
-    public async Task<IActionResult> Reject(int id, [FromQuery] int approvedByUserId)
+    public async Task<IActionResult> Reject(int id)
     {
-        var result = await _business.Reject(id, approvedByUserId);
+        var adminId = GetUserIdFromToken();
+        if (adminId == null) return Unauthorized();
+
+        var result = await _business.Reject(id, adminId.Value);
         if (!result.Success) return BadRequest(result);
         return Ok(result);
+    }
+
+    // GET: api/vacation/all  (ADMIN)
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _business.GetAll();
+        if (!result.Success) return StatusCode(500, result);
+        return Ok(result);
+    }
+
+    private int? GetUserIdFromToken()
+    {
+        var claim = User.FindFirst("id");
+        if (claim == null) return null;
+        return int.Parse(claim.Value);
     }
 }

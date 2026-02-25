@@ -1,10 +1,11 @@
 ﻿using ArteTextil.Business;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ArteTextil.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize] // tengo que cambiarlo por solo colaboladores y admin, pero lo dejo así para probar
 [ApiController]
 [Route("api/[controller]")]
 public class AttendanceController : ControllerBase
@@ -16,25 +17,50 @@ public class AttendanceController : ControllerBase
         _business = business;
     }
 
-    // POST: api/attendance/check-in/5
-    [HttpPost("check-in/{userId}")]
-    public async Task<IActionResult> CheckIn(int userId)
+    private int? GetUserIdFromToken()
     {
-        var result = await _business.CheckIn(userId);
+        var claim = User.FindFirst("id");  
+
+        if (claim == null) return null;
+
+        if (!int.TryParse(claim.Value, out var id))
+            return null;
+
+        return id;
+    }
+
+    // POST: api/attendance/check-in
+    [HttpPost("check-in")]
+    public async Task<IActionResult> CheckIn()
+    {
+        var userId = GetUserIdFromToken();
+
+        if (userId == null)
+            return Unauthorized("Token sin id válido");
+
+        var result = await _business.CheckIn(userId.Value);
+
         if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    // POST: api/attendance/check-out/5
-    [HttpPost("check-out/{userId}")]
-    public async Task<IActionResult> CheckOut(int userId)
+    // POST: api/attendance/check-out
+    [HttpPost("check-out")]
+    public async Task<IActionResult> CheckOut()
     {
-        var result = await _business.CheckOut(userId);
+        var userId = GetUserIdFromToken();
+
+        if (userId == null)
+            return Unauthorized("Token sin id válido");
+
+        var result = await _business.CheckOut(userId.Value);
+
         if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
     // GET: api/attendance/all
+    [Authorize(Policy = "AdminOnly")]   // admin
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
@@ -42,4 +68,5 @@ public class AttendanceController : ControllerBase
         if (!result.Success) return StatusCode(500, result);
         return Ok(result);
     }
+
 }

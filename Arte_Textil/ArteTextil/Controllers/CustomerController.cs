@@ -61,6 +61,14 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
+        // Nuevo endpoint para obtener segmentos
+        [HttpGet("segments")]
+        public async Task<IActionResult> GetSegments([FromQuery] string? filter)
+        {
+            var result = await _customerBusiness.GetSegments(filter);
+            return Ok(result);
+        }
+
         // PATCH: api/customer/{id}/status
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateStatus(int id, [FromBody] bool isActive)

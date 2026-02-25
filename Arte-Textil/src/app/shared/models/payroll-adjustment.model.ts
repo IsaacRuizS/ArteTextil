@@ -11,6 +11,7 @@ export class PayrollAdjustmentModel {
 
     adjustmentId!: number;
     userId!: number;
+    userName?: string;
     amount!: number;
     type!: string;
     reason?: string;

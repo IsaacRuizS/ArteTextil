@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+import { UserModel } from '../../../shared/models/user.model';
 import { PayrollAdjustmentModel } from '../../../shared/models/payroll-adjustment.model';
 import { ApiPayrollAdjustmentService } from '../../../services/api-payroll-adjustment.service';
+import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
 
 @Component({
@@ -19,16 +20,20 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
     adjustments: PayrollAdjustmentModel[] = [];
     adjustmentsOrigin: PayrollAdjustmentModel[] = [];
+    users: any[] = []; 
+
     adjustmentForm: FormGroup;
 
     showFormModal = false;
     showDeleteModal = false;
-    isEditing = false;
     adjustmentToDelete: PayrollAdjustmentModel | null = null;
     searchTerm = '';
 
+    isAdmin = false;
+
     constructor(
         private apiAdjustment: ApiPayrollAdjustmentService,
+        private apiUser: ApiUserService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
@@ -38,22 +43,45 @@ export class PayrollAdjustmentsComponent implements OnInit {
             userId: ['', Validators.required],
             amount: ['', Validators.required],
             type: ['Extra', Validators.required],
-            reason: [''],
-            isActive: [true]
+            reason: ['']
         });
     }
 
     ngOnInit(): void {
+
+        // detectar rol desde token
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            const payload: any = JSON.parse(atob(token.split('.')[1]));
+            this.isAdmin = payload?.roleId === "1";
+        }
+
+        this.loadUsers();
         this.loadAdjustments();
     }
 
+    // cargar los usuarios (dropdown)
+    loadUsers() {
+
+    this.apiUser.getAll()
+        .then((users) => {
+            this.users = users;
+            this.cdr.markForCheck();
+        })
+        .catch(() => { });
+}
+
+    // cargar los ajustes
     loadAdjustments() {
-        const userId = 0; // luego tomar de sesión
 
         this.sharedService.setLoading(true);
 
-        this.apiAdjustment.getByUser(userId).subscribe({
-            next: (data) => {
+        const request = this.isAdmin
+            ? this.apiAdjustment.getAll()      // admin ve todo
+            : this.apiAdjustment.getMine();   // usuario/colaborador ve lo suyo
+
+        request.subscribe({
+            next: (data: PayrollAdjustmentModel[]) => {
                 this.adjustments = data;
                 this.adjustmentsOrigin = data;
                 this.cdr.markForCheck();
@@ -63,36 +91,42 @@ export class PayrollAdjustmentsComponent implements OnInit {
         });
     }
 
+    // buscador
     onSearch(event: any) {
         this.searchTerm = event.target.value;
         this.onFilter();
     }
 
     onFilter() {
-        this.adjustments = this.adjustmentsOrigin;
 
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+        const source = [...this.adjustmentsOrigin];
+
+        if (!this.searchTerm || this.searchTerm.trim() === '') {
+            this.adjustments = source;
+            return;
+        }
 
         const term = this.searchTerm.toLowerCase();
 
-        this.adjustments = this.adjustments.filter(a =>
-            a.userId.toString().includes(term) ||
-            a.type.toLowerCase().includes(term)
+        this.adjustments = source.filter(a =>
+            (a.userName && a.userName.toLowerCase().includes(term))
+            || a.userId.toString().includes(term)
+            || a.type.toLowerCase().includes(term)
         );
     }
 
+    // modal crear
     openCreateModal() {
-        this.isEditing = false;
-        this.adjustmentForm.reset({ adjustmentId: 0, type: 'Extra', isActive: true });
+        this.adjustmentForm.reset({
+            adjustmentId: 0,
+            type: 'Extra'
+        });
         this.showFormModal = true;
     }
 
-    openDeleteModal(adj: PayrollAdjustmentModel) {
-        this.adjustmentToDelete = adj;
-        this.showDeleteModal = true;
-    }
-
+    // crear ajuste
     saveAdjustment() {
+
         if (this.adjustmentForm.invalid) {
             this.adjustmentForm.markAllAsTouched();
             return;
@@ -103,6 +137,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
         this.apiAdjustment.create(this.adjustmentForm.value).subscribe({
             next: () => {
                 this.showFormModal = false;
+                this.adjustmentForm.reset({ type: 'Extra' });
                 this.loadAdjustments();
                 this.sharedService.setLoading(false);
             },
@@ -110,7 +145,14 @@ export class PayrollAdjustmentsComponent implements OnInit {
         });
     }
 
+    // eliminar
+    openDeleteModal(adj: PayrollAdjustmentModel) {
+        this.adjustmentToDelete = adj;
+        this.showDeleteModal = true;
+    }
+
     confirmDelete() {
+
         if (!this.adjustmentToDelete) return;
 
         this.sharedService.setLoading(true);

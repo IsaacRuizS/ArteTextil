@@ -18,6 +18,9 @@ public class QuoteItem : EntityBase
 
     public bool IsActive { get; set; } = true;
 
+    [ForeignKey("ProductId")]
+    public Product? Product { get; set; }
+
     // Navigation
     [ForeignKey(nameof(QuoteId))]
     public Quote? Quote { get; set; }

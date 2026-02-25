@@ -34,7 +34,7 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let a of attendances">
-                        <td class="ps-4 fw-semibold">{{ a.userId }}</td>
+                        <td class="ps-4 fw-semibold">{{ a.userName || a.userId }}</td>
                         <td>{{ a.checkIn | date:'shortDate' }}</td>
                         <td>{{ a.checkIn | date:'shortTime' }}</td>
                         <td>{{ a.checkOut ? (a.checkOut | date:'shortTime') : '-' }}</td>

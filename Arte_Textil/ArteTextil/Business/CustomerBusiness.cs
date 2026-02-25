@@ -12,6 +12,7 @@ namespace ArteTextil.Business;
 public class CustomerBusiness
 {
     private readonly IRepositoryCustomer _repositoryCustomer;
+    private readonly ArteTextilDbContext _context;
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
 
@@ -20,6 +21,7 @@ public class CustomerBusiness
         IMapper mapper,
         ISystemLogHelper logHelper)
     {
+        _context = context;
         _repositoryCustomer = new RepositoryCustomer(context);
         _mapper = mapper;
         _logHelper = logHelper;
@@ -206,6 +208,58 @@ public class CustomerBusiness
         {
             response.Success = false;
             response.Message = $"Error al actualizar estado del cliente: {ex.Message}";
+        }
+
+        return response;
+    }
+
+    // OBTENER SEGMENTACIÓN DE CLIENTES
+    public async Task<ApiResponse<List<CustomerSegmentDto>>> GetSegments(string? filter = null)
+    {
+        var response = new ApiResponse<List<CustomerSegmentDto>>();
+
+        try
+        {
+            var data = _context.Customers
+                .Select(c => new CustomerSegmentDto
+                {
+                    customerId = c.CustomerId,
+                    fullName = c.FullName,
+                    quotesCount = _context.Quotes.Count(q => q.CustomerId == c.CustomerId && q.DeletedAt == null),
+                    lastQuote = _context.Quotes
+                        .Where(q => q.CustomerId == c.CustomerId && q.DeletedAt == null)
+                        .Max(q => (DateTime?)q.CreatedAt)
+                })
+                .ToList();
+
+            // Segmentación
+            foreach (var c in data)
+            {
+                if (c.quotesCount >= 5)
+                    c.segment = "Frecuente";
+                else if (c.lastQuote >= DateTime.UtcNow.AddDays(-30))
+                    c.segment = "Nuevo";
+                else if (c.lastQuote == null || c.lastQuote < DateTime.UtcNow.AddMonths(-6))
+                    c.segment = "Inactivo";
+                else
+                    c.segment = "Normal";
+            }
+
+            // Filtro
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                data = data
+                    .Where(x => x.segment.ToLower() == filter.ToLower())
+                    .ToList();
+            }
+
+            response.Data = data;
+            response.Message = "Segmentación obtenida";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
         }
 
         return response;

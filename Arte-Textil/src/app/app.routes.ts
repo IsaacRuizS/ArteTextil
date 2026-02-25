@@ -41,6 +41,18 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/promotion/promotion.component').then(m => m.PromotionComponent)
             },
             {
+  path: 'analytics/customer-segmentation',
+  loadComponent: () =>
+    import('./pages/analytics/customer-segmentation/customer-segmentation.component')
+      .then(m => m.CustomerSegmentationComponent)
+},
+{
+  path: 'analytics/demand',
+  loadComponent: () =>
+    import('./pages/analytics/demand/demand.component')
+      .then(m => m.DemandComponent)
+},
+            {
                 path: 'analytics',
                 loadComponent: () => import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent)
             },
@@ -48,6 +60,7 @@ export const routes: Routes = [
                 path: 'customer-analytics',
                 loadComponent: () => import('./pages/analytics/customer-analytics.component/customer-analytics.component').then(m => m.CustomerAnalyticsComponent)
             },
+
             {
                 path: 'dashboard',
                 loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)

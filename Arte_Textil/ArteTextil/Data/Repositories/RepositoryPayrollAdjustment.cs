@@ -4,6 +4,7 @@ namespace ArteTextil.Data.Repositories;
 
 public interface IRepositoryPayrollAdjustment : IRepositoryBase<PayrollAdjustment>
 {
+    ArteTextilDbContext Context { get; }
 }
 
 public class RepositoryPayrollAdjustment
@@ -13,4 +14,6 @@ public class RepositoryPayrollAdjustment
         : base(context)
     {
     }
+
+    public ArteTextilDbContext Context => _context;
 }

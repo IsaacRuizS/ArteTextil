@@ -8,8 +8,10 @@ export class VacationModel {
         }
     }
 
-    vacationId!: number;
+    vacationRequestId!: number; 
     userId!: number;
+    userName?: string;
+
     startDate!: Date;
     endDate!: Date;
     status!: string;

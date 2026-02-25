@@ -18,7 +18,6 @@ export class AttendanceComponent implements OnInit {
     attendancesOrigin: AttendanceModel[] = [];
 
     searchTerm = '';
-    currentUserId = 1; // sacarlo despues del token o de la sesion
 
     constructor(
         private apiAttendance: ApiAttendanceService,
@@ -46,27 +45,25 @@ export class AttendanceComponent implements OnInit {
 
     // CHECK IN
     checkIn() {
-        this.sharedService.setLoading(true);
 
-        this.apiAttendance.checkIn(this.currentUserId).subscribe({
-            next: () => {
-                this.loadAttendances();
-            },
-            error: () => this.sharedService.setLoading(false)
-        });
-    }
+    this.sharedService.setLoading(true);
+
+    this.apiAttendance.checkIn().subscribe({
+        next: () => this.loadAttendances(),
+        error: () => this.sharedService.setLoading(false)
+    });
+}
 
     // CHECK OUT
     checkOut() {
-        this.sharedService.setLoading(true);
 
-        this.apiAttendance.checkOut(this.currentUserId).subscribe({
-            next: () => {
-                this.loadAttendances();
-            },
-            error: () => this.sharedService.setLoading(false)
-        });
-    }
+    this.sharedService.setLoading(true);
+
+    this.apiAttendance.checkOut().subscribe({
+        next: () => this.loadAttendances(),
+        error: () => this.sharedService.setLoading(false)
+    });
+}
 
     onSearch(event: any) {
         this.searchTerm = event.target.value;
@@ -74,15 +71,26 @@ export class AttendanceComponent implements OnInit {
     }
 
     onFilter() {
-        this.attendances = this.attendancesOrigin;
 
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+    this.attendances = this.attendancesOrigin;
 
-        const term = this.searchTerm.toLowerCase();
+    if (!this.searchTerm || this.searchTerm.trim() === '') return;
 
-        this.attendances = this.attendances.filter(a =>
-            a.userId.toString().includes(term) ||
-            (a.checkIn && a.checkIn.toString().toLowerCase().includes(term))
-        );
-    }
+    const term = this.searchTerm.toLowerCase();
+
+    this.attendances = this.attendances.filter(a =>
+
+        // busca por nombre
+        (a.userName && a.userName.toLowerCase().includes(term))
+
+        // busca por id
+        || a.userId.toString().includes(term)
+
+        // busca por fecha check-in
+        || (a.checkIn && new Date(a.checkIn).toLocaleDateString().toLowerCase().includes(term))
+
+        // busca por fecha check-out
+        || (a.checkOut && new Date(a.checkOut).toLocaleDateString().toLowerCase().includes(term))
+    );
+}
 }

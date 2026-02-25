@@ -76,11 +76,28 @@ public class PayrollAdjustmentBusiness
 
         try
         {
-            var data = await _repository.GetAllAsync(a =>
-                a.UserId == userId &&
-                a.DeletedAt == null);
+            var data = _repository.Query()
+                .Where(a => a.UserId == userId && a.DeletedAt == null)
+                .Join(
+                    _repository.Context.Users,
+                    a => a.UserId,
+                    u => u.UserId,
+                    (a, u) => new PayrollAdjustmentDto
+                    {
+                        adjustmentId = a.AdjustmentId,
+                        userId = a.UserId,
+                        userName = u.FullName,
+                        amount = a.Amount,
+                        type = a.Type,
+                        reason = a.Reason,
+                        isActive = a.IsActive,
+                        createdAt = a.CreatedAt,
+                        updatedAt = a.UpdatedAt,
+                        deletedAt = a.DeletedAt
+                    }
+                ).ToList();
 
-            response.Data = _mapper.Map<List<PayrollAdjustmentDto>>(data);
+            response.Data = data;
             response.Message = "Ajustes obtenidos";
         }
         catch (Exception ex)
@@ -126,6 +143,46 @@ public class PayrollAdjustmentBusiness
 
             response.Data = true;
             response.Message = "Ajuste eliminado";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    // Ver todos
+    public async Task<ApiResponse<List<PayrollAdjustmentDto>>> GetAll()
+    {
+        var response = new ApiResponse<List<PayrollAdjustmentDto>>();
+
+        try
+        {
+            var data = _repository.Query()
+                .Where(a => a.DeletedAt == null)
+                .Join(
+                    _repository.Context.Users,
+                    a => a.UserId,
+                    u => u.UserId,
+                    (a, u) => new PayrollAdjustmentDto
+                    {
+                        adjustmentId = a.AdjustmentId,
+                        userId = a.UserId,
+                        userName = u.FullName,
+                        amount = a.Amount,
+                        type = a.Type,
+                        reason = a.Reason,
+                        isActive = a.IsActive,
+                        createdAt = a.CreatedAt,
+                        updatedAt = a.UpdatedAt,
+                        deletedAt = a.DeletedAt
+                    }
+                ).ToList();
+
+            response.Data = data;
+            response.Message = "Ajustes obtenidos";
         }
         catch (Exception ex)
         {

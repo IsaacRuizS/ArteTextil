@@ -60,6 +60,7 @@ builder.Services.AddScoped<ProductBusiness>();
 builder.Services.AddScoped<SupplierBusiness>();
 builder.Services.AddScoped<CategoryBusiness>();
 builder.Services.AddScoped<AttendanceBusiness>();
+builder.Services.AddScoped<DemandBusiness>();
 builder.Services.AddScoped<VacationBusiness>();
 builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();

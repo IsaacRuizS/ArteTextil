@@ -4,6 +4,7 @@ public class VacationRequestDto : DtoBase
 {
     public int vacationRequestId { get; set; }
     public int userId { get; set; }
+    public string? userName { get; set; }
     public DateTime startDate { get; set; }
     public DateTime endDate { get; set; }
     public string status { get; set; } = "Pending";

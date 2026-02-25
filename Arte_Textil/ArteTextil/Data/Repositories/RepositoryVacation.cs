@@ -4,6 +4,8 @@ namespace ArteTextil.Data.Repositories;
 
 public interface IRepositoryVacation : IRepositoryBase<Vacation>
 {
+    ArteTextilDbContext Context { get; }
+
 }
 
 public class RepositoryVacation
@@ -13,4 +15,6 @@ public class RepositoryVacation
         : base(context)
     {
     }
+
+    public ArteTextilDbContext Context => _context;
 }

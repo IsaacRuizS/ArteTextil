@@ -1,0 +1,14 @@
+<div class="p-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Predicción de Demanda</h3>
+
+        <input type="text"
+               class="form-control w-25"
+               placeholder="Filtrar por producto"
+               (input)="onFilter($event)">
+    </div>
+
+    <canvas id="demandChart"></canvas>
+
+</div>

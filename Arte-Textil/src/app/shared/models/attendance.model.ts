@@ -12,6 +12,7 @@ export class AttendanceModel {
     }
 
     attendanceId!: number;
+    userName?: string;
     userId!: number;
     checkIn?: Date;
     checkOut?: Date;

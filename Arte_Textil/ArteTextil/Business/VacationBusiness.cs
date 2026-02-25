@@ -14,6 +14,7 @@ public class VacationBusiness
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
 
+
     public VacationBusiness(
         ArteTextilDbContext context,
         IMapper mapper,
@@ -39,6 +40,7 @@ public class VacationBusiness
             }
 
             var entity = _mapper.Map<Vacation>(dto);
+            entity.UserId = dto.userId;
             entity.Status = "Pendiente";
             entity.IsActive = true;
             entity.CreatedAt = DateTime.UtcNow;
@@ -70,11 +72,29 @@ public class VacationBusiness
 
         try
         {
-            var data = await _repository.GetAllAsync(v =>
-                v.UserId == userId &&
-                v.DeletedAt == null);
+            var data = _repository.Query()
+                .Where(v => v.UserId == userId && v.DeletedAt == null)
+                .Join(
+                    _repository.Context.Users,
+                    v => v.UserId,
+                    u => u.UserId,
+                    (v, u) => new VacationRequestDto
+                    {
+                        vacationRequestId = v.VacationId,
+                        userId = v.UserId,
+                        userName = u.FullName,
+                        startDate = v.StartDate,
+                        endDate = v.EndDate,
+                        status = v.Status,
+                        ApprovedByUserId = v.ApprovedByUserId,
+                        IsActive = v.IsActive,
+                        createdAt = v.CreatedAt,
+                        updatedAt = v.UpdatedAt,
+                        deletedAt = v.DeletedAt
+                    }
+                ).ToList();
 
-            response.Data = _mapper.Map<List<VacationRequestDto>>(data);
+            response.Data = data;
             response.Message = "Solicitudes obtenidas";
         }
         catch (Exception ex)
@@ -93,11 +113,29 @@ public class VacationBusiness
 
         try
         {
-            var data = await _repository.GetAllAsync(v =>
-                v.Status == "Pendiente" &&
-                v.DeletedAt == null);
+            var data = _repository.Query()
+                .Where(v => v.Status == "Pendiente" && v.DeletedAt == null)
+                .Join(
+                    _repository.Context.Users,
+                    v => v.UserId,
+                    u => u.UserId,
+                    (v, u) => new VacationRequestDto
+                    {
+                        vacationRequestId = v.VacationId,
+                        userId = v.UserId,
+                        userName = u.FullName,  
+                        startDate = v.StartDate,
+                        endDate = v.EndDate,
+                        status = v.Status,
+                        ApprovedByUserId = v.ApprovedByUserId,
+                        IsActive = v.IsActive,
+                        createdAt = v.CreatedAt,
+                        updatedAt = v.UpdatedAt,
+                        deletedAt = v.DeletedAt
+                    }
+                ).ToList();
 
-            response.Data = _mapper.Map<List<VacationRequestDto>>(data);
+            response.Data = data;
             response.Message = "Solicitudes pendientes";
         }
         catch (Exception ex)
@@ -191,6 +229,46 @@ public class VacationBusiness
 
             response.Data = true;
             response.Message = "Solicitud rechazada";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    public async Task<ApiResponse<List<VacationRequestDto>>> GetAll()
+    {
+        var response = new ApiResponse<List<VacationRequestDto>>();
+
+        try
+        {
+            var data = _repository.Query()
+                .Where(v => v.DeletedAt == null)
+                .Join(
+                    _repository.Context.Users,
+                    v => v.UserId,
+                    u => u.UserId,
+                    (v, u) => new VacationRequestDto
+                    {
+                        vacationRequestId = v.VacationId,
+                        userId = v.UserId,
+                        userName = u.FullName,
+                        startDate = v.StartDate,
+                        endDate = v.EndDate,
+                        status = v.Status,
+                        ApprovedByUserId = v.ApprovedByUserId,
+                        IsActive = v.IsActive,
+                        createdAt = v.CreatedAt,
+                        updatedAt = v.UpdatedAt,
+                        deletedAt = v.DeletedAt
+                    }
+                ).ToList();
+
+            response.Data = data;
+            response.Message = "Solicitudes obtenidas";
         }
         catch (Exception ex)
         {

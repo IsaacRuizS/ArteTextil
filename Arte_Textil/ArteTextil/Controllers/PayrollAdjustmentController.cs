@@ -26,12 +26,18 @@ public class PayrollAdjustmentController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/payrolladjustment/user/5
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUser(int userId)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
     {
+        var result = await _business.GetAll();
+        return Ok(result);
+    }
+
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine()
+    {
+        var userId = int.Parse(User.FindFirst("id")!.Value);
         var result = await _business.GetByUser(userId);
-        if (!result.Success) return StatusCode(500, result);
         return Ok(result);
     }
 

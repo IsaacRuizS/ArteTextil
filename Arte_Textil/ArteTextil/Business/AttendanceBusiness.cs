@@ -4,6 +4,7 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace ArteTextil.Business;
@@ -13,12 +14,14 @@ public class AttendanceBusiness
     private readonly IRepositoryAttendance _repository;
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
+    private readonly ArteTextilDbContext _context;
 
     public AttendanceBusiness(
-        ArteTextilDbContext context,
-        IMapper mapper,
-        ISystemLogHelper logHelper)
+    ArteTextilDbContext context,
+    IMapper mapper,
+    ISystemLogHelper logHelper)
     {
+        _context = context;
         _repository = new RepositoryAttendance(context);
         _mapper = mapper;
         _logHelper = logHelper;
@@ -125,15 +128,31 @@ public class AttendanceBusiness
     }
 
     // Ver asistencias
+
     public async Task<ApiResponse<List<AttendanceDto>>> GetAll()
     {
         var response = new ApiResponse<List<AttendanceDto>>();
 
         try
         {
-            var data = await _repository.GetAllAsync(a => a.DeletedAt == null);
+            var data = await _context.Attendance
+                .Where(a => a.DeletedAt == null)
+                .Select(a => new AttendanceDto
+                {
+                    attendanceId = a.AttendanceId,
+                    userId = a.UserId,
+                    userName = _context.Users
+                        .Where(u => u.UserId == a.UserId)
+                        .Select(u => u.FullName)
+                        .FirstOrDefault(),
 
-            response.Data = _mapper.Map<List<AttendanceDto>>(data);
+                    checkIn = a.CheckIn,
+                    checkOut = a.CheckOut,
+                    isActive = a.IsActive
+                })
+                .ToListAsync();
+
+            response.Data = data;
             response.Message = "Asistencias obtenidas correctamente";
         }
         catch (Exception ex)

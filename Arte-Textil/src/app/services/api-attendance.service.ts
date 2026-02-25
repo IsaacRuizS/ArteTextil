@@ -18,11 +18,31 @@ export class ApiAttendanceService extends ApiBaseService {
             }));
     }
 
-    checkIn(userId: number) {
-        return this.http.post<any>(`${this.baseUrl}/api/attendance/check-in/${userId}`, {}, this.getHttpOptions());
-    }
+    checkIn(): Observable<boolean> {
+    return this.http.post<any>(
+        `${this.baseUrl}/api/attendance/check-in`,
+        {},
+        this.getHttpOptions()
+    ).pipe(
+        map((res: any) => {
+            if (!res?.success) throw new Error(res?.message || 'Error al marcar entrada');
+            return res.data === true;
+        }),
+        catchError(err => throwError(() => err))
+    );
+}
 
-    checkOut(userId: number) {
-        return this.http.post<any>(`${this.baseUrl}/api/attendance/check-out/${userId}`, {}, this.getHttpOptions());
-    }
+    checkOut(): Observable<boolean> {
+    return this.http.post<any>(
+        `${this.baseUrl}/api/attendance/check-out`,
+        {},
+        this.getHttpOptions()
+    ).pipe(
+        map((res: any) => {
+            if (!res?.success) throw new Error(res?.message || 'Error al marcar salida');
+            return res.data === true;
+        }),
+        catchError(err => throwError(() => err))
+    );
+}
 }
