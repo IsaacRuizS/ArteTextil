@@ -16,6 +16,13 @@
 
         </a>
 
-        <button class="btn btn-light btn-sm">Cerrar sesión</button>
+        <ng-container *ngIf="isAuthenticated; else guestButtons">
+            <button class="btn btn-outline-light btn-sm" (click)="onLogout()">Cerrar sesión</button>
+        </ng-container>
+
+        <ng-template #guestButtons>
+            <button class="btn btn-outline-light btn-sm" (click)="onNavigateToLogin()">Iniciar sesión</button>
+            <button class="btn btn-light btn-sm" (click)="onNavigateToRegister()">Registrarse</button>
+        </ng-template>
     </div>
 </nav>

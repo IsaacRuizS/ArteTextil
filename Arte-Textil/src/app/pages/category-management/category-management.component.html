@@ -9,8 +9,19 @@
     </div>
 
     <!-- FILTER -->
-    <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por nombre..." (input)="onSearch($event)">
+    <div class="row mb-4 g-2">
+        <div class="col-md-8">
+            <input type="text" class="form-control" placeholder="Buscar por nombre..."
+                (input)="onSearch($event)">
+        </div>
+
+        <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
+                <option value="0">Todos</option>
+                <option value="1">Activos</option>
+                <option value="2">Inactivos</option>
+            </select>
+        </div>
     </div>
 
     <!-- LIST -->
@@ -27,7 +38,7 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let c of categories">
+                    <tr *ngFor="let c of categories | paginate: { itemsPerPage: 50, currentPage: page }">
                         <td class="ps-4 fw-semibold">{{ c.name }}</td>
                         <td>{{ c.description || '-' }}</td>
                         <td>
@@ -43,13 +54,20 @@
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(c)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)">
+                                @if (c.isActive) {
+                                    <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                    <i class="mdi mdi-eye-outline"></i>
+                                }
                             </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
         </div>
     </div>
 
@@ -110,14 +128,14 @@
                     <i class="mdi mdi-alert-circle-outline"></i>
                 </div>
 
-                <h5 class="mb-2 fw-bold">¿Desactivar?</h5>
+                <h5 class="mb-2 fw-bold">¿Cambiar de estado?</h5>
                 <p class="text-muted small">
-                    La categoría no podrá utilizarse en productos.
+                    ¿Estas seguro que quieres cambiar el estado?.
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
-                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Desactivar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Confirmar</button>
                 </div>
             </div>
         </div>

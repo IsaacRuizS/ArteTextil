@@ -1,9 +1,11 @@
 ﻿using ArteTextil.Business;
 using ArteTextil.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers;
 
+[Authorize(Policy = "AdminOnly")]
 [ApiController]
 [Route("api/[controller]")]
 public class PayrollAdjustmentController : ControllerBase

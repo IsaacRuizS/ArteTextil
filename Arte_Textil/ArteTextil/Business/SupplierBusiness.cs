@@ -193,14 +193,15 @@ namespace ArteTextil.Business
             return response;
         }
 
-        // DELETE LÓGICO
-        public async Task<ApiResponse<bool>> Delete(int id)
+        // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+        public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                var supplier = await _repositorySupplier.FirstOrDefaultAsync(s => s.SupplierId == id && s.DeletedAt == null);
+                var supplier = await _repositorySupplier
+                    .FirstOrDefaultAsync(s => s.SupplierId == id);
 
                 if (supplier == null)
                 {
@@ -211,25 +212,27 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(supplier);
 
-                supplier.IsActive = false;
-                supplier.DeletedAt = DateTime.UtcNow;
+                supplier.IsActive = isActive;
 
                 _repositorySupplier.Update(supplier);
                 await _repositorySupplier.SaveAsync();
 
-                await _logHelper.LogDelete(
+                await _logHelper.LogUpdate(
                     tableName: "Suppliers",
                     recordId: supplier.SupplierId,
-                    previousValue: previousSnapshot
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(supplier)
                 );
 
                 response.Data = true;
-                response.Message = "Proveedor eliminado correctamente";
+                response.Message = isActive
+                    ? "Proveedor activado correctamente"
+                    : "Proveedor desactivado correctamente";
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"Error al eliminar proveedor: {ex.Message}";
+                response.Message = $"Error al actualizar estado del proveedor: {ex.Message}";
             }
 
             return response;

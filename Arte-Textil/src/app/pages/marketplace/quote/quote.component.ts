@@ -103,8 +103,6 @@ export class QuoteComponent implements OnInit {
             }))
         });
 
-        console.log('COTIZACIÓN ENVIADA (MODEL):', quote);
-
         this.sharedService.setLoading(true);
 
         this.apiQuoteService.create(quote)

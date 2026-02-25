@@ -1,78 +1,137 @@
-<div class="promotions-wrapper">
+<div class="promotions-wrapper p-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold">Promociones</h2>
-
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Gestión de Promociones</h2>
         <button class="btn btn-primary" (click)="openCreateModal()">
-            Crear promoción <i class="mdi mdi-plus"></i>
+            <i class="mdi mdi-plus-circle me-1"></i>Nueva Promoción
         </button>
     </div>
 
-    <p class="text-muted">Administración completa de promociones.</p>
+    <!-- FILTER -->
+    <div class="row mb-4 g-2">
+        <div class="col-md-8">
+            <input
+                type="text"
+                class="form-control"
+                placeholder="Buscar por nombre o producto..."
+                (input)="onSearch($event)">
+        </div>
 
-    <!-- TABLA PRINCIPAL -->
-    <div class="table-responsive card shadow-sm p-3">
-
-        <table class="table align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Promoción</th>
-                    <th>Producto</th>
-                    <th>Descuento</th>
-                    <th>Vigencia</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @for (p of promotions; track p.promotionId) {
-                <tr>
-
-                    <td>{{ p.name }}</td>
-                    <td>{{ p.productName || getProductName(p.productId) }}</td>
-                    <td>{{ p.discountPercent }}%</td>
-                    <td>{{ (p.startDate | date:'dd/MM/yyyy') || 'N/A' }} → {{ (p.endDate | date:'dd/MM/yyyy') || 'N/A' }}</td>
-
-                    <td>
-                        <span class="badge state cursor-pointer" [class.bg-success]="p.isActive"
-                            [class.bg-secondary]="!p.isActive" (click)="onChangeStatus(p)">
-                            {{ p.isActive ? 'Activa' : 'Inactiva' }}
-                        </span>
-                    </td>
-
-                    <td class="text-end">
-
-                        <button class="btn btn-primary btn-sm me-1" (click)="openEditModal(p)">
-                            Editar
-                        </button>
-
-                        <button class="btn btn-danger btn-sm" (click)="openDeleteModal(p)">
-                            Eliminar
-                        </button>
-
-                    </td>
-
-                </tr>
-                }
-            </tbody>
-
-        </table>
-
+        <div class="col-md-4">
+            <select
+                class="form-select"
+                [(ngModel)]="statusFilter"
+                (change)="onStatusChanged()">
+                <option value="0">Todas</option>
+                <option value="1">Activas</option>
+                <option value="2">Inactivas</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Modales -->
-    @if (showFormModal) {
-    <app-promotion-form-modal [promotion]="editingPromotion" [products]="products"
-        (saveCreate)="saveCreatedPromotion($event)" (saveUpdate)="saveUpdatedPromotion($event)"
+    <!-- LIST -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Promoción</th>
+                        <th>Producto</th>
+                        <th>Descuento</th>
+                        <th>Vigencia</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr *ngFor="let p of promotions | paginate: { itemsPerPage: 50, currentPage: page }">
+
+                        <td class="ps-4 fw-semibold">{{ p.name }}</td>
+
+                        <td>{{ p.productName || getProductName(p.productId) }}</td>
+
+                        <td>{{ p.discountPercent }}%</td>
+
+                        <td>
+                            {{ p.startDate | date:'dd/MM/yyyy' }} →
+                            {{ p.endDate | date:'dd/MM/yyyy' }}
+                        </td>
+
+                        <td>
+                            <span
+                                class="badge rounded-pill"
+                                [class.bg-success-subtle]="p.isActive"
+                                [class.text-success]="p.isActive"
+                                [class.bg-secondary-subtle]="!p.isActive"
+                                [class.text-secondary]="!p.isActive">
+                                {{ p.isActive ? 'Activa' : 'Inactiva' }}
+                            </span>
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <button
+                                class="btn btn-sm btn-light text-primary me-2"
+                                (click)="openEditModal(p)">
+                                <i class="mdi mdi-pencil"></i>
+                            </button>
+
+                            <button
+                                class="btn btn-sm btn-light"
+                                (click)="openDeleteModal(p)">
+                                @if (p.isActive) {
+                                    <i class="mdi mdi-eye-off"></i>
+                                } @else {
+                                    <i class="mdi mdi-eye-outline"></i>
+                                }
+                            </button>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <pagination-controls
+                (pageChange)="page = $event"
+                previousLabel="‹"
+                nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
+        </div>
+    </div>
+</div>
+
+<!-- FORM MODAL -->
+@if (showFormModal) {
+    <app-promotion-form-modal
+        [promotion]="editingPromotion"
+        [products]="products"
+        (saveCreate)="saveCreatedPromotion($event)"
+        (saveUpdate)="saveUpdatedPromotion($event)"
         (close)="showFormModal = false">
     </app-promotion-form-modal>
-    }
-    
-    @if (showDeleteModal) {
-    <app-promotion-delete-modal [promotion]="deletePromotion" (confirm)="deletePromotionLogic()"
-        (close)="showDeleteModal = false">
-    </app-promotion-delete-modal>
-    }
+}
 
+<!-- DELETE MODAL -->
+@if (showDeleteModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-center p-3">
+            <div class="modal-body">
+                <div class="mb-3 text-danger display-4">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+                <h5 class="mb-2 fw-bold">¿Modificar?</h5>
+                <p class="text-muted small">
+                    ¿Deseas modificar el estado de la promoción?
+                </p>
+                <div class="d-flex justify-content-center gap-2 mt-4">
+                    <button class="btn btn-light" (click)="showDeleteModal = false">Cancelar</button>
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">Modificar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+}

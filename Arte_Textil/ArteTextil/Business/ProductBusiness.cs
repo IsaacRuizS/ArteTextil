@@ -257,14 +257,15 @@ namespace ArteTextil.Business
             return response;
         }
 
-        // DELETE (LÓGICO)
-        public async Task<ApiResponse<bool>> Delete(int id)
+        // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+        public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
         {
             var response = new ApiResponse<bool>();
 
             try
             {
-                var product = await _repositoryProduct.FirstOrDefaultAsync(p => p.ProductId == id && p.DeletedAt == null);
+                var product = await _repositoryProduct
+                    .FirstOrDefaultAsync(p => p.ProductId == id);
 
                 if (product == null)
                 {
@@ -275,29 +276,32 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(product);
 
-                product.DeletedAt = DateTime.UtcNow;
-                product.IsActive = false;
+                product.IsActive = isActive;
 
                 _repositoryProduct.Update(product);
                 await _repositoryProduct.SaveAsync();
 
-                await _logHelper.LogDelete(
+                await _logHelper.LogUpdate(
                     tableName: "Products",
-                    recordId: id,
-                    previousValue: previousSnapshot
+                    recordId: product.ProductId,
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(product)
                 );
 
                 response.Data = true;
-                response.Message = "Producto eliminado correctamente";
+                response.Message = isActive
+                    ? "Producto activado correctamente"
+                    : "Producto desactivado correctamente";
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"Error al eliminar producto: {ex.Message}";
+                response.Message = $"Error al actualizar estado del producto: {ex.Message}";
             }
 
             return response;
         }
+
 
         // GET ALL For Market
         public async Task<ApiResponse<List<ProductDto>>> GetAllForMarket()

@@ -1,9 +1,11 @@
 using ArteTextil.Business;
 using ArteTextil.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PromotionController : ControllerBase
@@ -85,18 +87,6 @@ namespace ArteTextil.Controllers
                 return BadRequest(result);
 
             return Ok(result);
-        }
-
-        // DELETE: api/promotion/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _promotionBusiness.Delete(id);
-
-            if (!result.Success)
-                return NotFound(result);
-
-            return Ok(result);
-        }
+        } 
     }
 }

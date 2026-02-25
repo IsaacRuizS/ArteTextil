@@ -3,8 +3,10 @@ using ArteTextil.Data.Entities;
 using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
@@ -13,17 +15,29 @@ namespace ArteTextil.Business
     public class UserBusiness
     {
         private readonly IRepositoryUser _repositoryUser;
+        private readonly IRepositoryCustomer _repositoryCustomer;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IMapper _mapper;
         private readonly ISystemLogHelper _logHelper;
+        private readonly JwtHelper _jwtHelper;
+        private readonly IEmailService _emailService;
+        private readonly ArteTextilDbContext _context;
 
         public UserBusiness(
             ArteTextilDbContext context,
             IMapper mapper,
-            ISystemLogHelper logHelper)
+            ISystemLogHelper logHelper,
+            JwtHelper jwtHelper,
+            IEmailService emailService)
         {
+            _context = context;
             _repositoryUser = new RepositoryUser(context);
+            _repositoryCustomer = new RepositoryCustomer(context);
+            _refreshTokenRepository = new RefreshTokenRepository(context);
             _mapper = mapper;
             _logHelper = logHelper;
+            _jwtHelper = jwtHelper;
+            _emailService = emailService;
         }
 
         // GET ALL
@@ -70,6 +84,107 @@ namespace ArteTextil.Business
             {
                 response.Success = false;
                 response.Message = $"Error al obtener usuario: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // REGISTER (público, siempre crea un Customer con RoleId = 3)
+        public async Task<ApiResponse<UserDto>> Register(RegisterDto dto)
+        {
+            var response = new ApiResponse<UserDto>();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.fullName) || string.IsNullOrWhiteSpace(dto.email) ||
+                    string.IsNullOrWhiteSpace(dto.password) || string.IsNullOrWhiteSpace(dto.phone))
+                {
+                    response.Success = false;
+                    response.Message = "Todos los campos son obligatorios.";
+                    return response;
+                }
+
+                if (!new EmailAddressAttribute().IsValid(dto.email))
+                {
+                    response.Success = false;
+                    response.Message = "El correo no tiene un formato válido.";
+                    return response;
+                }
+
+                var emailUsedInUsers = await _repositoryUser.AnyAsync(
+                    u => u.Email == dto.email && u.DeletedAt == null);
+
+                if (emailUsedInUsers)
+                {
+                    response.Success = false;
+                    response.Message = "Ya existe una cuenta registrada con ese correo.";
+                    return response;
+                }
+
+                var emailUsedInCustomers = await _repositoryCustomer.AnyAsync(
+                    c => c.Email == dto.email && c.DeletedAt == null);
+
+                if (emailUsedInCustomers)
+                {
+                    response.Success = false;
+                    response.Message = "Ya existe una cuenta registrada con ese correo.";
+                    return response;
+                }
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    var hasher = new PasswordHasher<User>();
+                    var user = new User
+                    {
+                        FullName = dto.fullName,
+                        Email = dto.email,
+                        Phone = dto.phone,
+                        PasswordHash = "temp",
+                        RoleId = 3,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    user.PasswordHash = hasher.HashPassword(user, dto.password);
+
+                    await _repositoryUser.AddAsync(user);
+
+                    var customer = new Customer
+                    {
+                        FullName = dto.fullName,
+                        Email = dto.email,
+                        Phone = dto.phone,
+                        IsActive = true,
+                        UserId = user.UserId,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _repositoryCustomer.AddAsync(customer);
+
+                    await transaction.CommitAsync();
+
+                    await _logHelper.LogCreate(
+                        tableName: "Users",
+                        recordId: user.UserId,
+                        newValue: JsonSerializer.Serialize(user)
+                    );
+
+                    await _emailService.SendRegistrationConfirmationAsync(user.FullName, user.Email);
+
+                    response.Data = _mapper.Map<UserDto>(user);
+                    response.Message = "Cuenta creada correctamente. Revisa tu correo para confirmar el registro.";
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al registrar usuario: {ex.Message}";
             }
 
             return response;
@@ -246,10 +361,105 @@ namespace ArteTextil.Business
 
             return response;
         }
-        // LOGIN
-        public async Task<ApiResponse<UserDto>> Login(LoginDto dto)
+        // REFRESH TOKEN
+        public async Task<ApiResponse<AuthResponseDto>> RefreshToken(string refreshToken)
         {
-            var response = new ApiResponse<UserDto>();
+            var response = new ApiResponse<AuthResponseDto>();
+
+            try
+            {
+                var stored = await _refreshTokenRepository.FirstOrDefaultAsync(
+                    t => t.Token == refreshToken);
+
+                if (stored == null || stored.RevokedAt.HasValue || stored.ExpiresAt <= DateTime.UtcNow)
+                {
+                    response.Success = false;
+                    response.Message = "Refresh token inválido o expirado.";
+                    return response;
+                }
+
+                var user = await _repositoryUser.FirstOrDefaultAsync(
+                    u => u.UserId == stored.UserId && u.DeletedAt == null && u.IsActive);
+
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "Usuario no encontrado o inactivo.";
+                    return response;
+                }
+
+                // Revocar el token usado (rotación)
+                stored.RevokedAt = DateTime.UtcNow;
+                _refreshTokenRepository.Update(stored);
+                await _refreshTokenRepository.SaveAsync();
+
+                // Generar nuevos tokens
+                var newAccessToken = _jwtHelper.GenerateAccessToken(user);
+                var (newRefreshValue, newRefreshExpiry) = _jwtHelper.GenerateRefreshToken();
+
+                var newRefreshToken = new RefreshToken
+                {
+                    Token = newRefreshValue,
+                    UserId = user.UserId,
+                    ExpiresAt = newRefreshExpiry
+                };
+                await _refreshTokenRepository.AddAsync(newRefreshToken);
+
+                response.Data = new AuthResponseDto
+                {
+                    User = _mapper.Map<UserDto>(user),
+                    Token = newAccessToken,
+                    RefreshToken = newRefreshValue,
+                    RefreshTokenExpiry = newRefreshExpiry
+                };
+                response.Message = "Token renovado correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al renovar token: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // LOGOUT
+        public async Task<ApiResponse<bool>> Logout(string refreshToken)
+        {
+            var response = new ApiResponse<bool>();
+
+            try
+            {
+                var stored = await _refreshTokenRepository.FirstOrDefaultAsync(
+                    t => t.Token == refreshToken && t.RevokedAt == null);
+
+                if (stored == null)
+                {
+                    response.Success = false;
+                    response.Message = "Refresh token no encontrado.";
+                    return response;
+                }
+
+                stored.RevokedAt = DateTime.UtcNow;
+                _refreshTokenRepository.Update(stored);
+                await _refreshTokenRepository.SaveAsync();
+
+                response.Data = true;
+                response.Message = "Sesión cerrada correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al cerrar sesión: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // LOGIN
+        public async Task<ApiResponse<AuthResponseDto>> Login(LoginDto dto)
+        {
+            var response = new ApiResponse<AuthResponseDto>();
 
             try
             {
@@ -265,7 +475,7 @@ namespace ArteTextil.Business
                 if (!user.IsActive)
                 {
                     response.Success = false;
-                    response.Message = "El usuario se encuentra inactivo.";
+                    response.Message = "Credenciales incorrectas.";
                     return response;
                 }
 
@@ -284,8 +494,35 @@ namespace ArteTextil.Business
                 _repositoryUser.Update(user);
                 await _repositoryUser.SaveAsync();
 
+                var accessToken = _jwtHelper.GenerateAccessToken(user);
+                var (refreshTokenValue, refreshTokenExpiry) = _jwtHelper.GenerateRefreshToken();
 
-                response.Data = _mapper.Map<UserDto>(user);
+                // Revocar refresh tokens anteriores del usuario
+                var existingTokens = await _refreshTokenRepository.GetAllAsync(
+                    t => t.UserId == user.UserId && t.RevokedAt == null);
+                foreach (var existing in existingTokens)
+                {
+                    existing.RevokedAt = DateTime.UtcNow;
+                    _refreshTokenRepository.Update(existing);
+                }
+                await _refreshTokenRepository.SaveAsync();
+
+                // Guardar nuevo refresh token
+                var refreshToken = new RefreshToken
+                {
+                    Token = refreshTokenValue,
+                    UserId = user.UserId,
+                    ExpiresAt = refreshTokenExpiry
+                };
+                await _refreshTokenRepository.AddAsync(refreshToken);
+
+                response.Data = new AuthResponseDto
+                {
+                    User = _mapper.Map<UserDto>(user),
+                    Token = accessToken,
+                    RefreshToken = refreshTokenValue,
+                    RefreshTokenExpiry = refreshTokenExpiry
+                };
                 response.Message = "Login exitoso";
             }
             catch (Exception ex)

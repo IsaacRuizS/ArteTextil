@@ -3,8 +3,10 @@ using ArteTextil.Data.Entities;
 using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Text.Json;
 
 namespace ArteTextil.Business;
@@ -15,20 +17,27 @@ public class QuoteBusiness
     private readonly IRepositoryQuote _repositoryQuote;
     private readonly IRepositoryQuoteItem _repositoryQuoteItem;
     private readonly IRepositoryCustomer _repositoryCustomer;
+    private readonly IRepositoryUser _repositoryUser;
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
+    private readonly IEmailService _emailService;
+
 
     public QuoteBusiness(
         ArteTextilDbContext context,
         IMapper mapper,
-        ISystemLogHelper logHelper)
+        ISystemLogHelper logHelper,
+        IEmailService emailService
+        )
     {
         _context = context;
         _repositoryQuote = new RepositoryQuote(context);
         _repositoryQuoteItem = new RepositoryQuoteItem(context);
         _repositoryCustomer = new RepositoryCustomer(context);
+        _repositoryUser = new RepositoryUser(context);
         _mapper = mapper;
         _logHelper = logHelper;
+        _emailService = emailService;
     }
 
     // GET ALL
@@ -123,9 +132,38 @@ public class QuoteBusiness
                 }
                 else
                 {
+
+                    //Validar si un usuario con ese correo ya existe y si no crearlo
+                    var existingUser = await _repositoryUser.FirstOrDefaultAsync(u => u.Email == dto.Customer.email && u.DeletedAt == null);
+
+                    User user;
+
+                    if (existingUser != null)
+                    {
+                        user = existingUser;
+                    }
+                    else
+                    {
+                        user = new User
+                        {
+                            FullName = dto.Customer.fullName,
+                            Email = dto.Customer.email ?? "",
+                            Phone = dto.Customer.phone ?? "",
+                            PasswordHash = "",
+                            RoleId = 3,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        await _repositoryUser.AddAsync(user);
+                        await _repositoryUser.SaveAsync();
+                    }
+
+
                     // No existe → crear nuevo cliente
                     var newCustomer = new Customer
                     {
+                        UserId = user.UserId,
                         FullName = dto.Customer.fullName,
                         Email = dto.Customer.email,
                         Phone = dto.Customer.phone,
@@ -189,17 +227,56 @@ public class QuoteBusiness
                 .FirstAsync(q => q.QuoteId == quote.QuoteId);
 
             // LOG
-            
+
+            var logObject = new
+            {
+                quote.QuoteId,
+                quote.CustomerId,
+                quote.Total,
+                quote.Status,
+                Items = created.QuoteItems?.Select(i => new
+                {
+                    i.QuoteItemId,
+                    i.ProductId,
+                    i.Quantity,
+                    i.Price
+                })
+            };
+
             await _logHelper.LogCreate(
                 tableName: "Quotes",
                 recordId: quote.QuoteId,
-                newValue: JsonSerializer.Serialize(created)
+                newValue: JsonSerializer.Serialize(logObject)
             );
+
 
             await transaction.CommitAsync();
 
             response.Data = _mapper.Map<QuoteDto>(created);
             response.Message = "Cotización creada correctamente";
+
+            // ENVIAR CORREO (post-commit)
+            try
+            {
+                var customer = await _repositoryCustomer.GetByIdAsync(dto.customerId);
+
+                if (customer != null)
+                {
+                    await _emailService.SendQuoteCreatedAsync(
+                        quote,
+                        customer
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                await _logHelper.LogCreate(
+                 tableName: "Email Quote",
+                 recordId: quote.QuoteId,
+                 newValue: $"Error enviando el email con el id de cotización {quote.QuoteId}: {ex.Message}"
+             );
+            }
+
         }
         catch (Exception ex)
         {
@@ -294,14 +371,15 @@ public class QuoteBusiness
         return response;
     }
 
-    // DELETE (SOFT)
-    public async Task<ApiResponse<bool>> Delete(int id)
+    // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+    public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
     {
         var response = new ApiResponse<bool>();
 
         try
         {
-            var quote = await _repositoryQuote.FirstOrDefaultAsync(q => q.QuoteId == id && q.DeletedAt == null);
+            var quote = await _repositoryQuote
+                .FirstOrDefaultAsync(q => q.QuoteId == id);
 
             if (quote == null)
             {
@@ -312,27 +390,30 @@ public class QuoteBusiness
 
             var previousSnapshot = JsonSerializer.Serialize(quote);
 
-            quote.DeletedAt = DateTime.UtcNow;
-            quote.IsActive = false;
+            quote.IsActive = isActive;
 
             _repositoryQuote.Update(quote);
             await _repositoryQuote.SaveAsync();
 
-            await _logHelper.LogDelete(
+            await _logHelper.LogUpdate(
                 tableName: "Quotes",
-                recordId: id,
-                previousValue: previousSnapshot
+                recordId: quote.QuoteId,
+                previousValue: previousSnapshot,
+                newValue: JsonSerializer.Serialize(quote)
             );
 
             response.Data = true;
-            response.Message = "Cotización eliminada correctamente";
+            response.Message = isActive
+                ? "Cotización activada correctamente"
+                : "Cotización desactivada correctamente";
         }
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = $"Error al eliminar cotización: {ex.Message}";
+            response.Message = $"Error al actualizar estado de la cotización: {ex.Message}";
         }
 
         return response;
     }
+
 }

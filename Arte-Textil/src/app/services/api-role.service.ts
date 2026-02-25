@@ -6,7 +6,7 @@ import { RolModel } from '../shared/models/rol.model';
 
 @Injectable({
     providedIn: 'root'
-})  
+})
 export class ApiRolService extends ApiBaseService {
 
     constructor(public override http: HttpClient) {
@@ -93,13 +93,18 @@ export class ApiRolService extends ApiBaseService {
             });
     }
 
-    // DELETE: api/rol/{id}
-    delete(id: number): Promise<boolean> {
-        return this.http.delete(`${this.baseUrl}/api/rol/${id}`, this.getHttpOptions())
+    // PATCH: api/rol/{id}/status
+    updateStatus(id: number, isActive: boolean): Promise<boolean> {
+        return this.http
+            .patch(
+                `${this.baseUrl}/api/rol/${id}/status`,
+                isActive,
+                this.getHttpOptions()
+            )
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Error al eliminar el proveedor.');
+                    throw new Error(res?.message || 'Error al actualizar estado del rol.');
                 }
 
                 return res.data === true;
@@ -109,7 +114,10 @@ export class ApiRolService extends ApiBaseService {
                     ? this.getErrorMsg(err)
                     : err.message;
 
-                return Promise.reject(new Error(`Error al eliminar proveedor: ${errMsg}`));
+                return Promise.reject(
+                    new Error(`Error al actualizar estado del rol: ${errMsg}`)
+                );
             });
     }
+
 }

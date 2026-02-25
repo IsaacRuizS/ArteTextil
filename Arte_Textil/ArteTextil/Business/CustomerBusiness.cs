@@ -166,15 +166,15 @@ public class CustomerBusiness
         return response;
     }
 
-        // DELETE (SOFT)
-        public async Task<ApiResponse<bool>> Delete(int id)
+    // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+    public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
     {
         var response = new ApiResponse<bool>();
 
         try
         {
             var customer = await _repositoryCustomer
-                .FirstOrDefaultAsync(c => c.CustomerId == id && c.DeletedAt == null);
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
 
             if (customer == null)
             {
@@ -185,27 +185,30 @@ public class CustomerBusiness
 
             var previousSnapshot = JsonSerializer.Serialize(customer);
 
-            customer.DeletedAt = DateTime.UtcNow;
-            customer.IsActive = false;
+            customer.IsActive = isActive;
 
             _repositoryCustomer.Update(customer);
             await _repositoryCustomer.SaveAsync();
 
-            await _logHelper.LogDelete(
+            await _logHelper.LogUpdate(
                 tableName: "Customers",
-                recordId: id,
-                previousValue: previousSnapshot
+                recordId: customer.CustomerId,
+                previousValue: previousSnapshot,
+                newValue: JsonSerializer.Serialize(customer)
             );
 
             response.Data = true;
-            response.Message = "Cliente eliminado correctamente";
+            response.Message = isActive
+                ? "Cliente activado correctamente"
+                : "Cliente desactivado correctamente";
         }
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = $"Error al eliminar cliente: {ex.Message}";
+            response.Message = $"Error al actualizar estado del cliente: {ex.Message}";
         }
 
         return response;
     }
+
 }

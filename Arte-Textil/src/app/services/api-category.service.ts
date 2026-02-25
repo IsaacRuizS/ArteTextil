@@ -85,22 +85,25 @@ export class ApiCategoryService extends ApiBaseService {
             );
     }
 
-    // DELETE: api/category/{id}
-    delete(id: number): Observable<boolean> {
-
-        return this.http.delete<any>(`${this.baseUrl}/api/category/${id}`, this.getHttpOptions())
+    // PATCH: api/category/{id}/status
+    updateStatus(id: number, isActive: boolean): Observable<boolean> {
+        return this.http
+            .patch<any>(
+                `${this.baseUrl}/api/category/${id}/status`,
+                isActive,
+                this.getHttpOptions()
+            )
             .pipe(
                 map((res: any) => {
-
                     if (!res?.success) {
-                        throw new Error(res?.message || 'Error al eliminar la categoría.');
+                        throw new Error(res?.message || 'Error al actualizar estado de la categoría.');
                     }
-
                     return res.data === true;
                 }),
                 catchError(err => throwError(() => err))
             );
     }
+
 
     // GET: api/category/all-active
     getAllActive(): Observable<CategoryModel[]> {

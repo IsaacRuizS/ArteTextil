@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { SupplierModel } from '../../../shared/models/supplier.model';
 import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { SharedService } from '../../../services/shared.service';
@@ -9,7 +10,7 @@ import { SharedService } from '../../../services/shared.service';
     selector: 'app-suppliers',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule],
     providers: [FormBuilder],
     templateUrl: './suppliers.component.html',
     styleUrls: ['./suppliers.component.scss']
@@ -26,6 +27,10 @@ export class SuppliersComponent implements OnInit {
     isEditing = false;
     supplierToDelete: SupplierModel | null = null;
     searchTerm = '';
+
+    statusFilter: number = 1; // 0: all, 1: active, 2: inactive
+
+    page = 1;
 
     constructor(
         private apiSupplierService: ApiSupplierService,
@@ -57,6 +62,8 @@ export class SuppliersComponent implements OnInit {
                 this.suppliers = suppliers;
                 this.suppliersOrigins = suppliers;
 
+                this.onFilterInfo();
+
                 this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },
@@ -66,11 +73,13 @@ export class SuppliersComponent implements OnInit {
         });
     }
 
-
-
-
     onSearch(event: any) {
         this.searchTerm = event.target.value;
+        this.onFilterInfo();
+    }
+
+    onStatusChanged() {
+
         this.onFilterInfo();
     }
 
@@ -78,16 +87,30 @@ export class SuppliersComponent implements OnInit {
 
         this.suppliers = this.suppliersOrigins;
 
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+        if (this.statusFilter > 0) {
 
-        const term = this.searchTerm.toLowerCase();
+            if (this.statusFilter == 1) {
+                this.suppliers = this.suppliers.filter(s => s.isActive);
+            } else if (this.statusFilter == 2) {
+                this.suppliers = this.suppliers.filter(s => !s.isActive);
+            }
+        }
 
-        this.suppliers = this.suppliers.filter(s =>
-            s.name.toLowerCase().includes(term) ||
-            s.email.toLowerCase().includes(term) ||
-            s.phone.toLowerCase().includes(term) ||
-            s.contactPerson.toLowerCase().includes(term)
-        );
+        if (this.searchTerm != null && this.searchTerm.trim() != '') {
+
+            const term = this.searchTerm.toLowerCase();
+
+            this.suppliers = this.suppliers.filter(s =>
+                s.name.toLowerCase().includes(term) ||
+                s.email.toLowerCase().includes(term) ||
+                s.phone.toLowerCase().includes(term) ||
+                s.contactPerson.toLowerCase().includes(term)
+            );
+        }
+
+        this.page = 1;
+
+        this.cdr.markForCheck();
     }
 
     // ACTIONS
@@ -167,7 +190,9 @@ export class SuppliersComponent implements OnInit {
 
     private _deleteSupplier(supplierId: number) {
 
-        this.apiSupplierService.delete(supplierId).subscribe({
+        let supplier = this.suppliersOrigins.find(s => s.supplierId === supplierId)?.isActive;
+
+        this.apiSupplierService.updateStatus(supplierId, !supplier).subscribe({
             next: () => {
 
                 this.showDeleteModal = false;

@@ -1,36 +1,51 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 import Swal from 'sweetalert2';
 
 import { PromotionFormModal } from './components/promotion-form-modal';
-import { PromotionDeleteModal } from './components/promotion-delete-modal';
 import { ApiPromotionService } from '../../services/api-promotion.service';
 import { ApiProductService } from '../../services/api-product.service';
 import { PromotionModel } from '../../shared/models/promotion.model';
 import { ProductModel } from '../../shared/models/product.model';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
     selector: 'app-promotion',
     standalone: true,
-    imports: [CommonModule, PromotionFormModal, PromotionDeleteModal],
+    imports: [
+        CommonModule,
+        FormsModule,
+        NgxPaginationModule,
+        PromotionFormModal
+    ],
     templateUrl: './promotion.component.html',
     styleUrls: ['./promotion.component.scss'],
 })
 export class PromotionComponent implements OnInit {
 
     products: ProductModel[] = [];
-    promotions: PromotionModel[] = [];
 
+    promotions: PromotionModel[] = [];
+    promotionsOrigins: PromotionModel[] = [];
+
+    // UI
     showFormModal = false;
     showDeleteModal = false;
-
     editingPromotion: PromotionModel | null = null;
-    deletePromotion: PromotionModel | null = null;
+    promotionToDelete: PromotionModel | null = null;
+
+    // Filters
+    searchTerm = '';
+    statusFilter = 1; // 0 all, 1 active, 2 inactive
+    page = 1;
 
     constructor(
         private apiPromotionService: ApiPromotionService,
         private apiProductService: ApiProductService,
-        private cdr: ChangeDetectorRef
+        private sharedService: SharedService,
+        private cdr: ChangeDetectorRef,
     ) { }
 
     ngOnInit() {
@@ -40,38 +55,40 @@ export class PromotionComponent implements OnInit {
 
     loadProducts() {
         this.apiProductService.getAll().subscribe({
-            next: (data) => {
-                this.products = data;
-                this.cdr.markForCheck();
-            },
-            error: (err) => {
-                console.error('Error al cargar productos:', err);
-                Swal.fire('Error', 'No se pudieron cargar los productos', 'error');
-            }
+            next: data => this.products = data,
+            error: () => Swal.fire('Error', 'No se pudieron cargar los productos', 'error')
         });
     }
 
     loadPromotions() {
+
+        this.sharedService.setLoading(true);
+
         this.apiPromotionService.getAll().subscribe({
-            next: (data) => {
-                this.promotions = [...data];
+            next: data => {
+                this.promotions = data;
+                this.promotionsOrigins = data;
+                this.onFilterInfo();
+                this.sharedService.setLoading(false);
                 this.cdr.markForCheck();
             },
-            error: (err) => {
-                console.error('Error al cargar promociones:', err);
+            error: () => {
+                this.sharedService.setLoading(false);
                 Swal.fire('Error', 'No se pudieron cargar las promociones', 'error');
             }
         });
     }
 
-    getProductName(id: number | undefined) {
+    getProductName(id?: number) {
         if (!id) return 'Producto desconocido';
-        const product = this.products.find(p => p.productId === id);
-        return product?.name ?? 'Producto desconocido';
+        return this.products.find(p => p.productId === id)?.name ?? 'Producto desconocido';
     }
 
-    onChangeStatus(promo: PromotionModel) {
-        const newStatus = !promo.isActive;
+    // FILTERS
+    onSearch(event: any) {
+        this.searchTerm = event.target.value;
+        this.onFilterInfo();
+    }
 
         this.apiPromotionService.changeStatus(promo.promotionId, newStatus).subscribe({
             next: () => {
@@ -85,8 +102,30 @@ export class PromotionComponent implements OnInit {
         });
     }
 
-    // -------------------- Abrir modales --------------------
+    onFilterInfo() {
 
+        let data = this.promotionsOrigins;
+
+        if (this.statusFilter == 1) {
+            data = data.filter(p => p.isActive);
+        } else if (this.statusFilter == 2) {
+            data = data.filter(p => !p.isActive);
+        }
+
+        if (this.searchTerm?.trim()) {
+            const term = this.searchTerm.toLowerCase();
+            data = data.filter(p =>
+                p.name.toLowerCase().includes(term) ||
+                this.getProductName(p.productId).toLowerCase().includes(term)
+            );
+        }
+
+        this.promotions = data;
+        this.page = 1;
+        this.cdr.markForCheck();
+    }
+
+    // ACTIONS
     openCreateModal() {
         this.editingPromotion = null;
         this.showFormModal = true;
@@ -98,76 +137,63 @@ export class PromotionComponent implements OnInit {
     }
 
     openDeleteModal(promo: PromotionModel) {
-        this.deletePromotion = promo;
+        this.promotionToDelete = promo;
         this.showDeleteModal = true;
     }
 
-    // -------------------- Recepción de cambios --------------------
+    confirmDelete() {
+        if (!this.promotionToDelete) return;
+
+        const newStatus = !this.promotionToDelete.isActive;
+
+        this.sharedService.setLoading(true);
+
+        this.apiPromotionService
+            .changeStatus(this.promotionToDelete.promotionId, newStatus)
+            .subscribe({
+                next: () => {
+                    this.showDeleteModal = false;
+                    this.promotionToDelete = null;
+                    this.loadPromotions();
+                },
+                error: () => {
+                    this.sharedService.setLoading(false);
+                    Swal.fire('Error', 'No se pudo modificar la promoción', 'error');
+                }
+            });
+    }
 
     saveCreatedPromotion(formData: any) {
-        const newPromotion = new PromotionModel({
-            name: formData.name,
-            description: formData.description || '',
-            discountPercent: Number(formData.discountPercent),
-            startDate: new Date(formData.startDate),
-            endDate: new Date(formData.endDate),
-            productId: Number(formData.productId),
+
+        const promo = new PromotionModel({
+            ...formData,
             isActive: true
         });
 
-        this.apiPromotionService.create(newPromotion).subscribe({
+        this.apiPromotionService.create(promo).subscribe({
             next: () => {
                 this.showFormModal = false;
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción creada correctamente', 'success');
             },
-            error: (err) => {
-                console.error('Error al crear promoción:', err);
-                Swal.fire('Error', err?.message || 'No se pudo crear la promoción', 'error');
-            }
+            error: () => Swal.fire('Error', 'No se pudo crear la promoción', 'error')
         });
     }
 
     saveUpdatedPromotion(formData: any) {
-        if (!this.editingPromotion) return;
 
-        const updatedPromotion = new PromotionModel({
+        const promo = new PromotionModel({
             ...this.editingPromotion,
-            name: formData.name,
-            description: formData.description,
-            discountPercent: Number(formData.discountPercent),
-            startDate: new Date(formData.startDate),
-            endDate: new Date(formData.endDate),
-            productId: Number(formData.productId),
-            isActive: formData.isActive
+            ...formData
         });
 
-        this.apiPromotionService.update(updatedPromotion).subscribe({
+        this.apiPromotionService.update(promo).subscribe({
             next: () => {
                 this.showFormModal = false;
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción actualizada correctamente', 'success');
             },
-            error: (err) => {
-                console.error('Error al actualizar promoción:', err);
-                Swal.fire('Error', err?.message || 'No se pudo actualizar la promoción', 'error');
-            }
-        });
-    }
-
-    deletePromotionLogic() {
-        if (!this.deletePromotion) return;
-
-        this.apiPromotionService.delete(this.deletePromotion.promotionId).subscribe({
-            next: () => {
-                this.showDeleteModal = false;
-                this.loadPromotions();
-                Swal.fire('Éxito', 'Promoción eliminada correctamente', 'success');
-            },
-            error: (err) => {
-                console.error('Error al eliminar promoción:', err);
-                Swal.fire('Error', 'No se pudo eliminar la promoción', 'error');
-            }
+            error: () => Swal.fire('Error', 'No se pudo actualizar la promoción', 'error')
         });
     }
 }

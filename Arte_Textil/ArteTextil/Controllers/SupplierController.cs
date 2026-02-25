@@ -1,9 +1,11 @@
 ﻿using ArteTextil.Business;
 using ArteTextil.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     [ApiController]
     [Route("api/[controller]")]
     public class SupplierController : ControllerBase
@@ -63,11 +65,11 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
-        // DELETE: api/supplier/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        // PATCH: api/supplier/{id}/status
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] bool isActive)
         {
-            var result = await _supplierBusiness.Delete(id);
+            var result = await _supplierBusiness.UpdateIsActive(id, isActive);
 
             if (!result.Success)
                 return NotFound(result);

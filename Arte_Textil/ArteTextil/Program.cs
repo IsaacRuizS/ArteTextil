@@ -1,8 +1,12 @@
-using ArteTextil.Data;
 using ArteTextil.Business;
+using ArteTextil.Data;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +24,9 @@ builder.Services.AddCors(options =>
 
 Env.Load();
 
-var server = Env.GetString("DB_SERVER");
+var server   = Env.GetString("DB_SERVER");
 var database = Env.GetString("DB_NAME");
-var user = Env.GetString("DB_USER");
+var user     = Env.GetString("DB_USER");
 var password = Env.GetString("DB_PASSWORD");
 
 var connectionString =
@@ -38,8 +42,6 @@ var connectionString =
     $"Application Name=\"ArteTextilApp\";" +
     $"Command Timeout=30;";
 
-
-// Agregar servicios al contenedor
 builder.Services.AddDbContext<ArteTextilDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -51,7 +53,7 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddScoped<ISystemLogHelper, SystemLogHelper>();
 
-//agregar entidades
+// Entidades
 builder.Services.AddScoped<RolBusiness>();
 builder.Services.AddScoped<UserBusiness>();
 builder.Services.AddScoped<ProductBusiness>();
@@ -63,30 +65,75 @@ builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<JwtHelper>();
 
+builder.Services.AddAuthorization(options =>
+{
+    // Solo roles 1 y 2 (Admin / Empleado). RoleId 3 = Customer queda excluido.
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireClaim("roleId", "1", "2"));
+});
 
-// Agregar servicios de controladores y Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name         = "Authorization",
+        Type         = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme       = "Bearer",
+        BearerFormat = "JWT",
+        In           = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description  = "Ingresa tu token JWT. Ejemplo: eyJhbGci..."
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer           = true,
+            ValidateAudience         = true,
+            ValidateLifetime         = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew                = TimeSpan.Zero,
+            ValidIssuer              = builder.Configuration["Jwt:Issuer"],
+            ValidAudience            = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
 
 var app = builder.Build();
 
-// Configuraci�n del pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
-// uso del CORS aqu�
 app.UseCors(corsPolicy);
-
-// NO usamos Auth todav�a
-// app.UseAuthentication();
-// app.UseAuthorization();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

@@ -10,7 +10,7 @@ export const routes: Routes = [
     {
         path: '',
         component: FullComponent,
-        //canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
         children: [
             // HR Routes
             {
@@ -96,6 +96,10 @@ export const routes: Routes = [
             {
                 path: 'login',
                 loadComponent: () => import('./pages/login/login').then(m => m.Login)
+            },
+            {
+                path: 'register',
+                loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
             }
         ]
     },
