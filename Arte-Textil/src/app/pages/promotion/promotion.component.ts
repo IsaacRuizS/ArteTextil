@@ -90,8 +90,16 @@ export class PromotionComponent implements OnInit {
         this.onFilterInfo();
     }
 
-    onStatusChanged() {
-        this.onFilterInfo();
+        this.apiPromotionService.changeStatus(promo.promotionId, newStatus).subscribe({
+            next: () => {
+                this.loadPromotions();
+                Swal.fire('Éxito', `Promoción ${newStatus ? 'activada' : 'desactivada'} correctamente`, 'success');
+            },
+            error: (err) => {
+                console.error('Error al cambiar estado:', err);
+                Swal.fire('Error', 'No se pudo cambiar el estado de la promoción', 'error');
+            }
+        });
     }
 
     onFilterInfo() {

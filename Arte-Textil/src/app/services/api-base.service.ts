@@ -7,7 +7,8 @@ import { environment } from "../../environments/environment";
 })
 export class ApiBaseService {
 
-    baseUrl = environment.apiUrl;
+    baseUrl = 'http://localhost:5045';
+    //baseUrl = 'https://192.168.64.3:45455'; // conveyor.cloud para los de mac
 
     constructor(public http: HttpClient) {
     }
