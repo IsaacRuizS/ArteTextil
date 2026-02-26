@@ -77,5 +77,7 @@ export class PromotionFormModal implements OnInit {
         } else {
             this.saveCreate.emit({ ...this.form });
         }
+
+        this.close.emit();
     }
 }

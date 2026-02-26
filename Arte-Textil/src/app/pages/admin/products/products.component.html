@@ -93,7 +93,6 @@
 
                         <th>Precio</th>
                         <th>Stock</th>
-                        <th class="d-none d-lg-table-cell">Fecha de creación</th>
                         <th>Estado</th>
                         <th class="text-end pe-3 pe-md-4">Acciones</th>
                     </tr>
@@ -102,7 +101,7 @@
                 <tbody>
                     @if (filteredProducts.length === 0) {
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             No hay productos registrados.
                         </td>
                     </tr>
@@ -136,10 +135,6 @@
                             <div class="text-muted small d-none d-md-block">
                                 Mín: {{ p.minStock }}
                             </div>
-                        </td>
-
-                        <td class="d-none d-lg-table-cell text-muted small">
-                            {{ p.createdAt ? (p.createdAt | date:'dd/MM/yyyy') : '-' }}
                         </td>
 
                         <td>

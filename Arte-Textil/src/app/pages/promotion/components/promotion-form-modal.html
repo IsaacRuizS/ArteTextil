@@ -22,9 +22,9 @@
 
                 <label class="form-label fw-semibold">Producto *</label>
                 <select class="form-select mb-3" [(ngModel)]="form.productId">
-                    <option [ngValue]="0">Seleccione</option>
+                    <option [value]="0">Seleccione</option>
                     @for (p of products; track p.productId) {
-                    <option [ngValue]="p.productId">{{ p.name }}</option>
+                    <option [value]="p.productId">{{ p.name }}</option>
                     }
                 </select>
 
