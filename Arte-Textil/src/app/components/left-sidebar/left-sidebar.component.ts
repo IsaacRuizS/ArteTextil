@@ -31,8 +31,6 @@ export class LeftSidebarComponent {
             children: [
                 { label: 'Roles', link: '/admin/roles' },
                 { label: 'Usuarios', link: '/admin/users' },
-                { label: 'Proveedores', link: '/admin/suppliers' },
-                { label: 'Productos', link: '/admin/products' }
             ]
         },
         {

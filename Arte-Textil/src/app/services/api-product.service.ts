@@ -45,6 +45,8 @@ export class ApiProductService extends ApiBaseService {
                         throw new Error(res?.message || 'Error al obtener el producto.');
                     }
 
+                    res.data.productImages = res.data.productImages?.filter((img: any) => img?.isActive == true && img?.deletedAt == null) || [];
+
                     return new ProductModel(res.data);
                 }),
                 catchError(err => throwError(() => err))

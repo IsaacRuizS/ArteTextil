@@ -9,30 +9,48 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const isBrowser = isPlatformBrowser(platformId);
 
-    // No adjuntar token en endpoints de autenticación para evitar loops
     const isAuthEndpoint =
         req.url.includes('/login') ||
         req.url.includes('/refresh-token') ||
         req.url.includes('/logout');
 
+    //EXCLUIR IMGBB (CLAVE DEL PROBLEMA)
+    const isImgBB = req.url.includes('api.imgbb.com');
+
     let authReq = req;
-    if (!isAuthEndpoint && isBrowser) {
+
+    if (!isAuthEndpoint && !isImgBB && isBrowser) {
         const token = authService.token;
         if (token) {
             authReq = req.clone({
-                setHeaders: { Authorization: `Bearer ${token}` }
+                setHeaders: {
+                    Authorization: `Bearer ${token}`
+                }
             });
         }
     }
 
     return next(authReq).pipe(
         catchError((error: HttpErrorResponse) => {
-            // Si es 401 y hay refresh token disponible, intentar renovar
-            if (error.status === 401 && !isAuthEndpoint && isBrowser && authService.refreshToken) {
+
+            // NO intentar refresh con ImgBB
+            if (isImgBB) {
+                return throwError(() => error);
+            }
+
+            // Refresh token SOLO para tu API
+            if (
+                error.status === 401 &&
+                !isAuthEndpoint &&
+                isBrowser &&
+                authService.refreshToken
+            ) {
                 return from(authService.refreshAccessToken()).pipe(
                     switchMap((newToken: string) => {
                         const retryReq = req.clone({
-                            setHeaders: { Authorization: `Bearer ${newToken}` }
+                            setHeaders: {
+                                Authorization: `Bearer ${newToken}`
+                            }
                         });
                         return next(retryReq);
                     }),
@@ -42,6 +60,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                     })
                 );
             }
+
             return throwError(() => error);
         })
     );

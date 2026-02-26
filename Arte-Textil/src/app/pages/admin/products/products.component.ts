@@ -12,6 +12,9 @@ import { SharedService } from '../../../services/shared.service';
 import { SupplierModel } from '../../../shared/models/supplier.model';
 import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { ProductImageModel } from '../../../shared/models/productImage.model';
+import { UploadImageService } from '../../../services/upload-image.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-products',
@@ -50,12 +53,17 @@ export class ProductsComponent implements OnInit {
 
     page = 1;
 
+    selectedFiles: File[] = [];
+    uploadedImages: ProductImageModel[] = [];
+    uploadingImages = false;
+
     constructor(
         private apiProductService: ApiProductService,
         private apiCategoryService: ApiCategoryService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
         private apiSupplierService: ApiSupplierService,
+        private uploadImageService: UploadImageService,
         private fb: FormBuilder
     ) {
         this.productForm = this.fb.group({
@@ -68,7 +76,9 @@ export class ProductsComponent implements OnInit {
             minStock: [10, [Validators.required, Validators.min(0)]],
             categoryId: [null, [Validators.required]],
             supplierId: [null, [Validators.required]], // si lo ocupas obligatorio pon Validators.required
-            isActive: [true]
+            isActive: [true],
+
+            productImages: [[]]
         });
     }
 
@@ -238,6 +248,98 @@ export class ProductsComponent implements OnInit {
         return cat?.name ?? '-';
     }
 
+    onImagesSelected(event: any) {
+        const files: File[] = Array.from(event.target.files);
+
+        // Validaciones básicas
+        for (const file of files) {
+
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire('Error', 'Maximo 5MB por imagen', 'error');
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) continue;
+            if (file.size > 5 * 1024 * 1024) continue; // 5MB
+            this.selectedFiles.push(file);
+        }
+
+        this.uploadSelectedImages();
+    }
+
+    uploadSelectedImages() {
+
+        if (this.selectedFiles.length === 0) return;
+
+        this.uploadingImages = true;
+        this.sharedService.setLoading(true);
+
+        let uploadedCount = 0;
+
+        this.selectedFiles.forEach((file, index) => {
+
+            this.uploadImageService.uploadImage(file).subscribe({
+                next: (url) => {
+
+                    const img = new ProductImageModel({
+                        imageUrl: url,
+                        isActive: true,
+                        isMain: this.uploadedImages.length === 0, // primera = principal
+                    });
+
+                    this.uploadedImages.push(img);
+                },
+                complete: () => {
+                    uploadedCount++;
+                    if (uploadedCount === this.selectedFiles.length) {
+                        this.uploadingImages = false;
+                        this.sharedService.setLoading(false);
+                        this.selectedFiles = [];
+                    }
+                },
+                error: () => {
+                    uploadedCount++;
+                    this.sharedService.setLoading(false);
+                }
+            });
+        });
+    }
+
+    setMainImage(img: ProductImageModel) {
+        this.uploadedImages.forEach(i => i.isMain = false);
+        img.isMain = true;
+    }
+
+    removeImage(img: ProductImageModel) {
+        this.uploadedImages = this.uploadedImages.filter(i => i !== img);
+
+        // asegurar que siempre haya una principal
+        if (!this.uploadedImages.some(i => i.isMain) && this.uploadedImages.length > 0) {
+            this.uploadedImages[0].isMain = true;
+        }
+    }
+
+    toggleImageStatus(img: ProductImageModel) {
+
+        if (img.isMain && img.isActive) {
+
+            // Buscar otra imagen activa que NO sea esta
+            const replacement = this.uploadedImages.find(i =>
+                i !== img && i.isActive
+            );
+
+            // Si no hay reemplazo, no permitir
+            if (replacement) {
+                replacement.isMain = true;
+            }
+
+            // Asignar nueva imagen principal
+            img.isMain = false;
+        }
+
+        img.isActive = !img.isActive;
+    }
+
     // MODALS
     openCreateModal() {
         this.isEditing = false;
@@ -278,10 +380,13 @@ export class ProductsComponent implements OnInit {
             isActive: product.isActive ?? true
         });
 
+        this.uploadedImages = product.productImages ? [...product.productImages] : [];
+
         this.showFormModal = true;
     }
 
     closeFormModal() {
+        this.uploadedImages = [];
         this.showFormModal = false;
         this.productForm.markAsPristine();
         this.productForm.markAsUntouched();
@@ -294,7 +399,10 @@ export class ProductsComponent implements OnInit {
             return;
         }
 
-        const payload = new ProductModel(this.productForm.value);
+        const payload = new ProductModel({
+            ...this.productForm.value,
+            productImages: this.uploadedImages
+        });
 
         this.sharedService.setLoading(true);
 
@@ -303,11 +411,9 @@ export class ProductsComponent implements OnInit {
                 .pipe(finalize(() => this.sharedService.setLoading(false)))
                 .subscribe({
                     next: () => {
+                        this.uploadedImages = [];
                         this.showFormModal = false;
                         this.loadProducts();
-                    },
-                    error: (err) => {
-                        // manejar error
                     }
                 });
         } else {
@@ -315,11 +421,9 @@ export class ProductsComponent implements OnInit {
                 .pipe(finalize(() => this.sharedService.setLoading(false)))
                 .subscribe({
                     next: () => {
+                        this.uploadedImages = [];
                         this.showFormModal = false;
                         this.loadProducts();
-                    },
-                    error: (err) => {
-                        // manejar error
                     }
                 });
         }

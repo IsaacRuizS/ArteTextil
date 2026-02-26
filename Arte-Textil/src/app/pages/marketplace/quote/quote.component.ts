@@ -117,7 +117,6 @@ export class QuoteComponent implements OnInit {
             },
             error: (err) => {
                 // manejar error
-                console.log('COTIZACIÓN ENVIADA (ERROR):', err);
 
             }
         });
