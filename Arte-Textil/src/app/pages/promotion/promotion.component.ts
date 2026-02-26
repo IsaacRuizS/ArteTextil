@@ -90,6 +90,22 @@ export class PromotionComponent implements OnInit {
         this.onFilterInfo();
     }
 
+
+    onChangeStatus(promo: PromotionModel) {
+        const newStatus = !promo.isActive;
+
+        this.apiPromotionService.changeStatus(promo.promotionId, newStatus).subscribe({
+            next: (updated) => {
+                promo.isActive = updated.isActive;
+                Swal.fire('Éxito', `Promoción ${newStatus ? 'activada' : 'desactivada'} correctamente`, 'success');
+            },
+            error: (err) => {
+                console.error('Error al cambiar estado:', err);
+                Swal.fire('Error', 'No se pudo cambiar el estado de la promoción', 'error');
+            }
+        });
+    }
+
     onStatusChanged() {
         this.onFilterInfo();
     }
@@ -155,15 +171,21 @@ export class PromotionComponent implements OnInit {
             });
     }
 
-    saveCreatedPromotion(formData: any) {
+    saveCreatedPromotion(formData: any) { 
 
-        const promo = new PromotionModel({
-            ...formData,
+        const newPromotion = new PromotionModel({
+            name: formData.name,
+            description: formData.description || '',
+            discountPercent: formData.discountPercent,
+            startDate: new Date(formData.startDate),
+            endDate: new Date(formData.endDate),
+            productId: formData.productId,
             isActive: true
         });
 
-        this.apiPromotionService.create(promo).subscribe({
-            next: () => {
+        this.apiPromotionService.create(newPromotion).subscribe({
+            next: (created) => {
+                this.promotions.push(created);
                 this.showFormModal = false;
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción creada correctamente', 'success');
