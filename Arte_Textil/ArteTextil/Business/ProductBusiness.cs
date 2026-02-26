@@ -4,6 +4,7 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -128,35 +129,32 @@ namespace ArteTextil.Business
                 product.CreatedAt = DateTime.UtcNow;
                 product.Status = "Activo";
 
-                await _repositoryProduct.AddAsync(product);
-
-                // Imágenes
                 if (dto.productImages != null && dto.productImages.Any())
                 {
-                    foreach (var imageDto in dto.productImages)
-                    {
-                        var image = new ProductImage
+                    product.ProductImages = dto.productImages
+                        .Select(imageDto => new ProductImage
                         {
-                            ProductId = product.ProductId,
                             ImageUrl = imageDto.imageUrl,
                             IsMain = imageDto.isMain,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
-                        };
-
-                        await _repositoryProductImage.AddAsync(image);
-                    }
+                        })
+                        .ToList();
                 }
+
+                // Un solo insert (Product + ProductImages)
+                await _repositoryProduct.AddAsync(product);
 
                 var created = await _repositoryProduct.Query()
                     .Include(p => p.ProductImages)
                     .FirstAsync(p => p.ProductId == product.ProductId);
 
-                // Log de auditoría
                 await _logHelper.LogCreate(
                     tableName: "Products",
                     recordId: product.ProductId,
-                    newValue: JsonSerializer.Serialize(created)
+                    newValue: JsonSerializer.Serialize(
+                        _mapper.Map<ProductDto>(created)
+                    )
                 );
 
                 response.Data = _mapper.Map<ProductDto>(created);
@@ -171,7 +169,6 @@ namespace ArteTextil.Business
             return response;
         }
 
-        // UPDATE
         public async Task<ApiResponse<ProductDto>> Update(ProductDto dto)
         {
             var response = new ApiResponse<ProductDto>();
@@ -180,7 +177,10 @@ namespace ArteTextil.Business
             {
                 var product = await _repositoryProduct.Query()
                     .Include(p => p.ProductImages)
-                    .FirstOrDefaultAsync(p => p.ProductId == dto.productId && p.DeletedAt == null);
+                    .FirstOrDefaultAsync(p =>
+                        p.ProductId == dto.productId &&
+                        p.DeletedAt == null
+                    );
 
                 if (product == null)
                 {
@@ -189,9 +189,10 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var previousSnapshot = JsonSerializer.Serialize(product);
+                var previousSnapshot = JsonSerializer.Serialize(
+                    _mapper.Map<ProductDto>(product)
+                );
 
-                // Actualizar campos
                 product.Name = dto.name;
                 product.Description = dto.description;
                 product.ProductCode = dto.productCode;
@@ -205,44 +206,74 @@ namespace ArteTextil.Business
 
                 _repositoryProduct.Update(product);
 
-                // Imágenes
                 if (dto.productImages != null)
                 {
-                    var existingImages = await _repositoryProductImage.GetAllAsync(
-                        i => i.ProductId == dto.productId && i.DeletedAt == null);
+                    var dtoImages = dto.productImages.ToDictionary(i => i.productImageId);
 
-                    foreach (var img in existingImages)
+                    // Actualizar imágenes existentes
+                    foreach (var dbImg in product.ProductImages)
                     {
-                        img.DeletedAt = DateTime.UtcNow;
-                        img.IsActive = false;
-                        _repositoryProductImage.Update(img);
-                    }
-
-                    foreach (var imgDto in dto.productImages)
-                    {
-                        var newImg = new ProductImage
+                        if (dtoImages.TryGetValue(dbImg.ProductImageId, out var dtoImg))
                         {
-                            ProductId = dto.productId,
-                            ImageUrl = imgDto.imageUrl,
-                            IsMain = imgDto.isMain,
-                            IsActive = true,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        await _repositoryProductImage.AddAsync(newImg);
+                            dbImg.ImageUrl = dtoImg.imageUrl;
+                            dbImg.IsMain = dtoImg.isMain;
+                            dbImg.IsActive = dtoImg.isActive;
+                            dbImg.UpdatedAt = DateTime.UtcNow;
+                        }
                     }
+
+                    // Agregar nuevas imágenes (sin ID)
+                    var newImages = dto.productImages
+                        .Where(i => i.productImageId == 0)
+                        .Select(i => new ProductImage
+                        {
+                            ProductId = product.ProductId,
+                            ImageUrl = i.imageUrl,
+                            IsMain = i.isMain,
+                            IsActive = i.isActive,
+                            CreatedAt = DateTime.UtcNow
+                        });
+
+                    foreach (var img in newImages)
+                    {
+                        product.ProductImages.Add(img);
+                    }
+                }
+
+                // ---------------- VALIDAR MAIN ----------------
+                var activeImages = product.ProductImages
+                    .Where(i => i.IsActive)
+                    .ToList();
+
+                if (activeImages.Count(i => i.IsMain) > 1)
+                {
+                    // dejar solo la primera como main
+                    bool mainAssigned = false;
+                    foreach (var img in activeImages)
+                    {
+                        img.IsMain = !mainAssigned;
+                        mainAssigned = true;
+                    }
+                }
+
+                if (activeImages.Any() && !activeImages.Any(i => i.IsMain))
+                {
+                    activeImages.First().IsMain = true;
                 }
 
                 await _repositoryProduct.SaveAsync();
 
                 var updated = await _repositoryProduct.Query()
                     .Include(p => p.ProductImages)
-                    .FirstAsync(p => p.ProductId == dto.productId);
+                    .FirstAsync(p => p.ProductId == product.ProductId);
 
                 await _logHelper.LogUpdate(
                     tableName: "Products",
-                    recordId: dto.productId,
+                    recordId: product.ProductId,
                     previousValue: previousSnapshot,
-                    newValue: JsonSerializer.Serialize(updated)
+                    newValue: JsonSerializer.Serialize(
+                        _mapper.Map<ProductDto>(updated)
+                    )
                 );
 
                 response.Data = _mapper.Map<ProductDto>(updated);
@@ -314,7 +345,8 @@ namespace ArteTextil.Business
 
                 var products = await _repositoryProduct.Query()
                     .Where(p => p.DeletedAt == null && p.IsActive)
-                    .Include(p => p.ProductImages)
+                    .Include(p => p.ProductImages
+                    .Where(pi => pi.IsActive && pi.DeletedAt == null))
                     .Include(p => p.Promotions
                         .Where(pr =>
                             pr.IsActive &&
