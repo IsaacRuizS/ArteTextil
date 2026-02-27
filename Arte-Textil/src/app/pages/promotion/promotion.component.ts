@@ -38,7 +38,7 @@ export class PromotionComponent implements OnInit {
 
     // Filters
     searchTerm = '';
-    statusFilter = 1; // 0 all, 1 active, 2 inactive
+    statusFilter = 0; // 0 all, 1 active, 2 inactive
     page = 1;
 
     constructor(
@@ -95,8 +95,8 @@ export class PromotionComponent implements OnInit {
         const newStatus = !promo.isActive;
 
         this.apiPromotionService.changeStatus(promo.promotionId, newStatus).subscribe({
-            next: (updated) => {
-                promo.isActive = updated.isActive;
+            next: () => {
+                this.loadPromotions();
                 Swal.fire('Éxito', `Promoción ${newStatus ? 'activada' : 'desactivada'} correctamente`, 'success');
             },
             error: (err) => {
@@ -184,8 +184,7 @@ export class PromotionComponent implements OnInit {
         });
 
         this.apiPromotionService.create(newPromotion).subscribe({
-            next: (created) => {
-                this.promotions.push(created);
+            next: () => {
                 this.showFormModal = false;
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción creada correctamente', 'success');
