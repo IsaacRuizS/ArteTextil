@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Hangfire;
+using Hangfire.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,7 @@ builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<AlertBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtHelper>();
 
@@ -78,6 +81,11 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddHangfire(config =>
+    config.UseSqlServerStorage(connectionString));
+
+builder.Services.AddHangfireServer();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -135,6 +143,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(corsPolicy);
 app.UseAuthentication();
+app.UseHangfireDashboard("/hangfire");
+
+RecurringJob.AddOrUpdate<AlertBusiness>(
+    "check-massive-quotes",
+    x => x.CheckMassiveQuotes(),
+    Cron.MinuteInterval(1)
+);
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
