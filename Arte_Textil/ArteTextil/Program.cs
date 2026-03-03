@@ -66,6 +66,8 @@ builder.Services.AddScoped<PayrollAdjustmentBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<CartBusiness>();
+builder.Services.AddScoped<OrderBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtHelper>();
 
@@ -74,6 +76,9 @@ builder.Services.AddAuthorization(options =>
     // Solo roles 1 y 2 (Admin / Empleado). RoleId 3 = Customer queda excluido.
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireClaim("roleId", "1", "2"));
+
+    options.AddPolicy("CustomerOnly", policy =>
+        policy.RequireClaim("roleId", "3"));
 });
 
 builder.Services.AddControllers();
