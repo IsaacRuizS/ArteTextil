@@ -79,10 +79,12 @@ namespace ArteTextil.Helpers
                 .ForMember(d => d.PromotionId, o => o.MapFrom(s => s.promotionId));
 
             cfg.CreateMap<Quote, QuoteDto>()
-                .ForMember(d => d.quoteId, o => o.MapFrom(s => s.QuoteId));
+               .ForMember(d => d.quoteId, o => o.MapFrom(s => s.QuoteId))
+               .ForMember(d => d.items, o => o.MapFrom(s => s.QuoteItems));
 
             cfg.CreateMap<QuoteDto, Quote>()
-                .ForMember(d => d.QuoteId, o => o.MapFrom(s => s.quoteId));
+               .ForMember(d => d.QuoteId, o => o.MapFrom(s => s.quoteId))
+               .ForMember(d => d.QuoteItems, o => o.MapFrom(s => s.items));
 
             cfg.CreateMap<QuoteItem, QuoteItemDto>()
                 .ForMember(d => d.quoteItemId, o => o.MapFrom(s => s.QuoteItemId));
@@ -102,6 +104,23 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<CartDto, Cart>()
                 .ForMember(d => d.CartId, o => o.MapFrom(s => s.cartId));
 
+            cfg.CreateMap<Order, OrderDto>()
+            .ForMember(d => d.orderId, o => o.MapFrom(s => s.OrderId));
+
+            cfg.CreateMap<OrderDto, Order>()
+                .ForMember(d => d.OrderId, o => o.MapFrom(s => s.orderId));
+
+            cfg.CreateMap<OrderItem, OrderItemDto>()
+            .ForMember(d => d.orderItemId, o => o.MapFrom(s => s.OrderItemId));
+
+            cfg.CreateMap<OrderItemDto, OrderItem>()
+                .ForMember(d => d.OrderItemId, o => o.MapFrom(s => s.orderItemId));
+
+            cfg.CreateMap<OrderStatusHistory, OrderStatusHistoryDto>()
+            .ForMember(d => d.orderStatusHistoryId, o => o.MapFrom(s => s.OrderStatusHistoryId));
+
+            cfg.CreateMap<OrderStatusHistoryDto, OrderStatusHistory>()
+                .ForMember(d => d.OrderStatusHistoryId, o => o.MapFrom(s => s.orderStatusHistoryId));
         }
     }
 }
