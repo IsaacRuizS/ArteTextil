@@ -1,73 +1,64 @@
-<div class="modal fade show d-block modal-backdrop-custom" tabindex="-1" role="dialog">
+<div class="modal fade show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5)">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Detalles del producto</h5>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="mdi mdi-package-variant me-2 text-primary"></i>Detalles del producto
+                </h5>
                 <button type="button" class="btn-close" (click)="onClose()"></button>
             </div>
 
             <div class="modal-body">
 
                 <div class="row gy-3">
+                    <div class="col-md-4">
+                        <div class="small fw-bold text-muted mb-1">Código</div>
+                        <div class="fw-semibold">{{ selectedProduct.productCode || '-' }}</div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="small fw-bold text-muted mb-1">Nombre</div>
+                        <div class="fw-semibold fs-6">{{ selectedProduct.name }}</div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="small fw-bold text-muted mb-1">Descripción</div>
+                        <div class="text-muted">{{ selectedProduct.description || 'Sin descripción' }}</div>
+                    </div>
+
+                    <div class="col-12"><hr class="my-1"></div>
 
                     <div class="col-md-4">
-                        <label class="fw-semibold">Código:</label>
-                        <p>{{ selectedProduct.code }}</p>
+                        <div class="small fw-bold text-muted mb-1">Stock actual</div>
+                        <div class="fw-bold fs-4 text-primary">{{ selectedProduct.stock }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="small fw-bold text-muted mb-1">Stock mínimo</div>
+                        <div class="fw-semibold">{{ selectedProduct.minStock }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="small fw-bold text-muted mb-1">Precio</div>
+                        <div class="fw-semibold">₡{{ selectedProduct.price | number:'1.0-0' }}</div>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="fw-semibold">Nombre:</label>
-                        <p>{{ selectedProduct.name }}</p>
+                        <div class="small fw-bold text-muted mb-1">Estado</div>
+                        <span class="badge rounded-pill"
+                            [class.bg-success-subtle]="selectedProduct.isActive"
+                            [class.text-success]="selectedProduct.isActive"
+                            [class.bg-secondary-subtle]="!selectedProduct.isActive"
+                            [class.text-secondary]="!selectedProduct.isActive">
+                            {{ selectedProduct.isActive ? 'Activo' : 'Inactivo' }}
+                        </span>
                     </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Cantidad disponible:</label>
-                        <p>{{ selectedProduct.qty }}</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Ubicación:</label>
-                        <p>{{ selectedProduct.location }}</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Último movimiento:</label>
-                        <p>{{ selectedProduct.lastMovement }}</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Fecha movimiento:</label>
-                        <p>{{ selectedProduct.date }}</p>
-                    </div>
-
-                    <hr class="my-3">
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Entradas totales:</label>
-                        <p>{{ selectedProduct.details.entradas }}</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Salidas totales:</label>
-                        <p>{{ selectedProduct.details.salidas }}</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="fw-semibold">Observaciones:</label>
-                        <p>{{ selectedProduct.details.observaciones }}</p>
-                    </div>
-
                 </div>
 
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer border-0 pt-0">
                 <button class="btn btn-secondary" (click)="onClose()">Cerrar</button>
             </div>
 
         </div>
-
     </div>
 </div>

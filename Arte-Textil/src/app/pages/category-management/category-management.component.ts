@@ -151,6 +151,29 @@ export class CategoryManagementComponent implements OnInit {
         }
     }
 
+    // RF-04 – Exportar Excel (CSV compatible)
+    onGenerateExcel() {
+        const headers = ['Nombre', 'Descripción', 'Estado'];
+        const rows = this.categories.map(c => [
+            c.name,
+            c.description ?? '',
+            c.isActive ? 'Activa' : 'Inactiva'
+        ]);
+
+        const csvContent = [headers, ...rows]
+            .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+            .join('\r\n');
+
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `categorias_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     // CREATE
     private _createCategory(data: CategoryModel) {
 
