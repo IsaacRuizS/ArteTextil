@@ -96,6 +96,12 @@ namespace ArteTextil.Helpers
             cfg.CreateMap<CustomerDto, Customer>()
                 .ForMember(d => d.CustomerId, o => o.MapFrom(s => s.customerId));
 
+            cfg.CreateMap<Cart, CartDto>()
+                .ForMember(d => d.cartId, o => o.MapFrom(s => s.CartId));
+
+            cfg.CreateMap<CartDto, Cart>()
+                .ForMember(d => d.CartId, o => o.MapFrom(s => s.cartId));
+
         }
     }
 }

@@ -25,6 +25,7 @@ public class ArteTextilDbContext : DbContext
     public DbSet<QuoteItem> QuoteItems { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Cart> Carts { get; set; }
 
 
 
