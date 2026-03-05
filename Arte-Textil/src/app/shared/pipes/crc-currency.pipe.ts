@@ -7,7 +7,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class CustomCurrencyPipe implements PipeTransform {
 
     transform(
-        value: number | string,
+        value: number | string | null | undefined,
         symbol: string = '₡'
     ): string {
 

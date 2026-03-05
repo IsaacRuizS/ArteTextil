@@ -1,0 +1,50 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header">
+                <h5 class="fw-bold">Información del Cliente</h5>
+                <button class="btn-close" (click)="close()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="text-muted small">Nombre</label>
+                    <div class="fw-semibold">{{customer?.fullName}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Email</label>
+                    <div>{{customer?.email || '-'}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Teléfono</label>
+                    <div>{{customer?.phone || '-'}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Clasificación</label>
+                    <div>{{customer?.classification || '-'}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Score de actividad</label>
+                    <div>{{customer?.activityScore || '-'}}</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Última cotización</label>
+                    <div>{{customer?.lastQuoteDate | date:'yyyy-MM-dd'}}</div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" (click)="close()">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>

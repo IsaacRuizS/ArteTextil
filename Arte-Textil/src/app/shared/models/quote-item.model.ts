@@ -21,6 +21,7 @@ export class QuoteItemModel {
 
     quoteItemId?: number;
     productId!: number;
+    productName?: string;
     quantity!: number;
     price!: number;
 

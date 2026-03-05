@@ -1,5 +1,7 @@
+import { CustomerModel } from "./customer.model";
 import { OrderItemModel } from "./order-items.model";
 import { OrderStatusHistoryModel } from "./order-status-history.model";
+import { QuoteModel } from "./quote.model";
 
 export class OrderModel {
 
@@ -20,6 +22,14 @@ export class OrderModel {
 
             if (typeof init.deletedAt === 'string') {
                 init.deletedAt = new Date(init.deletedAt);
+            }
+
+            if (init.customer != null) {
+                init.customer = new CustomerModel(init.customer);
+            }
+
+            if (init.quote != null) {
+                init.quote = new QuoteModel(init.quote);
             }
 
             // Mapear arrays si vienen
@@ -43,8 +53,13 @@ export class OrderModel {
     notes?: string;
     isActive!: boolean;
 
+    customer?: CustomerModel;
+    quote?: QuoteModel;
+
     items?: OrderItemModel[];
     statusHistory?: OrderStatusHistoryModel[];
+
+    loggedUserId?: number;
 
     createdAt?: Date;
     updatedAt?: Date;

@@ -1,0 +1,70 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header">
+                <h5 class="fw-bold">Detalle de Cotización</h5>
+                <button class="btn-close" (click)="close()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row mb-3">
+
+                    <div class="col-md-4">
+                        <label class="text-muted small">ID Cotización</label>
+                        <div class="fw-semibold">#{{quote?.quoteId}}</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="text-muted small">Estado</label>
+                        <div>{{quote?.status}}</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="text-muted small">Total</label>
+                        <div class="fw-bold text-success">
+                            {{quote?.total | customCurrency:'₡'}}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Notas</label>
+                    <div>{{quote?.notes || '-'}}</div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3">Items</h6>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let i of quote?.items">
+                            <td>{{i.productName}}</td>
+                            <td>{{i.quantity}}</td>
+                            <td>{{i.price | customCurrency:'₡'}}</td>
+                            <td>{{i.quantity * i.price | customCurrency:'₡'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" (click)="close()">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>

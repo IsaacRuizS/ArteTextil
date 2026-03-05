@@ -13,6 +13,11 @@ import { SharedService } from '../../services/shared.service';
 import { OrderModel } from '../../shared/models/order.model';
 import { OrderFormModalComponent } from './order-form-modal.component';
 import { QuoteModel } from '../../shared/models/quote.model';
+import { CustomerModel } from '../../shared/models/customer.model';
+import { CustomerModalComponent } from '../../components/customer-modal/customer-modal.component';
+import { QuoteModalComponent } from '../../components/quote-modal/quote-modal.component';
+import { AuthService } from '../../services/auth.service';
+import { UserModel } from '../../shared/models/user.model';
 
 
 @Component({
@@ -23,7 +28,9 @@ import { QuoteModel } from '../../shared/models/quote.model';
         CommonModule,
         FormsModule,
         NgxPaginationModule,
-        OrderFormModalComponent
+        OrderFormModalComponent,
+        QuoteModalComponent,
+        CustomerModalComponent
     ],
     templateUrl: './orders-management.component.html',
     styleUrls: ['./orders-management.component.scss']
@@ -46,15 +53,27 @@ export class OrdersManagementComponent implements OnInit {
 
     // DELETE STATE
     showDeleteModal = false;
-    orderToDelete: OrderModel | null = null; 
-    
+    orderToDelete: OrderModel | null = null;
+
+    showCustomerModal = false;
+    showQuoteModal = false;
+
+    selectedCustomer?: CustomerModel;
+    selectedQuote?: QuoteModel;
+
+    loggedUserId: number | null = null;
+
     constructor(
         private apiOrderService: ApiOrderService,
         private sharedService: SharedService,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private authService: AuthService
     ) { }
 
     ngOnInit(): void {
+
+        this.loggedUserId = this.authService.currentUserValue?.userId ?? null;
+
         this.loadOrders();
     }
 
@@ -70,7 +89,7 @@ export class OrdersManagementComponent implements OnInit {
             next: (orders: OrderModel[]) => {
 
                 this.orders = orders;
-                this.ordersOrigin = orders;
+                this.ordersOrigin = orders; 
 
                 this.applyFilters();
 
@@ -128,15 +147,27 @@ export class OrdersManagementComponent implements OnInit {
     // MODAL CONTROL
     //
 
+    openCustomerModal(customer?: CustomerModel) {
+        this.selectedCustomer = customer;
+        this.showCustomerModal = true;
+    }
+
+    openQuoteModal(quote?: QuoteModel) {
+        this.selectedQuote = quote;
+        this.showQuoteModal = true;
+    }
+
     openCreateModal() {
         this.isEditing = false;
-        this.selectedOrder = null;
+        this.selectedOrder = new OrderModel();
+        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0; 
         this.showModal = true;
     }
 
     openEditModal(order: OrderModel) {
         this.isEditing = true;
         this.selectedOrder = { ...order }; // copia para evitar mutación directa
+        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0; 
         this.showModal = true;
     }
 

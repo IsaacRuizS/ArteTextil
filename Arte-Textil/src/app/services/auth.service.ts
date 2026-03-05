@@ -60,7 +60,9 @@ export class AuthService {
             localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
             localStorage.setItem(this.USER_KEY, JSON.stringify(user));
         }
+        
         this.currentUserSubject.next(user);
+
         if (user.roleId === 3) {
             this.router.navigate(['/marketplace']);
         } else {

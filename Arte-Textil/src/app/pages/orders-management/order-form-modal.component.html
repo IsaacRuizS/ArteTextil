@@ -109,10 +109,10 @@
 
                     @for (item of quoteForm.items; track $index; let i = $index) {
 
-                    <div class="row g-2 mb-2">
+                    <div class="row g-2 mt-2">
 
                         <div class="col-5">
-                            <select class="form-select" [(ngModel)]="item.productId" (change)="updatePrice(i)">
+                            <select class="form-select" [(ngModel)]="item.productId" (change)="updatePrice(item)">
                                 <option [value]="0">Seleccione producto</option>
                                 @for (p of products; track p.productId) {
                                 <option [value]="p.productId">
@@ -140,13 +140,15 @@
                     </div>
                     }
 
+                    <br>
+
                     <button class="btn btn-outline-primary btn-sm" (click)="addItem()">
                         + Agregar Producto
                     </button>
                 </div>
 
                 <!-- Fecha entrega -->
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="form-label fw-semibold">Fecha Entrega</label>
                     <input type="date" class="form-control" [(ngModel)]="orderForm.deliveryDate">
                 </div>
@@ -164,13 +166,22 @@
                 @if (isEdit) {
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Fecha Entrega</label>
+                    <label class="form-label fw-semibold">Fecha Entrega
+
+                        {{model.deliveryDate}}
+
+                    </label>
                     <input type="date" class="form-control" [(ngModel)]="model.deliveryDate">
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Estado</label>
-                    <input type="text" class="form-control" [(ngModel)]="model.status">
+
+                    <select class="form-select" [(ngModel)]="model.status">
+                        @for (s of orderStatuses; track s) {
+                        <option [value]="s">{{ s }}</option>
+                        }
+                    </select>
                 </div>
 
                 <div class="text-end">

@@ -9,18 +9,21 @@ import { QuoteModel } from '../../shared/models/quote.model';
 import { OrderModel } from '../../shared/models/order.model';
 import { CustomerModel } from '../../shared/models/customer.model';
 import { ProductModel } from '../../shared/models/product.model';
+import { SharedService } from '../../services/shared.service';
+import { AuthService } from '../../services/auth.service';
+import { UserModel } from '../../shared/models/user.model';
 
 
 @Component({
     selector: 'app-order-form-modal',
     standalone: true,
     imports: [CommonModule, FormsModule],
-    templateUrl: './order-form-modal.component.html'
+    templateUrl: './order-form-modal.component.html',
 })
 export class OrderFormModalComponent {
 
     @Input() isEdit = false;
-    @Input() order: any;
+    @Input() order: OrderModel | null = null;
 
     @Output() closed = new EventEmitter<void>();
     @Output() saved = new EventEmitter<void>();
@@ -41,7 +44,9 @@ export class OrderFormModalComponent {
         total: 0,
         createdByUserId: 1,
         isActive: true,
-        items: []
+        items: [],
+        sentToEmail: '',
+        notes: 'Creado por el Admin'
     });
 
     orderForm: OrderModel = new OrderModel({
@@ -49,22 +54,43 @@ export class OrderFormModalComponent {
         status: 'Nuevo',
         isActive: true,
         quoteId: 0,
-        notes: ''
+        notes: 'Creado por el Admin'
     });
 
-    model: any = {};
+    model: OrderModel = new OrderModel();
+
+    orderStatuses = [
+        'Nuevo',
+        'Procesando',
+        'En Camino',
+        'Entregado',
+        'Cancelado'
+    ];
 
     constructor(
         private quoteService: ApiQuoteService,
         private orderService: ApiOrderService,
         private customerService: ApiCustomerService,
-        private productService: ApiProductService
-    ) { }
+        private productService: ApiProductService,
+        private sharedService: SharedService,
+
+
+    ) {
+    }
 
     ngOnInit() {
 
+        console.log('Payload de cotización antes de crear:', this.order);
+
         if (this.isEdit) {
-            this.model = { ...this.order };
+
+            this.model = this.order ?? new OrderModel();
+
+            if (this.model.deliveryDate) {
+                const date = new Date(this.model.deliveryDate);
+                this.model.deliveryDate = date.toISOString().split('T')[0] as any;
+            }
+
             return;
         }
 
@@ -86,14 +112,20 @@ export class OrderFormModalComponent {
     }
 
     loadProducts() {
-        this.productService.getAllForMarket().subscribe(p => this.products = p);
+        this.productService.getAllForMarket().subscribe(p => {
+            this.products = p
+
+            console.log('Products loaded in OrderFormModalComponent:', this.products);
+
+        });
+
     }
 
     loadQuoteDetails() {
         if (!this.selectedQuoteId) return;
 
         this.selectedQuote = this.quotes.filter(q => q.quoteId == this.selectedQuoteId)[0];
-        this.selectedQuote.customer = this.customers.filter(c => c.customerId === this.selectedQuote?.customerId)[0];
+        this.selectedQuote.customer = this.customers.filter(c => c.customerId == this.selectedQuote?.customerId)[0];
     }
 
     addItem() {
@@ -108,16 +140,18 @@ export class OrderFormModalComponent {
         this.quoteForm.items?.splice(index, 1);
     }
 
-    updatePrice(index: number) {
-        const item = this.quoteForm.items![index];
-        const product = this.products.find(p => p.productId === item.productId);
-        if (!product) return;
-        item.price = product.price;
+    updatePrice(item: any) {
+
+        const product = this.products.find(p => p.productId == item.productId);
+        const quoteItem = this.quoteForm.items?.find(i => i.productId == item.productId);
+        if (quoteItem) {
+            quoteItem.price = product ? product.price : 0;
+        }
     }
 
     validateStock(index: number) {
         const item = this.quoteForm.items![index];
-        const product = this.products.find(p => p.productId === item.productId);
+        const product = this.products.find(p => p.productId == item.productId);
         if (!product) return;
 
         if (item.quantity > product.stock) {
@@ -149,20 +183,62 @@ export class OrderFormModalComponent {
             return;
         }
 
-        this.quoteService.create(this.quoteForm).subscribe(createdQuote => {
+        this.sharedService.setLoading(true);
 
-            const orderPayload = {
-                customerId: createdQuote.customerId,
-                quoteId: createdQuote.quoteId,
-                deliveryDate: this.orderForm.deliveryDate,
-                status: 'Nuevo',
-                isActive: true
-            };
+        let total = 0;
+        for (const item of this.quoteForm.items) {
+            const product = this.products.find(p => p.productId == item.productId);
+            if (product) {
+                total += item.quantity * product.price;
+            }
+        }
 
-            this.orderService.create(orderPayload).subscribe(() => {
-                this.saved.emit();
-                this.close();
-            });
+        this.quoteForm.total = total;
+
+        const customer = this.customers.find(c => c.customerId == this.quoteForm.customerId);
+        this.quoteForm.sentToEmail = customer ? customer.email : '';
+        this.quoteForm.createdByUserId = this.order?.loggedUserId ?? 1;
+        this.quoteForm.customerId = Number(this.quoteForm.customerId);
+
+        this.quoteService.create(this.quoteForm).subscribe({
+
+            next: (createdQuote) => {
+
+                console.log('Quote created successfully:', createdQuote);
+
+                const orderPayload: OrderModel = new OrderModel({
+                    customerId: createdQuote.customerId,
+                    quoteId: createdQuote.quoteId,
+                    deliveryDate: this.orderForm.deliveryDate,
+                    status: 'Nuevo',
+                    isActive: true,
+                }) ;
+                console.log('Quote created successfully:', orderPayload);
+
+                this.orderService.create(orderPayload).subscribe({
+
+                    next: () => {
+                        this.sharedService.setLoading(false);
+                        this.saved.emit();
+                        this.close();
+                    },
+
+                    error: (err) => {
+                        console.error('Error creando el pedido:', err);
+                        alert('Error al crear el pedido.');
+                        this.sharedService.setLoading(false);
+                    }
+
+                });
+
+            },
+
+            error: (err) => {
+                console.error('Error creando la cotización:', err);
+                alert('Error al crear la cotización.');
+                this.sharedService.setLoading(false);
+            }
+
         });
     }
 
@@ -179,7 +255,7 @@ export class OrderFormModalComponent {
 
     getProductName(productId: number): string {
 
-        const product = this.products.find(p => p.productId === productId);
+        const product = this.products.find(p => p.productId == productId);
         return product ? product.name : 'Producto no encontrado';
     }
 
@@ -194,24 +270,24 @@ export class OrderFormModalComponent {
 
     canCreateFromScratch(): boolean {
 
-        if (!this.quoteForm.customerId || this.quoteForm.customerId === 0)
+        if (!this.quoteForm.customerId || this.quoteForm.customerId == 0)
             return false;
 
         if (!this.orderForm.deliveryDate)
             return false;
 
-        if (!this.quoteForm.items || this.quoteForm.items.length === 0)
+        if (!this.quoteForm.items || this.quoteForm.items.length == 0)
             return false;
 
         for (const item of this.quoteForm.items) {
 
-            if (!item.productId || item.productId === 0)
+            if (!item.productId || item.productId == 0)
                 return false;
 
             if (!item.quantity || item.quantity <= 0)
                 return false;
 
-            const product = this.products.find(p => p.productId === item.productId);
+            const product = this.products.find(p => p.productId == item.productId);
             if (!product) return false;
 
             if (item.quantity > product.stock)
