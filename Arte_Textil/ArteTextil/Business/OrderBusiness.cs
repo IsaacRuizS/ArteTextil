@@ -49,10 +49,40 @@ namespace ArteTextil.Business
                 var orders = await _repositoryOrder.Query()
                     .Include(o => o.OrderItems)
                     .Include(o => o.OrderStatusHistory)
+                    .Include(o => o.Customer)
+                    .Include(o => o.Quote).ThenInclude(q => q.QuoteItems)
                     .Where(o => o.DeletedAt == null)
                     .ToListAsync();
 
-                response.Data = _mapper.Map<List<OrderDto>>(orders);
+                var productIds = orders
+                    .Where(o => o.Quote?.QuoteItems != null)
+                    .SelectMany(o => o.Quote!.QuoteItems!)
+                    .Select(qi => qi.ProductId)
+                    .Distinct()
+                    .ToList();
+
+                var products = await _repositoryProduct.Query()
+                    .Where(p => productIds.Contains(p.ProductId) && p.DeletedAt == null)
+                    .Select(p => new { p.ProductId, p.Name })
+                    .ToListAsync();
+
+                var productDictionary = products.ToDictionary(p => p.ProductId, p => p.Name);
+
+                var ordersDto = _mapper.Map<List<OrderDto>>(orders);
+
+                foreach (var order in ordersDto)
+                {
+                    order.quote?.items?.ForEach(qi =>
+                    {
+                        if (productDictionary.TryGetValue(qi.productId, out var name))
+                        {
+                            qi.productName = name;
+                        }
+                    });
+                }
+
+
+                response.Data = ordersDto;
                 response.Message = "Órdenes obtenidas correctamente";
             }
             catch (Exception ex)

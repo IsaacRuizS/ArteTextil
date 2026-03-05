@@ -105,7 +105,10 @@ namespace ArteTextil.Helpers
                 .ForMember(d => d.CartId, o => o.MapFrom(s => s.cartId));
 
             cfg.CreateMap<Order, OrderDto>()
-            .ForMember(d => d.orderId, o => o.MapFrom(s => s.OrderId));
+                .ForMember(d => d.orderId, o => o.MapFrom(s => s.OrderId))
+                .ForMember(d => d.items, o => o.MapFrom(s => s.OrderItems))
+                .ForMember(d => d.customerId, o => o.MapFrom(s => s.CustomerId))
+                .ForMember(d => d.quoteId, o => o.MapFrom(s => s.QuoteId));
 
             cfg.CreateMap<OrderDto, Order>()
                 .ForMember(d => d.OrderId, o => o.MapFrom(s => s.orderId));

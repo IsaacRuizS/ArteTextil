@@ -4,10 +4,7 @@ namespace ArteTextil.Interfaces
 {
     public interface IEmailService
     {
-        Task SendQuoteCreatedAsync(
-            Quote quote,
-            Customer customer
-        );
+        Task SendQuoteCreatedAsync(Quote quote, Customer customer);
 
         Task SendRegistrationConfirmationAsync(string fullName, string email);
     }

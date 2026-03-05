@@ -6,4 +6,5 @@ public class QuoteItemDto
     public int productId { get; set; }
     public int quantity { get; set; }
     public decimal price { get; set; }
+    public string? productName { get; set; }
 }

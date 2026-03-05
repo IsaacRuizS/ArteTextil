@@ -15,6 +15,10 @@ public class OrderDto : DtoBase
 
     public bool isActive { get; set; }
 
+    public CustomerDto? customer { get; set; }
+
+    public QuoteDto? quote { get; set; }
+
     public List<OrderItemDto>? items { get; set; }
 
     public List<OrderStatusHistoryDto>? statusHistory { get; set; }

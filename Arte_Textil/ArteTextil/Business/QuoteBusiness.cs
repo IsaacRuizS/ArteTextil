@@ -254,6 +254,8 @@ public class QuoteBusiness
 
             response.Data = _mapper.Map<QuoteDto>(created);
             response.Message = "Cotización creada correctamente";
+            response.Success = true;
+
 
             // ENVIAR CORREO (post-commit)
             try

@@ -62,7 +62,7 @@ namespace ArteTextil.Helpers
                                         <td style='padding:20px;'>
                                             <p><b>Cliente:</b> {customer.FullName}</p>
                                             <p><b>Email:</b> {customer.Email}</p>
-                                            <p><b>Email:</b> {phone}</p>
+                                            <p><b>Teléfono:</b> {phone}</p>
                                             <p><b>Fecha:</b> {quote.CreatedAt:dd/MM/yyyy}</p>
                                             <p><b>Estado:</b> {quote.Status}</p>
                                             <p><b>Mensaje:</b> {quote.Notes}</p>

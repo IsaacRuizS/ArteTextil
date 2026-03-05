@@ -19,6 +19,8 @@ public class Order : EntityBase
 
     // Navigation properties
     public ICollection<OrderItem>? OrderItems { get; set; }
-
     public ICollection<OrderStatusHistory>? OrderStatusHistory { get; set; }
+    
+    public Customer? Customer { get; set; }
+    public Quote? Quote { get; set; }
 }
