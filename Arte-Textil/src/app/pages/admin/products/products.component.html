@@ -7,9 +7,14 @@
             <div class="text-muted small">Administra tu inventario, precios y estado del catálogo.</div>
         </div>
 
-        <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-cube-send me-1"></i>Nuevo Producto
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success" (click)="onGenerateExcel()" title="Exportar lista actual">
+                <i class="mdi mdi-file-excel me-1"></i>Exportar Excel
+            </button>
+            <button class="btn btn-primary" (click)="openCreateModal()">
+                <i class="mdi mdi-cube-send me-1"></i>Nuevo Producto
+            </button>
+        </div>
     </div>
 
     <!-- FILTER -->

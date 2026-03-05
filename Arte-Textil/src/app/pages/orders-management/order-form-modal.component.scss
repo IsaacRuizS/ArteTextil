@@ -1,0 +1,46 @@
+.orders-container {
+  padding: 20px;
+}
+
+.card {
+  border-radius: 12px;
+}
+
+.sub-row td {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.history-item {
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  z-index: 9999;
+}
+
+.panel {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 14px;
+  padding: 18px;
+}

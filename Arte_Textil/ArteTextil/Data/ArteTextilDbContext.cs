@@ -26,8 +26,10 @@ public class ArteTextilDbContext : DbContext
     public DbSet<Customer> Customers { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Alert> Alerts { get; set; }
-
-
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<OrderStatusHistory> OrderStatusHistory { get; set; }
 
     // public DbSet<Usuario> Usuarios { get; set; }
 }

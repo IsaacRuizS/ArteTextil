@@ -1,29 +1,135 @@
 .inventory-wrapper {
     padding: 20px;
+
+    @media (min-width: 768px) {
+        padding: 28px 32px;
+    }
 }
 
-.filter-box {
+// ── Summary cards ────────────────────────────────────────
+.summary-card {
+    padding: 16px 20px;
+    border-radius: 12px;
+    border-left: 4px solid;
+
+    .summary-value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .summary-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    &--total {
+        background: #f0f4ff;
+        border-color: #4361ee;
+        .summary-value { color: #4361ee; }
+        .summary-label { color: #7a8ecb; }
+    }
+
+    &--ok {
+        background: #f0fdf4;
+        border-color: #22c55e;
+        .summary-value { color: #16a34a; }
+        .summary-label { color: #6dab87; }
+    }
+
+    &--warn {
+        background: #fffbeb;
+        border-color: #f59e0b;
+        .summary-value { color: #d97706; }
+        .summary-label { color: #b5996a; }
+    }
+
+    &--danger {
+        background: #fff1f2;
+        border-color: #ef4444;
+        .summary-value { color: #dc2626; }
+        .summary-label { color: #c08a8a; }
+    }
+}
+
+// ── Availability badges ───────────────────────────────────
+.availability-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    font-weight: 600;
+
+    &.badge-disponible {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+
+    &.badge-stock-bajo {
+        background-color: #fef9c3;
+        color: #854d0e;
+    }
+
+    &.badge-agotado {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    &.badge-inactivo {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+}
+
+// ── Movement modal ────────────────────────────────────────
+.product-info-bar {
     background: #f8f9fa;
-    padding: 15px;
+    border: 1px solid #e9ecef;
+    padding: 12px 16px;
+}
+
+.movement-option {
+    flex: 1;
+    padding: 10px 16px;
     border-radius: 8px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #6c757d;
+    text-align: center;
+    transition: all 0.15s ease;
+    user-select: none;
+
+    &:hover {
+        border-color: #adb5bd;
+        background: #f8f9fa;
+    }
+
+    &--entrada {
+        border-color: #22c55e;
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    &--salida {
+        border-color: #ef4444;
+        background: #fff1f2;
+        color: #dc2626;
+    }
 }
 
-.product-details {
-    background: #ffffff;
-    border-left: 5px solid #0d6efd;
-}
+.stock-preview {
+    &--ok {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
 
-.badge {
-    font-size: 0.85rem;
-} 
-
-.alert {
-    font-size: 0.95rem;
-}
-.alert i {
-    color: #721c24;
-}
-
-.btn-success i {
-    font-size: 18px;
+    &--danger {
+        background: #fff1f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
 }

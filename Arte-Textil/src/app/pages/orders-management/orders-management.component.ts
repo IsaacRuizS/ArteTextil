@@ -1,168 +1,180 @@
-import { Component } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnInit
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { ApiOrderService } from '../../services/api-order.service';
+import { SharedService } from '../../services/shared.service';
+import { OrderModel } from '../../shared/models/order.model';
+import { OrderFormModalComponent } from './order-form-modal.component';
+import { QuoteModel } from '../../shared/models/quote.model';
 
-type OrderStatus = 'Nuevo' | 'En producción' | 'Listo' | 'Entregado' | 'Atrasado' | 'Cancelado';
 
 @Component({
-  selector: 'app-orders-management',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './orders-management.component.html',
-  styleUrls: ['./orders-management.component.scss']
+    selector: 'app-orders-management',
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.Default,
+    imports: [
+        CommonModule,
+        FormsModule,
+        NgxPaginationModule,
+        OrderFormModalComponent
+    ],
+    templateUrl: './orders-management.component.html',
+    styleUrls: ['./orders-management.component.scss']
 })
-export class OrdersManagementComponent {
+export class OrdersManagementComponent implements OnInit {
 
-  // --- Formulario (solo UI) ---
-  newOrder = {
-    customer: '',
-    productType: 'Uniforme',
-    quantity: null as number | null,
-    deliveryDate: '',
-    status: 'Nuevo' as OrderStatus,
-    notifyClient: false
-  };
+    // LISTADO
+    orders: OrderModel[] = [];
+    ordersOrigin: OrderModel[] = [];
+    filteredOrders: OrderModel[] = [];
 
-  // Mensajes (simulados)
-  errorMsg = '';
-  successMsg = '';
+    page = 1;
+    statusFilter: number = 1; // 0 todos, 1 activos, 2 inactivos
+    searchTerm = '';
 
-  // --- Filtros/orden (solo UI) ---
-  filter = {
-    status: 'Todos',
-    search: '',
-    sortBy: 'Fecha entrega',
-    sortDir: 'Asc'
-  };
+    // MODAL STATE
+    showModal = false;
+    isEditing = false;
+    selectedOrder: OrderModel | null = null;
 
-  statusOptions: (OrderStatus | 'Todos')[] = ['Todos', 'Nuevo', 'En producción', 'Listo', 'Entregado', 'Atrasado', 'Cancelado'];
-  productTypes = ['Uniforme', 'Camisa', 'Pantalón', 'Accesorio'];
-  sortOptions = ['Fecha entrega', 'Estado', 'Cliente', 'Cantidad'];
+    // DELETE STATE
+    showDeleteModal = false;
+    orderToDelete: OrderModel | null = null; 
+    
+    constructor(
+        private apiOrderService: ApiOrderService,
+        private sharedService: SharedService,
+        private cdr: ChangeDetectorRef
+    ) { }
 
-  // --- Listado mock ---
-  orders = [
-    {
-      id: 'PED-001',
-      customer: 'APF Liceo Samuel Sáenz',
-      productType: 'Uniforme',
-      quantity: 40,
-      deliveryDate: '2025-12-20',
-      status: 'En producción' as OrderStatus,
-      canceled: false
-    },
-    {
-      id: 'PED-002',
-      customer: 'Cliente Mostrador',
-      productType: 'Camisa',
-      quantity: 12,
-      deliveryDate: '2025-12-18',
-      status: 'Atrasado' as OrderStatus,
-      canceled: false
-    },
-    {
-      id: 'PED-003',
-      customer: 'Institución X',
-      productType: 'Pantalón',
-      quantity: 25,
-      deliveryDate: '2025-12-28',
-      status: 'Nuevo' as OrderStatus,
-      canceled: false
-    }
-  ];
-
-  // --- Historial (mock) ---
-  history = [
-    { orderId: 'PED-001', date: '2025-12-12 09:10', action: 'Creación', detail: 'Estado inicial: Nuevo' },
-    { orderId: 'PED-001', date: '2025-12-13 14:22', action: 'Cambio de estado', detail: 'Nuevo → En producción' },
-    { orderId: 'PED-002', date: '2025-12-10 11:05', action: 'Cambio de estado', detail: 'En producción → Atrasado' }
-  ];
-
-  // --- UI: “modales” simulados con panel ---
-  editPanelOpen = false;
-  cancelPanelOpen = false;
-  selectedOrder: any = null;
-
-  editModel = {
-    customer: '',
-    productType: '',
-    quantity: 0,
-    deliveryDate: ''
-  };
-
-  cancelReason = '';
-  requireConfirmText = '';
-
-  // --- Helpers visuales ---
-  statusBadgeClass(status: OrderStatus) {
-    return {
-      'bg-secondary': status === 'Nuevo',
-      'bg-primary': status === 'En producción',
-      'bg-info': status === 'Listo',
-      'bg-success': status === 'Entregado',
-      'bg-warning': status === 'Atrasado',
-      'bg-dark': status === 'Cancelado'
-    };
-  }
-
-  openEdit(order: any) {
-    this.selectedOrder = order;
-    this.editModel = {
-      customer: order.customer,
-      productType: order.productType,
-      quantity: order.quantity,
-      deliveryDate: order.deliveryDate
-    };
-    this.editPanelOpen = true;
-    this.cancelPanelOpen = false;
-    this.errorMsg = '';
-    this.successMsg = '';
-  }
-
-  openCancel(order: any) {
-    this.selectedOrder = order;
-    this.cancelReason = '';
-    this.requireConfirmText = '';
-    this.cancelPanelOpen = true;
-    this.editPanelOpen = false;
-    this.errorMsg = '';
-    this.successMsg = '';
-  }
-
-  closePanels() {
-    this.editPanelOpen = false;
-    this.cancelPanelOpen = false;
-    this.selectedOrder = null;
-  }
-
-  // Solo “validación visual” (no persiste nada)
-  simulateCreate() {
-    this.errorMsg = '';
-    this.successMsg = '';
-
-    if (!this.newOrder.customer.trim() || !this.newOrder.quantity || !this.newOrder.deliveryDate) {
-      this.errorMsg = 'Campos obligatorios: cliente, cantidad y fecha de entrega.';
-      return;
+    ngOnInit(): void {
+        this.loadOrders();
     }
 
-    this.successMsg = 'Pedido registrado. Estado inicial asignado: "Nuevo".';
-  }
+    //
+    // LOAD DATA
+    //
 
-  simulateStatusChange(order: any, newStatus: OrderStatus) {
-    this.successMsg = `Cambio de estado simulado: ${order.id} → ${newStatus}. (Historial/Notificación:)`;
-    this.errorMsg = '';
-  }
+    loadOrders() {
 
-  simulateSaveEdit() {
-    this.successMsg = 'Cambios guardados. Auditoría: simulada.';
-    this.errorMsg = '';
-  }
+        this.sharedService.setLoading(true);
 
-  simulateCancel() {
-    this.errorMsg = '';
-    if (this.requireConfirmText.trim().toUpperCase() !== 'CANCELAR') {
-      this.errorMsg = 'Para confirmar la cancelación, escribe: CANCELAR';
-      return;
+        this.apiOrderService.getAll().subscribe({
+            next: (orders: OrderModel[]) => {
+
+                this.orders = orders;
+                this.ordersOrigin = orders;
+
+                this.applyFilters();
+
+                this.sharedService.setLoading(false);
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.sharedService.setLoading(false);
+            }
+        });
     }
-    this.successMsg = 'Pedido cancelado lógicamente. Persistencia en historial: simulada.';
-  }
+
+    reloadOrders() {
+        this.closeModal();
+        this.loadOrders();
+    }
+
+    //
+    // FILTERS
+    //
+
+    onSearch(event: any) {
+        this.searchTerm = event.target.value;
+        this.applyFilters();
+    }
+
+    applyFilters() {
+
+        this.filteredOrders = [...this.ordersOrigin];
+
+        // FILTRO ACTIVO / INACTIVO
+        if (this.statusFilter === 1) {
+            this.filteredOrders = this.filteredOrders.filter(o => o.isActive);
+        } else if (this.statusFilter === 2) {
+            this.filteredOrders = this.filteredOrders.filter(o => !o.isActive);
+        }
+
+        // BUSQUEDA
+        if (this.searchTerm?.trim()) {
+
+            const term = this.searchTerm.toLowerCase();
+
+            this.filteredOrders = this.filteredOrders.filter(o =>
+                o.status?.toLowerCase().includes(term) ||
+                o.orderId?.toString().includes(term)
+            );
+        }
+
+        this.page = 1;
+
+        this.cdr.markForCheck();
+    }
+
+    //
+    // MODAL CONTROL
+    //
+
+    openCreateModal() {
+        this.isEditing = false;
+        this.selectedOrder = null;
+        this.showModal = true;
+    }
+
+    openEditModal(order: OrderModel) {
+        this.isEditing = true;
+        this.selectedOrder = { ...order }; // copia para evitar mutación directa
+        this.showModal = true;
+    }
+
+    closeModal() {
+        this.showModal = false;
+        this.selectedOrder = null;
+        this.isEditing = false;
+    }
+
+    // DELETE (SOFT)
+
+    openDeleteModal(order: OrderModel) {
+        this.orderToDelete = order;
+        this.showDeleteModal = true;
+    }
+
+    confirmDelete() {
+
+        if (!this.orderToDelete) return;
+
+        this.sharedService.setLoading(true);
+
+        this.apiOrderService
+            .updateIsActive(
+                this.orderToDelete.orderId ?? 0,
+                !this.orderToDelete.isActive
+            )
+            .subscribe({
+                next: () => {
+
+                    this.showDeleteModal = false;
+                    this.orderToDelete = null;
+
+                    this.loadOrders();
+                },
+                error: () => {
+                    this.sharedService.setLoading(false);
+                }
+            });
+    }
 }

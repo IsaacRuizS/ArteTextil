@@ -12,6 +12,25 @@ export class ApiCustomerService extends ApiBaseService {
         super(http);
     }
 
+    // GET: api/promotion/all
+    getAll(): Observable<CustomerSegmentModel[]> {
+
+        return this.http.get<any>(`${this.baseUrl}/api/customer/all`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
+
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error desconocido al obtener los clientes.');
+                    }
+
+                    if (!Array.isArray(res.data)) return [];
+
+                    return res.data.map((item: any) => new CustomerSegmentModel(item));
+                }),
+                catchError(err => throwError(() => err))
+            );
+    }
+
     getSegments(filter?: string): Observable<CustomerSegmentModel[]> {
 
         let url = `${this.baseUrl}/api/customer/segments`;

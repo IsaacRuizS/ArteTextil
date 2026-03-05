@@ -1,0 +1,186 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    {{ isEdit ? 'Editar Pedido' : 'Crear Pedido' }}
+                </h5>
+                <button type="button" class="btn-close" (click)="close()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- STEP 1 - SELECCIÓN MODO -->
+                @if (!isEdit && createStep === 1) {
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        ¿El pedido proviene de una cotización?
+                    </label>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="existing" [(ngModel)]="mode">
+                        <label class="form-check-label">
+                            Cotización existente
+                        </label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" value="new" [(ngModel)]="mode">
+                        <label class="form-check-label">
+                            Crear nueva cotización
+                        </label>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button class="btn btn-primary" [disabled]="!mode" (click)="goToStep2()">
+                        Continuar
+                    </button>
+                </div>
+                }
+
+                <!-- STEP 2A - DESDE COTIZACIÓN EXISTENTE -->
+                @if (!isEdit && createStep === 2 && mode === 'existing') {
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Seleccionar Cotización
+                    </label>
+
+                    <select class="form-select" [(ngModel)]="selectedQuoteId" (change)="loadQuoteDetails()">
+                        <option [value]="null">Seleccione</option>
+                        @for (q of quotes; track q.quoteId) {
+                        <option [value]="q.quoteId">
+                            #{{ q.quoteId }} - ₡{{ q.total }}
+                        </option>
+                        }
+                    </select>
+                </div>
+
+                @if (selectedQuote) {
+                <div class="card p-3 bg-light border mb-3">
+                    <strong>Cliente:</strong>
+                    {{ selectedQuote.customer?.fullName }} <br>
+                    <strong>Total:</strong> ₡{{ selectedQuote.total }} <br>
+                    <strong>Productos:</strong>
+                    @for (i of selectedQuote.items; track i.quoteItemId; let index = $index) {
+                    {{ getProductName(i.productId) }} (x{{ i.quantity }})
+                    @if(index != (selectedQuote.items?.length ?? 0) - 1) {
+                    ,
+                    }
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Fecha Entrega</label>
+                    <input type="date" class="form-control" [(ngModel)]="orderForm.deliveryDate">
+                </div>
+
+                <div class="text-end">
+                    <button class="btn btn-success" [disabled]="!canCreateFromExisting()"
+                        (click)="createOrderFromExistingQuote()">
+                        Crear Pedido
+                    </button>
+                </div>
+                }
+                }
+
+                <!-- STEP 2B - CREAR COTIZACIÓN DESDE CERO -->
+                @if (!isEdit && createStep === 2 && mode === 'new') {
+
+                <!-- Cliente -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Cliente</label>
+                    <select class="form-select" [(ngModel)]="quoteForm.customerId">
+                        <option [value]="0">Seleccione cliente</option>
+                        @for (c of customers; track c.customerId) {
+                        <option [value]="c.customerId">
+                            {{ c.fullName }}
+                        </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Productos dinámicos -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Productos</label>
+
+                    @for (item of quoteForm.items; track $index; let i = $index) {
+
+                    <div class="row g-2 mb-2">
+
+                        <div class="col-5">
+                            <select class="form-select" [(ngModel)]="item.productId" (change)="updatePrice(i)">
+                                <option [value]="0">Seleccione producto</option>
+                                @for (p of products; track p.productId) {
+                                <option [value]="p.productId">
+                                    {{ p.name }} (Stock: {{ p.stock }})
+                                </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-3">
+                            <input type="number" class="form-control" min="1" [(ngModel)]="item.quantity"
+                                (change)="validateStock(i)">
+                        </div>
+
+                        <div class="col-2">
+                            <input type="number" class="form-control" [value]="item.price" readonly>
+                        </div>
+
+                        <div class="col-2 text-end">
+                            <button class="btn btn-danger btn-sm" (click)="removeItem(i)">
+                                ✕
+                            </button>
+                        </div>
+
+                    </div>
+                    }
+
+                    <button class="btn btn-outline-primary btn-sm" (click)="addItem()">
+                        + Agregar Producto
+                    </button>
+                </div>
+
+                <!-- Fecha entrega -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Fecha Entrega</label>
+                    <input type="date" class="form-control" [(ngModel)]="orderForm.deliveryDate">
+                </div>
+
+                <div class="text-end">
+                    <button class="btn btn-success" [disabled]="!canCreateFromScratch()" (click)="createFromScratch()">
+                        Crear Cotización + Pedido
+                    </button>
+                </div>
+                }
+
+                <!-- ===== -->
+                <!-- EDITAR PEDIDO -->
+                <!-- ===== -->
+                @if (isEdit) {
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Fecha Entrega</label>
+                    <input type="date" class="form-control" [(ngModel)]="model.deliveryDate">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Estado</label>
+                    <input type="text" class="form-control" [(ngModel)]="model.status">
+                </div>
+
+                <div class="text-end">
+                    <button class="btn btn-success" (click)="saveEdit()">
+                        Guardar Cambios
+                    </button>
+                </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
