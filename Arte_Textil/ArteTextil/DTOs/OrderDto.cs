@@ -6,7 +6,7 @@ public class OrderDto : DtoBase
     public int quoteId { get; set; }
 
     public required int customerId { get; set; }
-
+    public int performByUserId { get; set; }
     public required string status { get; set; }
 
     public DateTime? deliveryDate { get; set; }

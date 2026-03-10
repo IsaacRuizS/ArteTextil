@@ -88,5 +88,17 @@ namespace ArteTextil.Controllers
 
             return Ok(result);
         }
+
+        // GET: api/order/{orderId}/status-history
+        [HttpGet("{orderId}/status-history")]
+        public async Task<IActionResult> GetOrderStatusHistory(int orderId)
+        {
+            var result = await _orderBusiness.GetOrderStatusHistory(orderId);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 }
