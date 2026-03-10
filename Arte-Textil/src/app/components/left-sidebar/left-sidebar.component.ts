@@ -22,6 +22,8 @@ export class LeftSidebarComponent {
                 { label: 'Productos', link: '/admin/products' },
                 { label: 'Promociones', link: '/promotions' },
                 { label: 'Pedidos', link: '/orders-management' },
+                { label: 'Cotizaciones', link: '/quotes' },
+                { label: 'Clientes', link: '/customers' },
             ]
         },
 
@@ -47,12 +49,10 @@ export class LeftSidebarComponent {
             collapsed: true,
             children: [
                 { label: 'Analítica', link: '/analytics' },
-                { label: 'Segmentación de Clientes', link: '/analytics/customer-segmentation' },
                 { label: 'Predicción de Demanda', link: '/analytics/demand' },
                 { label: 'Analítica Clientes', link: '/customer-analytics' },
                 { label: 'Dashboard', link: '/dashboard' },
                 { label: 'Reportes', link: '/reports' },
-                { label: 'Producción', link: '/production' }
             ]
         }
     ];
