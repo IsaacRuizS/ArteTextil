@@ -53,6 +53,8 @@ export class OrderModel {
     notes?: string;
     isActive!: boolean;
 
+    performByUserId?: number;
+
     customer?: CustomerModel;
     quote?: QuoteModel;
 

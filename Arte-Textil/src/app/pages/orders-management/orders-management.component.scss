@@ -21,7 +21,7 @@
 }
 
 .history-item {
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 12px;
   padding: 10px 12px;
   background: #fff;
@@ -30,7 +30,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,4 +43,58 @@
   max-width: 720px;
   border-radius: 14px;
   padding: 18px;
+}
+
+.status-badge {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+
+.badge-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.badge-primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.badge-info {
+  background: #0dcaf0;
+  color: #000;
+}
+
+.badge-warning {
+  background: #ffc107;
+  color: #000;
+}
+
+.badge-dark {
+  background: #212529;
+  color: white;
+}
+
+.badge-purple {
+  background: #6f42c1;
+  color: white;
+}
+
+.badge-success {
+  background: #198754;
+  color: white;
+}
+
+.badge-danger {
+  background: #dc3545;
+  color: white;
 }

@@ -2,7 +2,8 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
-    OnInit
+    OnInit,
+    ViewChild
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -18,6 +19,7 @@ import { CustomerModalComponent } from '../../components/customer-modal/customer
 import { QuoteModalComponent } from '../../components/quote-modal/quote-modal.component';
 import { AuthService } from '../../services/auth.service';
 import { UserModel } from '../../shared/models/user.model';
+import { OrderStatusHistoryModalComponent } from '../../components/order-status-history-modal/order-status-history-modal.component';
 
 
 @Component({
@@ -30,12 +32,16 @@ import { UserModel } from '../../shared/models/user.model';
         NgxPaginationModule,
         OrderFormModalComponent,
         QuoteModalComponent,
-        CustomerModalComponent
+        CustomerModalComponent,
+        OrderStatusHistoryModalComponent
     ],
     templateUrl: './orders-management.component.html',
     styleUrls: ['./orders-management.component.scss']
 })
 export class OrdersManagementComponent implements OnInit {
+
+    @ViewChild('statusHistoryModal')
+    statusHistoryModal!: any;
 
     // LISTADO
     orders: OrderModel[] = [];
@@ -89,7 +95,7 @@ export class OrdersManagementComponent implements OnInit {
             next: (orders: OrderModel[]) => {
 
                 this.orders = orders;
-                this.ordersOrigin = orders; 
+                this.ordersOrigin = orders;
 
                 this.applyFilters();
 
@@ -147,6 +153,10 @@ export class OrdersManagementComponent implements OnInit {
     // MODAL CONTROL
     //
 
+    openStatusHistory(orderId: number) {
+        this.statusHistoryModal.open(orderId);
+    }
+
     openCustomerModal(customer?: CustomerModel) {
         this.selectedCustomer = customer;
         this.showCustomerModal = true;
@@ -160,14 +170,14 @@ export class OrdersManagementComponent implements OnInit {
     openCreateModal() {
         this.isEditing = false;
         this.selectedOrder = new OrderModel();
-        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0; 
+        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0;
         this.showModal = true;
     }
 
     openEditModal(order: OrderModel) {
         this.isEditing = true;
         this.selectedOrder = { ...order }; // copia para evitar mutación directa
-        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0; 
+        this.selectedOrder.loggedUserId = this.loggedUserId ?? 0;
         this.showModal = true;
     }
 
@@ -207,5 +217,38 @@ export class OrdersManagementComponent implements OnInit {
                     this.sharedService.setLoading(false);
                 }
             });
+    }
+
+    getStatusColor(status: string) {
+
+        switch (status) {
+
+            case 'Nuevo':
+                return 'badge-secondary';
+
+            case 'Corte':
+                return 'badge-primary';
+
+            case 'Confección':
+                return 'badge-info';
+
+            case 'Estampado':
+                return 'badge-warning';
+
+            case 'Procesando':
+                return 'badge-dark';
+
+            case 'En Camino':
+                return 'badge-purple';
+
+            case 'Entregado':
+                return 'badge-success';
+
+            case 'Cancelado':
+                return 'badge-danger';
+
+            default:
+                return 'badge-secondary';
+        }
     }
 }

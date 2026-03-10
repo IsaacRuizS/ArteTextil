@@ -4,6 +4,7 @@ import { map, catchError, throwError, Observable } from 'rxjs';
 
 import { ApiBaseService } from './api-base.service';
 import { OrderModel } from '../shared/models/order.model';
+import { OrderStatusHistoryModel } from '../shared/models/order-status-history.model';
 
 @Injectable({
     providedIn: 'root'
@@ -75,17 +76,17 @@ export class ApiOrderService extends ApiBaseService {
             data,
             this.getHttpOptions()
         )
-        .pipe(
-            map((res: any) => {
+            .pipe(
+                map((res: any) => {
 
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al actualizar orden.');
-                }
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al actualizar orden.');
+                    }
 
-                return new OrderModel(res.data);
-            }),
-            catchError(err => throwError(() => err))
-        );
+                    return new OrderModel(res.data);
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // PATCH: api/order/{id}/status
@@ -96,17 +97,17 @@ export class ApiOrderService extends ApiBaseService {
             newStatus,
             this.getHttpOptions()
         )
-        .pipe(
-            map((res: any) => {
+            .pipe(
+                map((res: any) => {
 
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al cambiar estado.');
-                }
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al cambiar estado.');
+                    }
 
-                return res.data === true;
-            }),
-            catchError(err => throwError(() => err))
-        );
+                    return res.data === true;
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // PATCH: api/order/{id}/active
@@ -117,17 +118,17 @@ export class ApiOrderService extends ApiBaseService {
             isActive,
             this.getHttpOptions()
         )
-        .pipe(
-            map((res: any) => {
+            .pipe(
+                map((res: any) => {
 
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al actualizar estado de la orden.');
-                }
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al actualizar estado de la orden.');
+                    }
 
-                return res.data === true;
-            }),
-            catchError(err => throwError(() => err))
-        );
+                    return res.data === true;
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 
     // GET: api/order/all-active
@@ -137,18 +138,37 @@ export class ApiOrderService extends ApiBaseService {
             `${this.baseUrl}/api/order/all-active`,
             this.getHttpOptions()
         )
-        .pipe(
-            map((res: any) => {
+            .pipe(
+                map((res: any) => {
 
-                if (!res?.success) {
-                    throw new Error(res?.message || 'Error al obtener órdenes activas.');
-                }
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al obtener órdenes activas.');
+                    }
 
-                if (!Array.isArray(res.data)) return [];
+                    if (!Array.isArray(res.data)) return [];
 
-                return res.data.map((x: any) => new OrderModel(x));
-            }),
-            catchError(err => throwError(() => err))
-        );
+                    return res.data.map((x: any) => new OrderModel(x));
+                }),
+                catchError(err => throwError(() => err))
+            );
+    }
+
+    // GET: api/order/{orderId}/status-history
+    getStatusHistory(orderId: number): Observable<OrderStatusHistoryModel[]> {
+
+        return this.http.get<any>(`${this.baseUrl}/api/order/${orderId}/status-history`, this.getHttpOptions())
+            .pipe(
+                map((res: any) => {
+
+                    if (!res?.success) {
+                        throw new Error(res?.message || 'Error al obtener historial de estados.');
+                    }
+
+                    if (!Array.isArray(res.data)) return [];
+
+                    return res.data.map((x: any) => new OrderStatusHistoryModel(x));
+                }),
+                catchError(err => throwError(() => err))
+            );
     }
 }
