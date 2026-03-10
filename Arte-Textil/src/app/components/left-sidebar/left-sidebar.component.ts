@@ -52,7 +52,8 @@ export class LeftSidebarComponent {
                 { label: 'Analítica Clientes', link: '/customer-analytics' },
                 { label: 'Dashboard', link: '/dashboard' },
                 { label: 'Reportes', link: '/reports' },
-                { label: 'Producción', link: '/production' }
+                { label: 'Producción', link: '/production' },
+                { label: 'Alertas', link: '/analytics/alerts' }
             ]
         }
     ];

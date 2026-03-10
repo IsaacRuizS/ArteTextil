@@ -15,16 +15,13 @@ export class ApiVacationService extends ApiBaseService {
     }
 
     // Colaborador: crear solicitud
-    create(data: { startDate: Date; endDate: Date }): Observable<VacationModel> {
+    create(data: any): Observable<VacationModel> {
 
-        const body = {
-            startDate: data.startDate,
-            endDate: data.endDate
-        };
+        console.log("API BODY:", data);
 
         return this.http.post<any>(
             `${this.baseUrl}/api/vacation`,
-            body,
+            data,
             this.getHttpOptions()
         ).pipe(
             map((res: any) => {
@@ -112,16 +109,16 @@ export class ApiVacationService extends ApiBaseService {
     // Vistas
     getAll(): Observable<VacationModel[]> {
 
-    return this.http.get<any>(
-        `${this.baseUrl}/api/vacation/all`,
-        this.getHttpOptions()
-    ).pipe(
-        map((res: any) => {
-            if (!res?.success) throw new Error(res?.message);
-            if (!Array.isArray(res.data)) return [];
-            return res.data.map((x: any) => new VacationModel(x));
-        }),
-        catchError(err => throwError(() => err))
-    );
-}
+        return this.http.get<any>(
+            `${this.baseUrl}/api/vacation/all`,
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) throw new Error(res?.message);
+                if (!Array.isArray(res.data)) return [];
+                return res.data.map((x: any) => new VacationModel(x));
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
 }

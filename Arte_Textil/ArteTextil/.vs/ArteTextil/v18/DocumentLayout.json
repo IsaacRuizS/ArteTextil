@@ -1,50 +1,78 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\",
+  "WorkspaceRootPath": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\dtos\\orderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:dtos\\orderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\vacationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\vacationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\orderbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\orderbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\vacationbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\vacationbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\quotebusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\quotebusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\helpers\\automapperconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:helpers\\automapperconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\dtos\\vacationrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:dtos\\vacationrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\quotecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\quotecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\entities\\vacation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\entities\\vacation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:1:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\artetextildbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\artetextildbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\helpers\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:helpers\\emailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:1:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\alertcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:1:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\alertcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\interfaces\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:interfaces\\iemailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\entities\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\entities\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\productbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\productbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\isaac\\documents\\github\\artetextil\\arte_textil\\artetextil\\helpers\\automapperconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:helpers\\automapperconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\entities\\alert.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\entities\\alert.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\alertbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\alertbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\quotecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\quotecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\suppliercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\suppliercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\alertcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\alertcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:2:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\artetextildbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:2:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\artetextildbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -54,7 +82,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Bookmark",
@@ -62,150 +90,234 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+              "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "OrderDto.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\OrderDto.cs",
-              "RelativeDocumentMoniker": "DTOs\\OrderDto.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\OrderDto.cs",
-              "RelativeToolTip": "DTOs\\OrderDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAUAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "VacationBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\VacationBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\VacationBusiness.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\VacationBusiness.cs",
+              "RelativeToolTip": "Business\\VacationBusiness.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAnwCEAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T03:34:29.572Z",
+              "WhenOpened": "2026-03-10T01:56:35.995Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "OrderController.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\OrderController.cs",
-              "RelativeDocumentMoniker": "Controllers\\OrderController.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\OrderController.cs",
-              "RelativeToolTip": "Controllers\\OrderController.cs",
-              "ViewState": "AgIAACYAAAAAAAAAAAAwwC4AAAAJAAAAAAAAAA==",
+              "Title": "VacationRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\VacationRequestDto.cs",
+              "RelativeDocumentMoniker": "DTOs\\VacationRequestDto.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\VacationRequestDto.cs",
+              "RelativeToolTip": "DTOs\\VacationRequestDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T03:24:06.9Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAUwBEAAAAkAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-03-05T02:59:20.542Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "EmailService.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\EmailService.cs",
-              "RelativeDocumentMoniker": "Helpers\\EmailService.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\EmailService.cs",
-              "RelativeToolTip": "Helpers\\EmailService.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAAAEAAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T03:01:03.426Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "IEmailService.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Interfaces\\IEmailService.cs",
-              "RelativeDocumentMoniker": "Interfaces\\IEmailService.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Interfaces\\IEmailService.cs",
-              "RelativeToolTip": "Interfaces\\IEmailService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T03:00:39.036Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAJ8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T02:57:14.935Z",
+              "WhenOpened": "2026-03-10T01:56:01.222Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "QuoteController.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\QuoteController.cs",
-              "RelativeDocumentMoniker": "Controllers\\QuoteController.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\QuoteController.cs",
-              "RelativeToolTip": "Controllers\\QuoteController.cs",
-              "ViewState": "AgIAACAAAAAAAAAAAAAwwDEAAAAMAAAAAAAAAA==",
+              "Title": "Vacation.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Vacation.cs",
+              "RelativeDocumentMoniker": "Data\\Entities\\Vacation.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Vacation.cs",
+              "RelativeToolTip": "Data\\Entities\\Vacation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T02:49:24.672Z",
+              "WhenOpened": "2026-03-10T01:54:50.589Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "QuoteBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\QuoteBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\QuoteBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\QuoteBusiness.cs",
-              "RelativeToolTip": "Business\\QuoteBusiness.cs",
-              "ViewState": "AgIAAPIAAAAAAAAAAAAEwP0AAAAAAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "ArteTextilDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\ArteTextilDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\ArteTextilDbContext.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\ArteTextilDbContext.cs",
+              "RelativeToolTip": "Data\\ArteTextilDbContext.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAA1wBsAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T00:37:46.108Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "AutoMapperConfig.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\AutoMapperConfig.cs",
-              "RelativeDocumentMoniker": "Helpers\\AutoMapperConfig.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\AutoMapperConfig.cs",
-              "RelativeToolTip": "Helpers\\AutoMapperConfig.cs",
-              "ViewState": "AgIAAEwAAAAAAAAAAAAgwFgAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T00:34:34.164Z",
+              "WhenOpened": "2026-03-03T02:28:44.562Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
-              "Title": "Order.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Order.cs",
-              "RelativeDocumentMoniker": "Data\\Entities\\Order.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Order.cs",
-              "RelativeToolTip": "Data\\Entities\\Order.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAA0wBgAAAAQAAAAAAAAAA==",
+              "Title": "Alert.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Alert.cs",
+              "RelativeDocumentMoniker": "Data\\Entities\\Alert.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Alert.cs",
+              "RelativeToolTip": "Data\\Entities\\Alert.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T00:33:18.866Z",
+              "WhenOpened": "2026-03-03T02:20:58.77Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "OrderBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\OrderBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\OrderBusiness.cs",
-              "ToolTip": "C:\\Users\\Isaac\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\OrderBusiness.cs",
-              "RelativeToolTip": "Business\\OrderBusiness.cs",
-              "ViewState": "AgIAAHAAAAAAAAAAAAAvwIAAAABAAAAAAAAAAA==",
+              "DocumentIndex": 10,
+              "Title": "AlertBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\AlertBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\AlertBusiness.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\AlertBusiness.cs",
+              "RelativeToolTip": "Business\\AlertBusiness.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-05T00:12:07.377Z",
+              "WhenOpened": "2026-03-03T02:02:53.485Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ProductBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\ProductBusiness.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
+              "RelativeToolTip": "Business\\ProductBusiness.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABoAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T02:39:25.994Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VacationController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\VacationController.cs",
+              "RelativeDocumentMoniker": "Controllers\\VacationController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\VacationController.cs",
+              "RelativeToolTip": "Controllers\\VacationController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwCIAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-10T03:05:11.871Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AutoMapperConfig.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\AutoMapperConfig.cs",
+              "RelativeDocumentMoniker": "Helpers\\AutoMapperConfig.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Helpers\\AutoMapperConfig.cs",
+              "RelativeToolTip": "Helpers\\AutoMapperConfig.cs",
+              "ViewState": "AgIAAC8AAAAAAAAAAAD4v0QAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T02:17:36.083Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AlertController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\AlertController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AlertController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\AlertController.cs",
+              "RelativeToolTip": "Controllers\\AlertController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAALAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T02:29:51.08Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAQwCEAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T00:59:59.638Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "SupplierController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\SupplierController.cs",
+              "RelativeDocumentMoniker": "Controllers\\SupplierController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\SupplierController.cs",
+              "RelativeToolTip": "Controllers\\SupplierController.cs",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAqwF0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T00:55:53.376Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AlertController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\AlertController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AlertController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\AlertController.cs",
+              "RelativeToolTip": "Controllers\\AlertController.cs",
+              "ViewState": "AgIAAPMAAAAAAAAAAIAwwAIBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T00:51:56.127Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "Controllers\\OrderController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "Controllers\\OrderController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwBcAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T01:15:13.056Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-03T01:19:09.595Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "ArteTextilDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\ArteTextilDbContext.cs",
+              "RelativeDocumentMoniker": "Data\\ArteTextilDbContext.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\ArteTextilDbContext.cs",
+              "RelativeToolTip": "Data\\ArteTextilDbContext.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAA8wBoAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T01:19:20.751Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "QuoteController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\QuoteController.cs",
+              "RelativeDocumentMoniker": "Controllers\\QuoteController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\QuoteController.cs",
+              "RelativeToolTip": "Controllers\\QuoteController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAuwE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T01:26:04.682Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CustomerController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CustomerController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CustomerController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\CustomerController.cs",
+              "RelativeToolTip": "Controllers\\CustomerController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-03T01:50:29.841Z"
             }
           ]
         }

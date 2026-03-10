@@ -22,7 +22,8 @@ public class VacationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] VacationRequestDto dto)
     {
-        // saca el usuario del token
+        Console.WriteLine("CONTROLLER NOTES: " + dto.notes);
+
         var claim = User.FindFirst("id");
         if (claim == null) return Unauthorized("Token sin id");
 
@@ -30,7 +31,6 @@ public class VacationController : ControllerBase
 
         var result = await _business.Create(dto);
 
-        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 

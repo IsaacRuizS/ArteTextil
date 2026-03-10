@@ -16,5 +16,6 @@ export class VacationModel {
     endDate!: Date;
     status!: string;
     approvedByUserId?: number;
+    notes?: string;
     isActive!: boolean;
 }

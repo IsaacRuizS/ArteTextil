@@ -9,5 +9,6 @@ public class VacationRequestDto : DtoBase
     public DateTime endDate { get; set; }
     public string status { get; set; } = "Pending";
     public int? ApprovedByUserId { get; set; }
+    public string? notes { get; set; }
     public bool IsActive { get; set; }
 }

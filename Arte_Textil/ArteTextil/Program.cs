@@ -84,7 +84,12 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim("roleId", "3"));
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+     });
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddHangfire(config =>
@@ -153,7 +158,7 @@ app.UseHangfireDashboard("/hangfire");
 RecurringJob.AddOrUpdate<AlertBusiness>(
     "check-massive-quotes",
     x => x.CheckMassiveQuotes(),
-    Cron.MinuteInterval(1)
+    Cron.MinuteInterval(50)
 );
 
 app.UseAuthorization();

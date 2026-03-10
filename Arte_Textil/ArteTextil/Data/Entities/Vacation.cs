@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ArteTextil.Data.Entities;
 
@@ -14,6 +15,9 @@ public class Vacation : EntityBase
 
     public string Status { get; set; }
     public int? ApprovedByUserId { get; set; }
+
+    [Column("Notes")]
+    public string? Notes { get; set; }
 
     public bool IsActive { get; set; }
 }

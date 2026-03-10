@@ -4,6 +4,7 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace ArteTextil.Business;
@@ -30,6 +31,8 @@ public class VacationBusiness
     {
         var response = new ApiResponse<VacationRequestDto>();
 
+        Console.WriteLine("DTO NOTES: " + dto.notes);
+
         try
         {
             if (dto.endDate < dto.startDate)
@@ -39,19 +42,26 @@ public class VacationBusiness
                 return response;
             }
 
-            var entity = _mapper.Map<Vacation>(dto);
-            entity.UserId = dto.userId;
-            entity.Status = "Pendiente";
-            entity.IsActive = true;
-            entity.CreatedAt = DateTime.UtcNow;
+            var entity = new Vacation
+            {
+                UserId = dto.userId,
+                StartDate = dto.startDate,
+                EndDate = dto.endDate,
+                Notes = dto.notes,
+                Status = "Pendiente",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            Console.WriteLine("ANTES DE GUARDAR VACATION");
 
             await _repository.AddAsync(entity);
 
-            await _logHelper.LogCreate(
-                "Vacations",
-                entity.VacationId,
-                JsonSerializer.Serialize(entity)
-            );
+            Console.WriteLine("DESPUES DE GUARDAR VACATION");
+            Console.WriteLine($"USERID: {entity.UserId}");
+            Console.WriteLine($"START: {entity.StartDate}");
+            Console.WriteLine($"END: {entity.EndDate}");
+            Console.WriteLine($"NOTES: {entity.Notes}");
 
             response.Data = _mapper.Map<VacationRequestDto>(entity);
             response.Message = "Solicitud enviada";
@@ -59,7 +69,7 @@ public class VacationBusiness
         catch (Exception ex)
         {
             response.Success = false;
-            response.Message = ex.Message;
+            response.Message = ex.InnerException?.Message ?? ex.Message;
         }
 
         return response;
@@ -86,6 +96,7 @@ public class VacationBusiness
                         startDate = v.StartDate,
                         endDate = v.EndDate,
                         status = v.Status,
+                        notes = v.Notes,
                         ApprovedByUserId = v.ApprovedByUserId,
                         IsActive = v.IsActive,
                         createdAt = v.CreatedAt,
@@ -127,6 +138,7 @@ public class VacationBusiness
                         startDate = v.StartDate,
                         endDate = v.EndDate,
                         status = v.Status,
+                        notes = v.Notes,
                         ApprovedByUserId = v.ApprovedByUserId,
                         IsActive = v.IsActive,
                         createdAt = v.CreatedAt,
@@ -259,6 +271,7 @@ public class VacationBusiness
                         startDate = v.StartDate,
                         endDate = v.EndDate,
                         status = v.Status,
+                        notes = v.Notes,
                         ApprovedByUserId = v.ApprovedByUserId,
                         IsActive = v.IsActive,
                         createdAt = v.CreatedAt,

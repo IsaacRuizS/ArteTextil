@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { VacationModel } from '../../../shared/models/vacation.model';
 import { ApiVacationService } from '../../../services/api-vacation.service';
 import { SharedService } from '../../../services/shared.service';
+import { ApiUserService } from '../../../services/api-user.service';
+import { UserModel } from '../../../shared/models/user.model';
 
 @Component({
     selector: 'app-vacations',
@@ -26,53 +28,78 @@ export class VacationsComponent implements OnInit {
     // cambiar manualmente para probar
     isAdmin = false;
 
+    users: UserModel[] = [];
+
     constructor(
         private apiVacation: ApiVacationService,
+        private apiUser: ApiUserService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
         this.vacationForm = this.fb.group({
+            userId: ['', Validators.required],
             startDate: ['', Validators.required],
-            endDate: ['', Validators.required]
+            endDate: ['', Validators.required],
+            notes: ['']
         });
     }
 
-  ngOnInit(): void {
+    ngOnInit(): void {
 
-    const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token');
 
-    if (token) {
-        const payload: any = JSON.parse(atob(token.split('.')[1]));
+        if (token) {
+            const payload: any = JSON.parse(atob(token.split('.')[1]));
 
-        console.log("TOKEN PAYLOAD:", payload);
+            console.log("TOKEN PAYLOAD:", payload);
 
-        this.isAdmin = payload?.roleId === "1";
+            this.isAdmin = payload?.roleId === "1";
+        }
+
+        this.showFormModal = false;
+
+        if (this.isAdmin) {
+            this.loadUsers();
+        }
+
+        this.loadVacations();
     }
-
-    this.showFormModal = false;
-    this.loadVacations();
-}
 
     // carga segun el rol
     loadVacations() {
 
-    this.sharedService.setLoading(true);
+        this.sharedService.setLoading(true);
 
-    const request = this.isAdmin
-        ? this.apiVacation.getAll()   // Admin ve todo
-        : this.apiVacation.getMine(); // Colaborador solo lo suyo
+        const request = this.isAdmin
+            ? this.apiVacation.getAll()   // Admin ve todo
+            : this.apiVacation.getMine(); // Colaborador solo lo suyo
 
-    request.subscribe({
-        next: (data) => {
-            this.vacations = data;
-            this.vacationsOrigin = data;
-            this.cdr.markForCheck();
-            this.sharedService.setLoading(false);
-        },
-        error: () => this.sharedService.setLoading(false)
-    });
-}
+        request.subscribe({
+            next: (data) => {
+                this.vacations = data;
+                this.vacationsOrigin = data;
+                this.cdr.markForCheck();
+                this.sharedService.setLoading(false);
+            },
+            error: () => this.sharedService.setLoading(false)
+        });
+    }
+
+    loadUsers() {
+
+        this.apiUser.getAll()
+            .then((users: UserModel[]) => {
+
+                this.users = users;
+
+                this.cdr.markForCheck();
+            })
+            .catch(err => {
+                console.error("ERROR USERS", err);
+            });
+    }
+
     // Buscador
     onSearch(event: any) {
         this.searchTerm = event.target.value;
@@ -81,22 +108,22 @@ export class VacationsComponent implements OnInit {
 
     onFilter() {
 
-    const source = [...this.vacationsOrigin];  // 👈 copia real
+        const source = [...this.vacationsOrigin];  // copia real
 
-    if (!this.searchTerm || this.searchTerm.trim() === '') {
-        this.vacations = source;
-        return;
+        if (!this.searchTerm || this.searchTerm.trim() === '') {
+            this.vacations = source;
+            return;
+        }
+
+        const term = this.searchTerm.toLowerCase();
+
+        this.vacations = source.filter(v =>
+            (v.userName && v.userName.toLowerCase().includes(term))
+            || v.status.toLowerCase().includes(term)
+            || new Date(v.startDate).toLocaleDateString().includes(term)
+            || new Date(v.endDate).toLocaleDateString().includes(term)
+        );
     }
-
-    const term = this.searchTerm.toLowerCase();
-
-    this.vacations = source.filter(v =>
-        (v.userName && v.userName.toLowerCase().includes(term))
-        || v.status.toLowerCase().includes(term)
-        || new Date(v.startDate).toLocaleDateString().includes(term)
-        || new Date(v.endDate).toLocaleDateString().includes(term)
-    );
-}
 
     // Formulario para colaborador
     openCreateModal() {
@@ -114,15 +141,20 @@ export class VacationsComponent implements OnInit {
     this.sharedService.setLoading(true);
 
     const payload = {
-        startDate: this.vacationForm.value.startDate,
-        endDate: this.vacationForm.value.endDate
+        userId: Number(this.vacationForm.get('userId')?.value),
+        startDate: this.vacationForm.get('startDate')?.value,
+        endDate: this.vacationForm.get('endDate')?.value,
+        notes: this.vacationForm.get('notes')?.value
     };
+
+    console.log("PAYLOAD FINAL:", payload);
 
     this.apiVacation.create(payload).subscribe({
         next: () => {
 
-            this.vacationForm.reset();
+            console.log("VACATION CREADA");
 
+            this.vacationForm.reset();
             this.showFormModal = false;
 
             this.loadVacations();
@@ -131,30 +163,31 @@ export class VacationsComponent implements OnInit {
         },
         error: (err) => {
             console.error("ERROR CREAR", err);
+            console.log("RESPUESTA BACKEND:", err.error);
             this.sharedService.setLoading(false);
         }
     });
 }
 
     // Admin
-   approve(vacation: VacationModel) {
+    approve(vacation: VacationModel) {
 
-    console.log("APROBAR", vacation);
+        console.log("APROBAR", vacation);
 
-    this.sharedService.setLoading(true);
+        this.sharedService.setLoading(true);
 
-    this.apiVacation.approve(vacation.vacationRequestId).subscribe({
-        next: () => {
-            console.log("APROBADO OK");
-            this.loadVacations();
-            this.sharedService.setLoading(false);
-        },
-        error: (err) => {
-            console.error("ERROR APROBAR", err);
-            this.sharedService.setLoading(false);
-        }
-    });
-}
+        this.apiVacation.approve(vacation.vacationRequestId).subscribe({
+            next: () => {
+                console.log("APROBADO OK");
+                this.loadVacations();
+                this.sharedService.setLoading(false);
+            },
+            error: (err) => {
+                console.error("ERROR APROBAR", err);
+                this.sharedService.setLoading(false);
+            }
+        });
+    }
 
     reject(vacation: VacationModel) {
         this.sharedService.setLoading(true);

@@ -61,10 +61,12 @@ namespace ArteTextil.Helpers
                 .ForMember(d => d.IsActive, o => o.MapFrom(s => s.isActive));
 
             cfg.CreateMap<Vacation, VacationRequestDto>()
-                .ForMember(d => d.vacationRequestId, o => o.MapFrom(s => s.VacationId));
+                .ForMember(d => d.vacationRequestId, o => o.MapFrom(s => s.VacationId))
+                .ForMember(d => d.notes, o => o.MapFrom(s => s.Notes));
 
             cfg.CreateMap<VacationRequestDto, Vacation>()
-                .ForMember(d => d.VacationId, o => o.MapFrom(s => s.vacationRequestId));
+                .ForMember(d => d.VacationId, o => o.MapFrom(s => s.vacationRequestId))
+                .ForMember(d => d.Notes, o => o.MapFrom(s => s.notes));
 
             cfg.CreateMap<PayrollAdjustment, PayrollAdjustmentDto>()
                 .ForMember(d => d.adjustmentId, o => o.MapFrom(s => s.AdjustmentId));

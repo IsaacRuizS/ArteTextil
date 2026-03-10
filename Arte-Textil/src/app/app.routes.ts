@@ -52,6 +52,12 @@ export const routes: Routes = [
     import('./pages/analytics/demand/demand.component')
       .then(m => m.DemandComponent)
 },
+{
+  path: 'analytics/alerts',
+  loadComponent: () =>
+    import('./pages/analytics/alerts/alerts.component')
+      .then(m => m.AlertsComponent)
+},
             {
                 path: 'analytics',
                 loadComponent: () => import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent)

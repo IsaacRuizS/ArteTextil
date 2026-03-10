@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 // componentes
 import { HeaderComponent } from '../../components/header/header.component';
 import { LeftSidebarComponent } from '../../components/left-sidebar/left-sidebar.component';
+import { AlertPollingService } from '../../services/alert-polling.service';
 
 @Component({
     selector: 'app-full',
@@ -18,11 +19,15 @@ import { LeftSidebarComponent } from '../../components/left-sidebar/left-sidebar
         RouterOutlet
     ]
 })
-export class FullComponent {
+export class FullComponent implements OnInit {
 
-    constructor() { }
+    constructor(private alertPolling: AlertPollingService) { }
 
     sidebarClosed = false;
+
+     ngOnInit(): void {
+        this.alertPolling.start();
+    }
 
     toggleSidebar() {
         this.sidebarClosed = !this.sidebarClosed;
