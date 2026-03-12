@@ -61,6 +61,9 @@ export class OrderFormModalComponent {
 
     orderStatuses = [
         'Nuevo',
+        'Corte',
+        'Confección',
+        'Estampado',
         'Procesando',
         'En Camino',
         'Entregado',
@@ -79,8 +82,6 @@ export class OrderFormModalComponent {
     }
 
     ngOnInit() {
-
-        console.log('Payload de cotización antes de crear:', this.order);
 
         if (this.isEdit) {
 
@@ -113,10 +114,7 @@ export class OrderFormModalComponent {
 
     loadProducts() {
         this.productService.getAllForMarket().subscribe(p => {
-            this.products = p
-
-            console.log('Products loaded in OrderFormModalComponent:', this.products);
-
+            this.products = p;
         });
 
     }
@@ -166,6 +164,7 @@ export class OrderFormModalComponent {
             customerId: this.selectedQuote?.customerId,
             quoteId: this.selectedQuote?.quoteId,
             deliveryDate: this.orderForm.deliveryDate,
+            performByUserId: this.order?.loggedUserId ?? 1,
             status: 'Nuevo',
             isActive: true
         });
@@ -203,17 +202,15 @@ export class OrderFormModalComponent {
         this.quoteService.create(this.quoteForm).subscribe({
 
             next: (createdQuote) => {
-
-                console.log('Quote created successfully:', createdQuote);
-
+                
                 const orderPayload: OrderModel = new OrderModel({
                     customerId: createdQuote.customerId,
                     quoteId: createdQuote.quoteId,
                     deliveryDate: this.orderForm.deliveryDate,
+                    performByUserId: this.order?.loggedUserId ?? 1,
                     status: 'Nuevo',
                     isActive: true,
                 }) ;
-                console.log('Quote created successfully:', orderPayload);
 
                 this.orderService.create(orderPayload).subscribe({
 
@@ -243,6 +240,9 @@ export class OrderFormModalComponent {
     }
 
     saveEdit() {
+
+        this.model.performByUserId = this.order?.loggedUserId ?? 1;
+
         this.orderService.update(this.model).subscribe(() => {
             this.saved.emit();
             this.close();

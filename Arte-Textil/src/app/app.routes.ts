@@ -41,23 +41,23 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/promotion/promotion.component').then(m => m.PromotionComponent)
             },
             {
-  path: 'analytics/customer-segmentation',
-  loadComponent: () =>
-    import('./pages/analytics/customer-segmentation/customer-segmentation.component')
-      .then(m => m.CustomerSegmentationComponent)
-},
-{
-  path: 'analytics/demand',
-  loadComponent: () =>
-    import('./pages/analytics/demand/demand.component')
-      .then(m => m.DemandComponent)
-},
-{
-  path: 'analytics/alerts',
-  loadComponent: () =>
-    import('./pages/analytics/alerts/alerts.component')
-      .then(m => m.AlertsComponent)
-},
+                path: 'analytics/customer-segmentation',
+                loadComponent: () =>
+                    import('./pages/analytics/customer-analytics.component/customer-analytics.component') 
+                        .then(m => m.CustomerAnalyticsComponent)
+            },
+            {
+                path: 'analytics/demand',
+                loadComponent: () =>
+                    import('./pages/analytics/demand/demand.component')
+                        .then(m => m.DemandComponent)
+            },
+            {
+                path: 'analytics/alerts',
+                loadComponent: () =>
+                    import('./pages/analytics/alerts/alerts.component')
+                        .then(m => m.AlertsComponent)
+            },
             {
                 path: 'analytics',
                 loadComponent: () => import('./pages/analytics/analytics.component').then(m => m.AnalyticsComponent)
@@ -95,17 +95,6 @@ export const routes: Routes = [
                 path: 'admin/products',
                 loadComponent: () => import('./pages/admin/products/products.component').then(m => m.ProductsComponent)
             },
-
-            {
-                path: 'production',
-                loadComponent: () => import('./pages/production/production-layout.component').then(m => m.ProductionLayoutComponent),
-                children: [
-                    { path: '', redirectTo: 'tracking', pathMatch: 'full' },
-                    { path: 'tracking', loadComponent: () => import('./pages/production/tracking/production-tracking.component').then(m => m.ProductionTrackingComponent) },
-                    { path: 'control', loadComponent: () => import('./pages/production/control/order-control.component').then(m => m.OrderControlComponent) },
-                    { path: 'reports', loadComponent: () => import('./pages/production/reports/production-reports.component').then(m => m.ProductionReportsComponent) }
-                ]
-            }
         ]
     },
     {

@@ -200,7 +200,7 @@ namespace ArteTextil.Business
 
                         await _repositoryOrderItem.AddAsync(orderItem);
 
-                        // 🔥 OPCIONAL: Descontar stock aquí
+                        // OPCIONAL: Descontar stock aquí
                         var product = await _repositoryProduct.GetByIdAsync(qi.ProductId);
                         if (product != null)
                         {
@@ -255,19 +255,23 @@ namespace ArteTextil.Business
                             };
 
                             await _repositoryOrderItem.AddAsync(orderItem);
-
-                            // Descontar stock
-                            var product = await _repositoryProduct.GetByIdAsync(item.productId);
-                            if (product != null)
-                            {
-                                product.Stock -= item.quantity;
-                                _repositoryProduct.Update(product);
-                            }
                         }
 
                         await _repositoryOrderItem.SaveAsync();
                     }
                 }
+
+                var history = new OrderStatusHistory
+                {
+                    OrderId = order.OrderId,
+                    Status = order.Status,
+                    PerformedByUserId = dto.performByUserId,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _repositoryOrderStatusHistory.AddAsync(history);
+                await _repositoryOrderStatusHistory.SaveAsync();
 
                 // LOG
                 var logObject = new
@@ -320,7 +324,17 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                var previousSnapshot = JsonSerializer.Serialize(order);
+                // Snapshot previo para log (evita ciclos)
+                var previousSnapshot = JsonSerializer.Serialize(new
+                {
+                    order.OrderId,
+                    order.CustomerId,
+                    order.QuoteId,
+                    order.Status,
+                    order.DeliveryDate,
+                    order.IsActive,
+                    order.Notes
+                });
 
                 var statusChanged = order.Status != dto.status;
 
@@ -333,6 +347,7 @@ namespace ArteTextil.Business
                 _repositoryOrder.Update(order);
                 await _repositoryOrder.SaveAsync();
 
+                // Crear historial si el estado cambió
                 if (statusChanged)
                 {
                     var history = new OrderStatusHistory
@@ -340,6 +355,7 @@ namespace ArteTextil.Business
                         OrderId = order.OrderId,
                         Status = order.Status,
                         IsActive = true,
+                        PerformedByUserId = dto.performByUserId,
                         CreatedAt = DateTime.UtcNow
                     };
 
@@ -347,11 +363,23 @@ namespace ArteTextil.Business
                     await _repositoryOrderStatusHistory.SaveAsync();
                 }
 
+                // Snapshot nuevo para log
+                var newSnapshot = JsonSerializer.Serialize(new
+                {
+                    order.OrderId,
+                    order.CustomerId,
+                    order.QuoteId,
+                    order.Status,
+                    order.DeliveryDate,
+                    order.IsActive,
+                    order.Notes
+                });
+
                 await _logHelper.LogUpdate(
                     tableName: "Orders",
                     recordId: order.OrderId,
                     previousValue: previousSnapshot,
-                    newValue: JsonSerializer.Serialize(order)
+                    newValue: newSnapshot
                 );
 
                 await transaction.CommitAsync();
@@ -362,6 +390,7 @@ namespace ArteTextil.Business
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
+
                 response.Success = false;
                 response.Message = $"Error al actualizar orden: {ex.Message}";
             }
@@ -471,6 +500,30 @@ namespace ArteTextil.Business
                 await transaction.RollbackAsync();
                 response.Success = false;
                 response.Message = $"Error al cambiar estado: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // GET STATUS HISTORY BY ORDER
+        public async Task<ApiResponse<List<OrderStatusHistory>>> GetOrderStatusHistory(int orderId)
+        {
+            var response = new ApiResponse<List<OrderStatusHistory>>();
+
+            try
+            {
+                var history = await _repositoryOrderStatusHistory.Query()
+                    .Where(h => h.OrderId == orderId && h.DeletedAt == null)
+                    .OrderByDescending(h => h.CreatedAt)
+                    .ToListAsync();
+
+                response.Data = history;
+                response.Message = "Historial de estados obtenido correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al obtener historial: {ex.Message}";
             }
 
             return response;

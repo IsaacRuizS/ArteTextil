@@ -1,0 +1,45 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)" *ngIf="isOpen">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header border-0">
+                <h5 class="fw-bold mb-0">Historial de estado</h5>
+                <button class="btn-close" (click)="close()"></button>
+            </div>
+
+            <div class="modal-body pt-2">
+
+                <div *ngIf="history.length == 0" class="text-center text-muted py-4">
+                    No hay historial disponible
+                </div>
+
+                <div *ngIf="history.length > 0" class="status-timeline">
+
+                    <div *ngFor="let h of history" class="status-item">
+
+                        <div class="status-line"></div>
+
+                        <div class="status-dot" [ngClass]="getStatusColor(h.status)">
+                        </div>
+
+                        <div class="status-content">
+
+                            <span class="badge status-badge" [ngClass]="getStatusColor(h.status)">
+                                {{ h.status }}
+                            </span>
+
+                            <div class="status-date">
+                                {{ h.createdAt | date:'medium' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
