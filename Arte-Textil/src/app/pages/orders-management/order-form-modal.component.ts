@@ -40,7 +40,7 @@ export class OrderFormModalComponent {
 
     quoteForm: QuoteModel = new QuoteModel({
         customerId: 0,
-        status: 'Pendiente',
+        status: 'Pedido Realizado',
         total: 0,
         createdByUserId: 1,
         isActive: true,
