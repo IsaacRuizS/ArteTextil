@@ -10,8 +10,17 @@
     </div>
     }
 
+    <!-- CARGANDO -->
+    @if (loading) {
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando carrito...</span>
+        </div>
+    </div>
+    }
+
     <!-- CARRITO VACÍO -->
-    @if (cart.length === 0) {
+    @if (!loading && cart.length === 0) {
     <div class="text-center mt-5">
         <h4 class="text-muted">Aún no has agregado items al carrito</h4>
         <a routerLink="/marketplace" class="btn btn-primary mt-3">
@@ -21,7 +30,7 @@
     }
 
     <!-- LISTADO DEL CARRITO -->
-    @if (cart.length > 0) {
+    @if (!loading && cart.length > 0) {
 
     <div class="table-responsive">
         <table class="table align-middle">
