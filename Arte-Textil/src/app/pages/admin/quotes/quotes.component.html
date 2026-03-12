@@ -1,0 +1,247 @@
+<div class="quotes-wrapper p-4">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold mb-0">
+            Gestión de Cotizaciones
+        </h2>
+
+        <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="mdi mdi-plus-circle me-1"></i>
+            Nueva Cotización
+        </button>
+
+    </div>
+
+
+    <!-- FILTROS -->
+
+    <div class="row mb-4 g-2">
+
+        <div class="col-md-8">
+
+            <input type="text" class="form-control" placeholder="Buscar por cliente, estado o notas..."
+                (input)="onSearch($event)">
+
+        </div>
+
+        <div class="col-md-4">
+
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
+
+                <option value="0">Todos</option>
+                <option value="1">Activos</option>
+                <option value="2">Inactivos</option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+<!-- TABLA -->
+
+<div class="card shadow-sm border-0">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="bg-light">
+
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Cliente</th>
+                    <th>Status</th>
+                    <th>Notas</th>
+                    <th>Total</th>
+                    <th>Creado por</th>
+                    <th>Fecha</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr *ngFor="let q of quotes | paginate: { itemsPerPage: 50, currentPage: page }">
+
+                    <td class="ps-4 fw-semibold">
+
+                        # {{ q.quoteId }}
+
+                    </td>
+
+                    <td>
+
+                        {{ q.customer?.fullName }}
+
+                    </td>
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        <span class="badge bg-primary-subtle text-primary">
+
+                            {{ q.status }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- NOTES -->
+
+                    <td>
+
+                        <span
+                            *ngIf="(q.notes?.length ?? 0) <= 40">
+
+                            {{ q.notes }}
+
+                        </span>
+
+                        <span
+                            *ngIf="(q.notes?.length ?? 0) > 40"
+                            [title]="q.notes">
+
+                            {{ q.notes?.substring(0,40) + '...' }}
+
+                        </span>
+
+                    </td>
+
+
+                    <!-- TOTAL -->
+
+                    <td>
+
+                        {{ q.total | customCurrency:'₡'}}
+
+                    </td>
+
+
+                    <!-- CREATED BY -->
+
+                    <td>
+
+                        {{ q.createdByUser?.fullName ?? "N/A" }}
+
+                    </td>
+
+
+                    <!-- DATE -->
+
+                    <td>
+
+                        {{ q.createdAt | date:'short' }}
+
+                    </td>
+
+
+                    <!-- ACTIONS -->
+
+                    <td class="text-end pe-4">
+
+                        <button
+                            class="btn btn-sm btn-light text-primary me-2"
+                            (click)="openEditModal(q)">
+
+                            <i class="mdi mdi-pencil"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-sm btn-light"
+                            (click)="openDeleteModal(q)">
+
+                            @if (q.isActive) {
+
+                                <i class="mdi mdi-eye-off"></i>
+
+                            } @else {
+
+                                <i class="mdi mdi-eye-outline"></i>
+
+                            }
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <pagination-controls
+            (pageChange)="page = $event"
+            previousLabel="‹"
+            nextLabel="›"
+            class="d-flex justify-content-end mt-3">
+        </pagination-controls>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL FORM -->
+
+@if (showFormModal) {
+
+<app-quotes-modal [quote]="quoteSelected" [isEditing]="isEditing" (saved)="onSaved()" (closed)="showFormModal = false">
+</app-quotes-modal>
+
+}
+
+
+<!-- DELETE MODAL -->
+
+@if (showDeleteModal) {
+
+<div class="modal d-block" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+
+        <div class="modal-content text-center p-3">
+
+            <div class="modal-body">
+
+                <div class="mb-3 text-danger display-4">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+
+                <h5 class="mb-2 fw-bold">¿Modificar estado?</h5>
+
+                <p class="text-muted small">
+                    ¿Deseas cambiar el estado de la cotización?
+                </p>
+
+                <div class="d-flex justify-content-center gap-2 mt-4">
+
+                    <button class="btn btn-light" (click)="showDeleteModal = false">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">
+                        Modificar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+}

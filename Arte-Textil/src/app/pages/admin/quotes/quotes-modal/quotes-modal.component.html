@@ -1,0 +1,242 @@
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header border-0 pb-0">
+
+                <h5 class="modal-title fw-bold">
+                    {{ isEditing ? 'Editar' : 'Nueva' }} Cotización
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    (click)="closed.emit()">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <!-- CLIENTE -->
+
+                <div class="mb-3">
+
+                    <label class="form-label small fw-bold text-muted">
+                        Cliente
+                    </label>
+
+                    <select
+                        class="form-select"
+                        [(ngModel)]="quoteForm.customerId">
+
+                        <option [value]="0">
+                            Seleccione cliente
+                        </option>
+
+                        @for (c of customers; track c.customerId) {
+
+                        <option [value]="c.customerId">
+                            {{ c.fullName }}
+                        </option>
+
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="mb-3">
+
+                    <label class="form-label small fw-bold text-muted">
+                        Estado
+                    </label>
+
+                    <select
+                        class="form-select"
+                        [(ngModel)]="quoteForm.status">
+
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pedido Realizado">Pedido Realizado</option>
+                        <option value="Entregado">Entregado</option>
+                        <option value="Cancelado">Cancelado</option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- NOTAS -->
+
+                <div class="mb-3">
+
+                    <label class="form-label small fw-bold text-muted">
+                        Notas
+                    </label>
+
+                    <textarea
+                        class="form-control"
+                        rows="2"
+                        [(ngModel)]="quoteForm.notes">
+                    </textarea>
+
+                </div>
+
+
+                <!-- PRODUCTOS -->
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold">
+                        Productos
+                    </label>
+
+                    @for (item of quoteForm.items; track $index; let i = $index) {
+
+                    <div class="row g-2 mt-2 align-items-center">
+
+                        <!-- PRODUCTO -->
+
+                        <div class="col-5">
+
+                            <select
+                                class="form-select"
+                                [(ngModel)]="item.productId"
+                                (change)="updatePrice(item)">
+
+                                <option [value]="0">
+                                    Seleccione producto
+                                </option>
+
+                                @for (p of products; track p.productId) {
+
+                                <option [value]="p.productId">
+                                    {{ p.name }} (Stock: {{ p.stock }})
+                                </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- CANTIDAD -->
+
+                        <div class="col-2">
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                min="1"
+                                [(ngModel)]="item.quantity"
+                                (ngModelChange)="calculateTotal()">
+
+                        </div>
+
+
+                        <!-- PRECIO -->
+
+                        <div class="col-2">
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                [value]="item.price"
+                                readonly>
+
+                        </div>
+
+
+                        <!-- SUBTOTAL -->
+
+                        <div class="col-2">
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                [value]="(item.price * item.quantity) | customCurrency:'₡'"
+                                readonly>
+
+                        </div>
+
+
+                        <!-- ELIMINAR -->
+
+                        <div class="col-1 text-end">
+
+                            <button
+                                class="btn btn-danger btn-sm"
+                                (click)="removeItem(i)">
+                                ✕
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    }
+
+                    <br>
+
+                    <button
+                        class="btn btn-outline-primary btn-sm"
+                        (click)="addItem()">
+
+                        + Agregar Producto
+
+                    </button>
+
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div class="text-end mt-4">
+
+                    <h5 class="fw-bold">
+
+                        Total:
+
+                        {{ quoteForm.total | customCurrency:'₡'}}
+
+                    </h5>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer border-0 pt-0">
+
+                <button
+                    class="btn btn-light"
+                    (click)="closed.emit()">
+                    Cancelar
+                </button>
+
+                <button
+                    class="btn btn-primary px-4"
+                    (click)="saveQuote()">
+                    Guardar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
