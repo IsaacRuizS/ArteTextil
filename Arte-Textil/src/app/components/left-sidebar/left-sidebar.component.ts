@@ -16,7 +16,7 @@ export class LeftSidebarComponent {
             label: 'Configuración de Catálogo',
             collapsed: true,
             children: [
-                { label: 'Proveedores', link: '/admin/suppliers' },
+                { label: 'Proveedores', link: '/suppliers' },
                 { label: 'Categorías', link: '/categories' },
                 { label: 'Inventario', link: '/inventory' },
                 { label: 'Productos', link: '/admin/products' },

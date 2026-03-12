@@ -88,13 +88,19 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/admin/users/users.component').then(m => m.UsersComponent)
             },
             {
-                path: 'admin/suppliers',
+                path: 'suppliers',
                 loadComponent: () => import('./pages/admin/suppliers/suppliers.component').then(m => m.SuppliersComponent)
             },
             {
                 path: 'admin/products',
                 loadComponent: () => import('./pages/admin/products/products.component').then(m => m.ProductsComponent)
             },
+            {
+                path: 'customers',
+                loadComponent: () => import('./pages/admin/customers/customers.component').then(m => m.CustomersComponent)
+            },
+
+            
         ]
     },
     {
