@@ -4,7 +4,9 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 using System.Text.Json;
 
 namespace ArteTextil.Business
@@ -164,7 +166,7 @@ namespace ArteTextil.Business
                         return response;
                     }
 
-                    if (quote.Status == "Convertida")
+                    if (quote.Status == "Pedido Realizado")
                     {
                         response.Success = false;
                         response.Message = "La cotización ya fue convertida en una orden.";
@@ -212,7 +214,7 @@ namespace ArteTextil.Business
                     await _repositoryOrderItem.SaveAsync();
 
                     // Cambiar estado Quote
-                    quote.Status = "Convertida";
+                    quote.Status = "Pedido Realizado";
                     quote.UpdatedAt = DateTime.UtcNow;
                     _repositoryQuote.Update(quote);
                 }
@@ -361,6 +363,16 @@ namespace ArteTextil.Business
 
                     await _repositoryOrderStatusHistory.AddAsync(history);
                     await _repositoryOrderStatusHistory.SaveAsync();
+
+                    if(dto.status == "Entregado" || dto.status == "Cancelado")
+                    {
+                        var quote = await _repositoryQuote.Query().FirstOrDefaultAsync(q => q.QuoteId == dto.quoteId && q.DeletedAt == null);
+                        if(quote != null)
+                        {
+                            quote.Status = dto.status;
+                            _repositoryQuote.Update(quote);
+                        }
+                    }
                 }
 
                 // Snapshot nuevo para log

@@ -24,4 +24,7 @@ public class Quote : EntityBase
 
     // Navigation
     public ICollection<QuoteItem>? QuoteItems { get; set; }
+
+    public Customer? Customer { get; set; }
+    public User? CreatedByUser { get; set; }
 }

@@ -12,6 +12,7 @@ public class QuoteDto : DtoBase
     public bool isActive { get; set; }
 
     public List<QuoteItemDto>? items { get; set; }
-    public CustomerDto? Customer { get; set; }
+    public CustomerDto? customer { get; set; }
+    public UserDto? createdByUser { get; set; }
 
 }

@@ -50,6 +50,8 @@ public class QuoteBusiness
             var quotes = await _repositoryQuote.Query()
                 .Where(q => q.DeletedAt == null)
                 .Include(q => q.QuoteItems)
+                .Include(q => q.Customer)
+                .Include(q => q.CreatedByUser)
                 .ToListAsync();
 
             response.Data = _mapper.Map<List<QuoteDto>>(quotes);
@@ -112,11 +114,11 @@ public class QuoteBusiness
 
             //RESOLVER CUSTOMER AUTOMÁTICAMENTE
             
-            if (dto.customerId == 0 && dto.Customer != null)
+            if (dto.customerId == 0 && dto.customer != null)
             {
                 var existingCustomer = await _repositoryCustomer
                     .FirstOrDefaultAsync(c =>
-                        c.Email == dto.Customer.email &&
+                        c.Email == dto.customer.email &&
                         c.DeletedAt == null);
 
                 if (existingCustomer != null)
@@ -134,7 +136,7 @@ public class QuoteBusiness
                 {
 
                     //Validar si un usuario con ese correo ya existe y si no crearlo
-                    var existingUser = await _repositoryUser.FirstOrDefaultAsync(u => u.Email == dto.Customer.email && u.DeletedAt == null);
+                    var existingUser = await _repositoryUser.FirstOrDefaultAsync(u => u.Email == dto.customer.email && u.DeletedAt == null);
 
                     User user;
 
@@ -146,9 +148,9 @@ public class QuoteBusiness
                     {
                         user = new User
                         {
-                            FullName = dto.Customer.fullName,
-                            Email = dto.Customer.email ?? "",
-                            Phone = dto.Customer.phone ?? "",
+                            FullName = dto.customer.fullName,
+                            Email = dto.customer.email ?? "",
+                            Phone = dto.customer.phone ?? "",
                             PasswordHash = "",
                             RoleId = 3,
                             IsActive = true,
@@ -164,9 +166,9 @@ public class QuoteBusiness
                     var newCustomer = new Customer
                     {
                         UserId = user.UserId,
-                        FullName = dto.Customer.fullName,
-                        Email = dto.Customer.email,
-                        Phone = dto.Customer.phone,
+                        FullName = dto.customer.fullName,
+                        Email = dto.customer.email,
+                        Phone = dto.customer.phone,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     };
@@ -292,7 +294,6 @@ public class QuoteBusiness
     }
 
 
-    // UPDATE
     public async Task<ApiResponse<QuoteDto>> Update(QuoteDto dto)
     {
         var response = new ApiResponse<QuoteDto>();
@@ -310,7 +311,10 @@ public class QuoteBusiness
                 return response;
             }
 
-            var previousSnapshot = JsonSerializer.Serialize(quote);
+            // Snapshot previo usando DTO para evitar ciclos
+            var previousSnapshot = JsonSerializer.Serialize(
+                _mapper.Map<QuoteDto>(quote)
+            );
 
             // Actualizar campos principales
             quote.Status = dto.status;
@@ -321,19 +325,50 @@ public class QuoteBusiness
 
             _repositoryQuote.Update(quote);
 
-            // Eliminar items actuales (soft delete)
-            foreach (var item in quote.QuoteItems!)
-            {
-                item.DeletedAt = DateTime.UtcNow;
-                item.IsActive = false;
-                _repositoryQuoteItem.Update(item);
-            }
+            var existingItems = quote.QuoteItems!
+                .Where(i => i.DeletedAt == null)
+                .ToList();
 
-            // Agregar nuevos items
-            if (dto.items != null)
+            var dtoItems = dto.items ?? new List<QuoteItemDto>();
+
+            //CREAR O ACTUALIZAR ITEMS
+
+            foreach (var itemDto in dtoItems)
             {
-                foreach (var itemDto in dto.items)
+                if (itemDto.quoteItemId > 0)
                 {
+                    var existingItem = existingItems
+                        .FirstOrDefault(i => i.QuoteItemId == itemDto.quoteItemId);
+
+                    if (existingItem != null)
+                    {
+                        // UPDATE
+                        existingItem.ProductId = itemDto.productId;
+                        existingItem.Quantity = itemDto.quantity;
+                        existingItem.Price = itemDto.price;
+                        existingItem.UpdatedAt = DateTime.UtcNow;
+
+                        _repositoryQuoteItem.Update(existingItem);
+                    }
+                    else
+                    {
+                        // CREATE si no existe
+                        var newItem = new QuoteItem
+                        {
+                            QuoteId = quote.QuoteId,
+                            ProductId = itemDto.productId,
+                            Quantity = itemDto.quantity,
+                            Price = itemDto.price,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        await _repositoryQuoteItem.AddAsync(newItem);
+                    }
+                }
+                else
+                {
+                    // CREATE (item nuevo)
                     var newItem = new QuoteItem
                     {
                         QuoteId = quote.QuoteId,
@@ -348,17 +383,38 @@ public class QuoteBusiness
                 }
             }
 
+            //ELIMINAR ITEMS QUE YA NO VIENEN
+
+            var dtoItemIds = dtoItems
+                .Where(i => i.quoteItemId > 0)
+                .Select(i => i.quoteItemId)
+                .ToList();
+
+            foreach (var existingItem in existingItems)
+            {
+                if (!dtoItemIds.Contains(existingItem.QuoteItemId))
+                {
+                    existingItem.DeletedAt = DateTime.UtcNow;
+                    existingItem.IsActive = false;
+
+                    _repositoryQuoteItem.Update(existingItem);
+                }
+            }
+
             await _repositoryQuote.SaveAsync();
 
             var updated = await _repositoryQuote.Query()
                 .Include(q => q.QuoteItems)
                 .FirstAsync(q => q.QuoteId == dto.quoteId);
 
+            // Log usando DTO para evitar ciclos
             await _logHelper.LogUpdate(
                 tableName: "Quotes",
                 recordId: dto.quoteId,
                 previousValue: previousSnapshot,
-                newValue: JsonSerializer.Serialize(updated)
+                newValue: JsonSerializer.Serialize(
+                    _mapper.Map<QuoteDto>(updated)
+                )
             );
 
             response.Data = _mapper.Map<QuoteDto>(updated);
