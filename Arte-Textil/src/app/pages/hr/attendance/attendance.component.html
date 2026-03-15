@@ -3,26 +3,40 @@
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Gestión de Asistencias</h2>
+
         <div class="d-flex gap-2">
+
             <button class="btn btn-success" (click)="checkIn()">
-                <i class="mdi mdi-login me-1"></i>Check-in
+                <i class="mdi mdi-login me-1"></i>
+                Check-in
             </button>
+
             <button class="btn btn-danger" (click)="checkOut()">
-                <i class="mdi mdi-logout me-1"></i>Check-out
+                <i class="mdi mdi-logout me-1"></i>
+                Check-out
             </button>
+
+            <!-- BOTÓN ADMIN -->
+            <button *ngIf="isAdmin" class="btn btn-primary" (click)="openAdminAttendance()">
+
+                <i class="mdi mdi-account-plus me-1"></i>
+                Registrar asistencia
+
+            </button>
+
         </div>
     </div>
 
     <!-- FILTER -->
     <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por usuario o fecha..."
-            (input)="onSearch($event)">
+        <input type="text" class="form-control" placeholder="Buscar por usuario o fecha..." (input)="onSearch($event)">
     </div>
 
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
+
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Usuario</th>
@@ -30,27 +44,130 @@
                         <th>Check-in</th>
                         <th>Check-out</th>
                         <th>Estado</th>
+                        <th *ngIf="isAdmin" class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     <tr *ngFor="let a of attendances">
-                        <td class="ps-4 fw-semibold">{{ a.userName || a.userId }}</td>
-                        <td>{{ a.checkIn | date:'shortDate' }}</td>
-                        <td>{{ a.checkIn | date:'shortTime' }}</td>
-                        <td>{{ a.checkOut ? (a.checkOut | date:'shortTime') : '-' }}</td>
+
+                        <td class="ps-4 fw-semibold">
+                            {{ a.userName || a.userId }}
+                        </td>
+
                         <td>
-                            <span class="badge rounded-pill"
-                                [class.bg-success-subtle]="a.checkOut"
-                                [class.text-success]="a.checkOut"
-                                [class.bg-warning-subtle]="!a.checkOut"
+                            {{ a.checkIn | date:'shortDate' }}
+                        </td>
+
+                        <td>
+                            {{ a.checkIn | date:'shortTime' }}
+                        </td>
+
+                        <td>
+                            {{ a.checkOut ? (a.checkOut | date:'shortTime') : '-' }}
+                        </td>
+
+                        <td>
+                            <span class="badge rounded-pill" [class.bg-success-subtle]="a.checkOut"
+                                [class.text-success]="a.checkOut" [class.bg-warning-subtle]="!a.checkOut"
                                 [class.text-warning]="!a.checkOut">
+
                                 {{ a.checkOut ? 'Completo' : 'Pendiente' }}
+
                             </span>
                         </td>
+
+                        <td *ngIf="isAdmin" class="text-end pe-4">
+
+                            <button class="btn btn-sm btn-light text-primary" (click)="editAttendance(a)">
+
+                                <i class="mdi mdi-pencil"></i>
+
+                            </button>
+
+                        </td>
+
                     </tr>
                 </tbody>
+
             </table>
         </div>
+
+        @if (showAdminModal) {
+
+        <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">
+                            Registrar asistencia
+                        </h5>
+
+                        <button type="button" class="btn-close" (click)="showAdminModal = false">
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <form [formGroup]="adminAttendanceForm">
+
+                            <div class="mb-3">
+                                <label class="form-label">Usuario</label>
+
+                                <select class="form-select" formControlName="userId">
+
+                                    <option value="">Seleccione usuario</option>
+
+                                    <option *ngFor="let u of users" [value]="u.userId">
+
+                                        {{ u.fullName }}
+
+                                    </option>
+
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Check-in</label>
+
+                                <input type="datetime-local" class="form-control" formControlName="checkIn">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Check-out</label>
+
+                                <input type="datetime-local" class="form-control" formControlName="checkOut">
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+
+                        <button class="btn btn-light" (click)="showAdminModal = false">
+
+                            Cancelar
+
+                        </button>
+
+                        <button class="btn btn-primary" (click)="saveAdminAttendance()">
+
+                            Guardar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        }
+
     </div>
 
 </div>

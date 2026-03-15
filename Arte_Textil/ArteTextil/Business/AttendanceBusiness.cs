@@ -163,4 +163,72 @@ public class AttendanceBusiness
 
         return response;
     }
+
+    // Registrar asistencias administrador
+
+    public async Task<ApiResponse<AttendanceDto>> CreateForUser(AttendanceDto dto)
+    {
+        var response = new ApiResponse<AttendanceDto>();
+
+        try
+        {
+            var attendance = new Attendance
+            {
+                UserId = dto.userId,
+                CheckIn = dto.checkIn,
+                CheckOut = dto.checkOut,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _repository.AddAsync(attendance);
+
+            response.Data = _mapper.Map<AttendanceDto>(attendance);
+            response.Message = "Asistencia registrada por administrador";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    // Editar asistencias administrador
+
+    public async Task<ApiResponse<bool>> Update(int id, AttendanceDto dto)
+    {
+        var response = new ApiResponse<bool>();
+
+        try
+        {
+            var attendance = await _repository.GetByIdAsync(id);
+
+            if (attendance == null)
+            {
+                response.Success = false;
+                response.Message = "Asistencia no encontrada";
+                return response;
+            }
+
+            attendance.CheckIn = dto.checkIn;
+            attendance.CheckOut = dto.checkOut;
+            attendance.UpdatedAt = DateTime.UtcNow;
+
+            _repository.Update(attendance);
+            await _repository.SaveAsync();
+
+            response.Data = true;
+            response.Message = "Asistencia actualizada";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
 }
+

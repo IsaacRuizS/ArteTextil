@@ -1,4 +1,5 @@
 ﻿using ArteTextil.Business;
+using ArteTextil.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -66,6 +67,30 @@ public class AttendanceController : ControllerBase
     {
         var result = await _business.GetAll();
         if (!result.Success) return StatusCode(500, result);
+        return Ok(result);
+    }
+
+    // Registro de asistencia por usuario (ADMIN)
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPost("admin")]
+    public async Task<IActionResult> CreateForUser([FromBody] AttendanceDto dto)
+    {
+        var result = await _business.CreateForUser(dto);
+
+        if (!result.Success) return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    // Editar asistencia por usuario (ADMIN)
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] AttendanceDto dto)
+    {
+        var result = await _business.Update(id, dto);
+
+        if (!result.Success) return BadRequest(result);
+
         return Ok(result);
     }
 
