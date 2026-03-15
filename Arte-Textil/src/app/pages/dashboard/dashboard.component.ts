@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-type AlertType = 'danger' | 'warning' | 'info';
+import { ApiAlertService } from '../../services/api-alert.service';
+import { AlertModel } from '../../shared/models/alert.model';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +13,23 @@ type AlertType = 'danger' | 'warning' | 'info';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
+
+  constructor(
+    private api: ApiAlertService,
+    private shared: SharedService
+  ) {}
+
+  ngOnInit(): void {
+    this.shared.setLoading(true);
+    this.api.getAll().subscribe({
+      next: data => {
+        this.alerts = data.slice(0, 4);
+        this.shared.setLoading(false);
+      },
+      error: () => this.shared.setLoading(false)
+    });
+  }
   // Filtros (solo UI)
   filter = {
     from: '',
@@ -56,13 +74,7 @@ export class DashboardComponent {
     { area: 'Empaque', units: 41, efficiency: 70 },
   ];
 
-  // Alertas (mock)
-  alerts: { type: AlertType; title: string; detail: string; time: string }[] = [
-    { type: 'danger', title: 'Pedidos atrasados', detail: '3 pedidos superaron la fecha estimada.', time: 'Hoy 10:15' },
-    { type: 'warning', title: 'Inventario bajo', detail: 'Tela blanca: 8 unidades restantes.', time: 'Hoy 09:40' },
-    { type: 'info', title: 'Promoción por vencer', detail: 'Descuento “Regreso a clases” vence en 2 días.', time: 'Ayer 18:05' },
-    { type: 'warning', title: 'Datos inconsistentes', detail: '1 pedido sin categoría asignada.', time: 'Ayer 16:22' },
-  ];
+  alerts: AlertModel[] = [];
 
   lastUpdateLabel = 'Hace 15s'; // UI placeholder (luego lo conectas a “tiempo real”)
 }

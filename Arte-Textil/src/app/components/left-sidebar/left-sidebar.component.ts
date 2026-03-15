@@ -11,7 +11,8 @@ export class LeftSidebarComponent {
     @Input() isClosed = false;
 
     menu: any[] = [
-        { label: 'Marketplace', link: '/marketplace' }, 
+        { label: 'Dashboard', link: '/dashboard' },
+        { label: 'Marketplace', link: '/marketplace' },
         {
             label: 'Configuración de Catálogo',
             collapsed: true,
@@ -48,10 +49,9 @@ export class LeftSidebarComponent {
             label: 'Analítica',
             collapsed: true,
             children: [
-                { label: 'Analítica', link: '/analytics' },
+                { label: 'Cotizaciones y Predicciones', link: '/analytics' },
                 { label: 'Predicción de Demanda', link: '/analytics/demand' },
-                { label: 'Analítica Clientes', link: '/customer-analytics' },
-                { label: 'Dashboard', link: '/dashboard' },
+                { label: 'Analítica de Clientes', link: '/customer-analytics' },
                 { label: 'Reportes', link: '/reports' },
                 { label: 'Alertas', link: '/analytics/alerts' }
             ]
