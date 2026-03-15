@@ -31,6 +31,12 @@ public class ArteTextilDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<OrderStatusHistory> OrderStatusHistory { get; set; }
+    public DbSet<DemandHistory> DemandHistory { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DemandHistory>().HasNoKey().ToView("vw_DemandHistory");
+    }
 
     // public DbSet<Usuario> Usuarios { get; set; }
 }
