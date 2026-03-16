@@ -16,6 +16,8 @@ public class QuoteItem : EntityBase
 
     public decimal Price { get; set; }
 
+    public decimal DiscountAmount { get; set; } = 0;
+
     public bool IsActive { get; set; } = true;
 
     [ForeignKey("ProductId")]

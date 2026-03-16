@@ -213,6 +213,7 @@ public class QuoteBusiness
                     ProductId = item.productId,
                     Quantity = item.quantity,
                     Price = item.price,
+                    DiscountAmount = item.discountAmount,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -346,6 +347,7 @@ public class QuoteBusiness
                         existingItem.ProductId = itemDto.productId;
                         existingItem.Quantity = itemDto.quantity;
                         existingItem.Price = itemDto.price;
+                        existingItem.DiscountAmount = itemDto.discountAmount;
                         existingItem.UpdatedAt = DateTime.UtcNow;
 
                         _repositoryQuoteItem.Update(existingItem);
@@ -359,6 +361,7 @@ public class QuoteBusiness
                             ProductId = itemDto.productId,
                             Quantity = itemDto.quantity,
                             Price = itemDto.price,
+                            DiscountAmount = itemDto.discountAmount,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
                         };
