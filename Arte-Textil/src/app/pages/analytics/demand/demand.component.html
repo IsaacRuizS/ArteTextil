@@ -25,85 +25,80 @@
         No se pudo cargar la información. Intenta de nuevo.
     </div>
 
-    <!-- Contenido -->
-    <ng-container *ngIf="!loading && !error">
-
-        <!-- Gráfico -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <canvas id="demandChart" height="100"></canvas>
-                <p class="text-muted small mt-2 mb-0">
-                    <span class="me-3">&#9135;&#9135; Histórico</span>
-                    <span>- - - Predicción (próximos 3 meses)</span>
-                </p>
-            </div>
+    <!-- Gráfico — siempre en el DOM para que @ViewChild funcione -->
+    <div class="card mb-4" [hidden]="loading || error">
+        <div class="card-body">
+            <canvas #demandChart height="100"></canvas>
+            <p class="text-muted small mt-2 mb-0">
+                <span class="me-3">&#9135;&#9135; Histórico</span>
+                <span>- - - Predicción (próximos 3 meses)</span>
+            </p>
         </div>
+    </div>
 
-        <!-- Tablas -->
-        <div class="row g-4">
+    <!-- Tablas -->
+    <div class="row g-4" *ngIf="!loading && !error">
 
-            <!-- Histórico -->
-            <div class="col-12 col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header fw-semibold">Histórico</div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Mes</th>
-                                        <th class="text-end">Cantidad</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let row of tableData">
-                                        <td>{{ row.productName }}</td>
-                                        <td>{{ row.month }}</td>
-                                        <td class="text-end">{{ row.totalQuantity }}</td>
-                                    </tr>
-                                    <tr *ngIf="tableData.length === 0">
-                                        <td colspan="3" class="text-center text-muted py-3">Sin datos</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- Histórico -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Histórico</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Mes</th>
+                                    <th class="text-end">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of tableData">
+                                    <td>{{ row.productName }}</td>
+                                    <td>{{ row.month }}</td>
+                                    <td class="text-end">{{ row.totalQuantity }}</td>
+                                </tr>
+                                <tr *ngIf="tableData.length === 0">
+                                    <td colspan="3" class="text-center text-muted py-3">Sin datos</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Predicción -->
-            <div class="col-12 col-lg-6">
-                <div class="card h-100">
-                    <div class="card-header fw-semibold">Predicción (próximos 3 meses)</div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Mes</th>
-                                        <th class="text-end">Cantidad estimada</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let row of forecastData">
-                                        <td>{{ row.productName }}</td>
-                                        <td>{{ row.month }}</td>
-                                        <td class="text-end text-success fw-semibold">{{ row.totalQuantity }}</td>
-                                    </tr>
-                                    <tr *ngIf="forecastData.length === 0">
-                                        <td colspan="3" class="text-center text-muted py-3">Sin datos</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- Predicción -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Predicción (próximos 3 meses)</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Mes</th>
+                                    <th class="text-end">Cantidad estimada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of forecastData">
+                                    <td>{{ row.productName }}</td>
+                                    <td>{{ row.month }}</td>
+                                    <td class="text-end text-success fw-semibold">{{ row.totalQuantity }}</td>
+                                </tr>
+                                <tr *ngIf="forecastData.length === 0">
+                                    <td colspan="3" class="text-center text-muted py-3">Sin datos</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
         </div>
 
-    </ng-container>
+    </div>
 
 </div>

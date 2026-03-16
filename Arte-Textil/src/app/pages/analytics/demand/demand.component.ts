@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ApiDemandService } from '../../../services/api-demand.service';
 import { ApiProductService } from '../../../services/api-product.service';
 import { DemandModel } from '../../../shared/models/demand.model';
@@ -13,7 +14,7 @@ import Chart from 'chart.js/auto';
     imports: [CommonModule, FormsModule],
     templateUrl: './demand.component.html'
 })
-export class DemandComponent implements OnInit {
+export class DemandComponent implements OnInit, OnDestroy {
 
     @ViewChild('demandChart') demandChartRef!: ElementRef;
 
@@ -30,8 +31,24 @@ export class DemandComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.productApi.getAll().subscribe(res => this.products = res);
-        this.load();
+        this.loading = true;
+        this.error = false;
+
+        forkJoin({
+            products: this.productApi.getAll(),
+            demand: this.api.getDemand()
+        }).subscribe({
+            next: ({ products, demand }) => {
+                this.products = products;
+                this.data = demand;
+                this.loading = false;
+                this.renderChart();
+            },
+            error: () => {
+                this.loading = false;
+                this.error = true;
+            }
+        });
     }
 
     load() {
@@ -45,7 +62,7 @@ export class DemandComponent implements OnInit {
             next: res => {
                 this.data = res;
                 this.loading = false;
-                setTimeout(() => this.renderChart(), 0);
+                this.renderChart();
             },
             error: () => {
                 this.loading = false;
@@ -105,7 +122,7 @@ export class DemandComponent implements OnInit {
             ];
         }).flat();
 
-        this.chart = new Chart('demandChart', {
+        this.chart = new Chart(this.demandChartRef.nativeElement, {
             type: 'line',
             data: { labels: months, datasets },
             options: {
@@ -129,6 +146,10 @@ export class DemandComponent implements OnInit {
                 }
             }
         });
+    }
+
+    ngOnDestroy(): void {
+        this.chart?.destroy();
     }
 
     get tableData(): DemandModel[] {
