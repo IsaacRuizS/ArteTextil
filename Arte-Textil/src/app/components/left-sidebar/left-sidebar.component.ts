@@ -11,7 +11,7 @@ export class LeftSidebarComponent {
     @Input() isClosed = false;
 
     menu: any[] = [
-        { label: 'Marketplace', link: '/marketplace' }, 
+        { label: 'Marketplace', link: '/marketplace' },
         {
             label: 'Configuración de Catálogo',
             collapsed: true,
@@ -41,7 +41,11 @@ export class LeftSidebarComponent {
             children: [
                 { label: 'Asistencia', link: '/hr/attendance' },
                 { label: 'Vacaciones', link: '/hr/vacations' },
-                { label: 'Planillas', link: '/hr/payroll' }
+
+                { label: 'Ajustes de Planilla', link: '/hr/payroll' },
+                { label: 'Salarios', link: '/hr/payroll/salaries' },
+                { label: 'Planillas Mensuales', link: '/hr/payroll/monthly' },
+                { label: 'Pagos', link: '/hr/payroll/payments' }
             ]
         },
         {

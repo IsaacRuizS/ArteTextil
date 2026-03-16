@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { FullComponent } from './layouts/full/full.component';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { PublicComponent } from './layouts/public/public.component';
-import { PayrollAdjustmentsComponent } from './pages/hr/payroll/payroll-adjustments.component';
+import { PayrollAdjustmentsComponent } from './pages/hr/payroll-adjustments/payroll-adjustments.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -23,7 +23,19 @@ export const routes: Routes = [
             },
             {
                 path: 'hr/payroll',
-                loadComponent: () => import('./pages/hr/payroll/payroll-adjustments.component').then(m => m.PayrollAdjustmentsComponent)
+                loadComponent: () => import('./pages/hr/payroll-adjustments/payroll-adjustments.component').then(m => m.PayrollAdjustmentsComponent)
+            },
+            {
+                path: 'hr/payroll/salaries',
+                loadComponent: () => import('./pages/hr/payroll/salary.component').then(m => m.SalaryComponent)
+            },
+            {
+                path: 'hr/payroll/monthly',
+                loadComponent: () => import('./pages/hr/payroll/payroll-monthly.component').then(m => m.PayrollMonthlyComponent)
+            },
+            {
+                path: 'hr/payroll/payments',
+                loadComponent: () => import('./pages/hr/payroll/payments.component').then(m => m.PaymentsComponent)
             },
             // Existing Routes
             {
@@ -43,7 +55,7 @@ export const routes: Routes = [
             {
                 path: 'analytics/customer-segmentation',
                 loadComponent: () =>
-                    import('./pages/analytics/customer-analytics.component/customer-analytics.component') 
+                    import('./pages/analytics/customer-analytics.component/customer-analytics.component')
                         .then(m => m.CustomerAnalyticsComponent)
             },
             {
