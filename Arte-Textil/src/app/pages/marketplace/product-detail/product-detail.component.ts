@@ -106,9 +106,15 @@ export class ProductDetailComponent {
         });
     }
 
+    getFinalPrice(): number {
+        const promo = this.product.bestPromotion;
+        if (!promo) return this.product.price;
+        return this.product.price - (this.product.price * (promo.discountPercent ?? 0) / 100);
+    }
+
     onBackToMarketplace() {
         this.router.navigate(['/marketplace']);
-    } 
+    }
 
     private _loadProduct() {
 

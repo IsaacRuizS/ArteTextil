@@ -130,7 +130,8 @@ export class OrderFormModalComponent {
         this.quoteForm.items?.push({
             productId: 0,
             quantity: 1,
-            price: 0
+            price: 0,
+            discountAmount: 0
         });
     }
 
@@ -139,12 +140,23 @@ export class OrderFormModalComponent {
     }
 
     updatePrice(item: any) {
-
         const product = this.products.find(p => p.productId == item.productId);
-        const quoteItem = this.quoteForm.items?.find(i => i.productId == item.productId);
-        if (quoteItem) {
-            quoteItem.price = product ? product.price : 0;
+        if (product) {
+            item.price = product.price;
+            const promo = product.bestPromotion;
+            item.discountAmount = promo ? Math.round(product.price * (promo.discountPercent ?? 0) / 100) : 0;
+        } else {
+            item.price = 0;
+            item.discountAmount = 0;
         }
+    }
+
+    getProductForItem(item: any): ProductModel | undefined {
+        return this.products.find(p => p.productId == item.productId);
+    }
+
+    getItemFinalPrice(item: any): number {
+        return (item.price ?? 0) - (item.discountAmount ?? 0);
     }
 
     validateStock(index: number) {
@@ -188,7 +200,7 @@ export class OrderFormModalComponent {
         for (const item of this.quoteForm.items) {
             const product = this.products.find(p => p.productId == item.productId);
             if (product) {
-                total += item.quantity * product.price;
+                total += item.quantity * (item.price - (item.discountAmount ?? 0));
             }
         }
 

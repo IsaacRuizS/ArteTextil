@@ -31,3 +31,22 @@
 .total-box {
     background: #fafafa;
 }
+
+.cart-price-original {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    text-decoration: line-through;
+}
+
+.cart-discount-badge {
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+}
+
+.carrito-container {
+    max-width: 1000px;
+}

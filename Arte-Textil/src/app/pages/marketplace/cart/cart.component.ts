@@ -81,6 +81,11 @@ export class CartComponent implements OnInit {
         });
     }
 
+    getUnitPrice(item: ProductModel): number {
+        const promo = item.bestPromotion;
+        return promo ? item.price - (item.price * (promo.discountPercent ?? 0) / 100) : item.price;
+    }
+
     getSubtotal(item: ProductModel): number {
         const promo = item.bestPromotion;
         const price = promo

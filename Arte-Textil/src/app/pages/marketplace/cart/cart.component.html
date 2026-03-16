@@ -38,9 +38,10 @@
                 <tr>
                     <th>Producto</th>
                     <th>Precio</th>
-                    <th>Cantidad</th>
+                    <th>Descuento</th>
                     <th>Subtotal</th>
-                    <th></th>
+                    <th>Total</th>
+                    <th>Cantidad</th>
                 </tr>
             </thead>
 
@@ -48,56 +49,62 @@
                 @for (item of cart; track item.productId) {
 
                 <tr>
-                    <td width="35%">
+                    <!-- Producto -->
+                    <td width="30%">
                         <div class="d-flex gap-3 align-items-center">
                             <img [src]="item.mainImageUrl" class="thumb">
-
                             <div>
                                 <h6 class="fw-bold mb-1">{{ item.name }}</h6>
-
                                 @if (item.stock === 0) {
                                 <span class="badge bg-danger">Sin stock</span>
-                                }
-
-                                @if (item.bestPromotion) {
-                                <span class="badge bg-success ms-2">
-                                    -{{ item.bestPromotion.discountPercent }}%
-                                </span>
                                 }
                             </div>
                         </div>
                     </td>
 
+                    <!-- Precio original -->
                     <td>
+                        @if (item.bestPromotion) {
+                        <span class="cart-price-original">{{ item.price | customCurrency:'₡' }}</span>
+                        } @else {
                         <strong>{{ item.price | customCurrency:'₡' }}</strong>
-                    </td>
-
-                    <td width="180">
-                        <div class="qty-box d-flex align-items-center gap-2">
-                            <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">
-                                -
-                            </button>
-
-                            <span class="qty">{{ item.quantitySelected }}</span>
-
-                            <button class="btn btn-light btn-sm" (click)="increaseQty(item)">
-                                +
-                            </button>
-                        </div>
-
-                        @if (item.quantitySelected! > item.stock) {
-                        <small class="text-danger">Stock insuficiente</small>
                         }
                     </td>
 
+                    <!-- Descuento -->
+                    <td>
+                        @if (item.bestPromotion) {
+                        <span class="badge cart-discount-badge">
+                            -{{ item.bestPromotion.discountPercent }}%
+                        </span>
+                        } @else {
+                        <span class="text-muted small">—</span>
+                        }
+                    </td>
+
+                    <!-- Subtotal (precio unitario tras descuento) -->
+                    <td>
+                        <strong class="text-success">{{ getUnitPrice(item) | customCurrency:'₡' }}</strong>
+                    </td>
+
+                    <!-- Total (subtotal × cantidad) -->
                     <td>
                         <strong>{{ getSubtotal(item) | customCurrency:'₡' }}</strong>
                     </td>
 
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item)">
-                            <i class="mdi mdi-delete"></i>
-                        </button>
+                    <!-- Cantidad + eliminar -->
+                    <td width="160">
+                        <div class="qty-box d-flex align-items-center gap-2">
+                            <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">-</button>
+                            <span class="qty">{{ item.quantitySelected }}</span>
+                            <button class="btn btn-light btn-sm" (click)="increaseQty(item)">+</button>
+                            <button class="btn btn-sm btn-outline-danger ms-1" (click)="removeItem(item)">
+                                <i class="mdi mdi-delete"></i>
+                            </button>
+                        </div>
+                        @if (item.quantitySelected! > item.stock) {
+                        <small class="text-danger">Stock insuficiente</small>
+                        }
                     </td>
                 </tr>
 

@@ -24,6 +24,7 @@ export class QuoteItemModel {
     productName?: string;
     quantity!: number;
     price!: number;
+    discountAmount?: number;
 
     createdAt?: Date;
     updatedAt?: Date;

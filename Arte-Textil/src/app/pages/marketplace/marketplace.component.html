@@ -86,20 +86,26 @@
 
                 <img [src]="p.mainImageUrl" class="card-img-top product-img" />
 
+                <!-- Promo ribbon -->
+                @if (p.bestPromotion) {
+                <div class="promo-ribbon">-{{ p.bestPromotion.discountPercent }}% OFF</div>
+                }
+
                 <div class="card-body">
 
-                    <div class="fw-semibold font-18">{{ p.name | truncate : 20 :true}}</div>
+                    <div class="fw-semibold font-18 mb-1">{{ p.name | truncate : 20 :true}}</div>
 
+                    <!-- Precio -->
                     @if (!p.bestPromotion) {
                     <p class="mb-1">
                         <strong>{{ p.price | customCurrency:'₡' }}</strong>
                     </p>
-                    }@else{
-                        <p class="mb-1">
-                            <strong class="text-success">{{ getFinalPrice(p) | customCurrency:'₡' }}</strong>
-                        </p>
+                    } @else {
+                    <div class="price-block mb-1">
+                        <span class="price-original">{{ p.price | customCurrency:'₡' }}</span>
+                        <strong class="price-final">{{ getFinalPrice(p) | customCurrency:'₡' }}</strong>
+                    </div>
                     }
-
 
                     <!-- Categoría -->
                     <p class="text-muted small mb-1">
@@ -107,23 +113,21 @@
                     </p>
 
                     <!-- Proveedor -->
-                    <p class="text-muted small mb-1">
+                    <p class="text-muted small mb-0">
                         Proveedor: {{ supplierName(p.supplierId) | truncate : 12 :true }}
                     </p>
 
-                    <!-- Estado de stock -->
-                    <span class="badge" [class.bg-success]="p.stock > 0" [class.bg-danger]="p.stock === 0">
-                        {{ p.stock > 0 ? 'Disponible' : 'Sin stock' }}
-                    </span>
-
-                    <!-- Promoción -->
-                    @if (p.bestPromotion) {
-                    <div class="mt-2">
-                        <span class="badge bg-warning text-dark">
-                            -{{ p.bestPromotion.discountPercent }}% hasta {{ p.bestPromotion.endDate | date }}
+                    <!-- Badges fila inferior -->
+                    <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                        <span class="badge" [class.bg-success]="p.stock > 0" [class.bg-danger]="p.stock === 0">
+                            {{ p.stock > 0 ? 'Disponible' : 'Sin stock' }}
                         </span>
+                        @if (p.bestPromotion) {
+                        <span class="badge promo-badge">
+                            {{ p.bestPromotion.name || ('hasta ' + (p.bestPromotion.endDate | date:'dd/MM')) }}
+                        </span>
+                        }
                     </div>
-                    }
 
                 </div>
             </div>

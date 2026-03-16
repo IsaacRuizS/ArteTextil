@@ -30,7 +30,7 @@ export class ApiBaseService {
             "Access-Control-Allow-Origin": "*"
         };
 
-        const token = localStorage.getItem('auth_token');
+        const token = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_token') : null;
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
         }
