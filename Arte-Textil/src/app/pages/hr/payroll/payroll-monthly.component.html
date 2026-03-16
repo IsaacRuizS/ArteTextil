@@ -3,9 +3,10 @@
         <h2 class="fw-bold mb-0">Planillas Mensuales</h2>
         <form [formGroup]="form" class="d-flex gap-2">
 
-            <input class="form-control" style="width:160px" placeholder="YYYY-MM" formControlName="period">
+            <input type="month" class="form-control" formControlName="month" (change)="onMonthChange()">
 
-            <button type="button" class="btn btn-primary" (click)="generate()">
+            <button type="button" class="btn btn-primary" (click)="generate()"
+                [disabled]="!form.get('month')?.value || generating">
 
                 Generar
 
@@ -29,19 +30,34 @@
                 <tbody>
                     <tr *ngFor="let p of payrolls">
                         <td>{{ p.userName || p.userId }}</td>
-                        <td>{{ p.month }}</td>
+                        <td>{{ p.year }}-{{ p.month | number:'2.0' }}</td>
                         <td>₡ {{ p.total }}</td>
-                        <td><span class="badge" [class.bg-warning]="p.status==='Pendiente'"
-                                [class.bg-success]="p.status==='Aprobada'">{{ p.status }}</span></td>
+                        <td>
+                            <span class="badge" [class.bg-warning]="!p.approvedByUserId"
+                                [class.bg-success]="p.approvedByUserId">
+
+                                {{ p.approvedByUserId ? 'Aprobada' : 'Pendiente' }}
+
+                            </span>
+                        </td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-success me-2" (click)="approve(p)"
-                                [disabled]="p.status==='Aprobada'"><i class="mdi mdi-check"></i></button>
-                            <button class="btn btn-sm btn-primary" (click)="registerPayment(p)"><i
-                                    class="mdi mdi-cash"></i> Pagar</button>
+                                [disabled]="p.approvedByUserId"><i class="mdi mdi-check"></i></button>
+                            <button class="btn btn-sm btn-primary" (click)="registerPayment(p)">
+
+                                <i class="mdi mdi-cash"></i> Pagar
+                            </button>
                         </td>
                     </tr>
                 </tbody>
             </table>
+
+            <div class="d-flex justify-content-end mt-3">
+                <h5 class="fw-bold">
+                    Total Planilla: ₡ {{ totalPayroll | number:'1.2-2' }}
+                </h5>
+            </div>
+
         </div>
     </div>
 </div>

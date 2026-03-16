@@ -37,7 +37,7 @@ export class SalaryComponent implements OnInit {
 
     ngOnInit(): void {
         this.load();
-        this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(()=>{});
+        this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => { });
     }
 
     load() {
@@ -61,19 +61,67 @@ export class SalaryComponent implements OnInit {
     }
 
     save() {
-        if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        const payload = {
+            salaryId: this.editingId ?? 0,
+            userId: Number(this.form.get('userId')?.value),
+            userName: "",
+            baseSalary: Number(this.form.get('baseSalary')?.value),
+            isActive: true
+        };
+
+        console.log("SALARY PAYLOAD:", payload);
+
         this.shared.setLoading(true);
-        const payload = { ...this.form.value };
+
         if (this.editingId) {
+
+            const payload = {
+                salaryId: this.editingId,
+                userId: Number(this.form.get('userId')?.value),
+                userName: "",
+                baseSalary: Number(this.form.get('baseSalary')?.value),
+                isActive: true
+            };
+
             this.api.update(this.editingId, payload).subscribe({
-                next: () => { this.showModal = false; this.load(); this.shared.setLoading(false); },
-                error: () => this.shared.setLoading(false)
+
+                next: () => {
+                    this.showModal = false;
+                    this.load();
+                    this.shared.setLoading(false);
+                },
+
+                error: (err) => {
+                    console.error("ERROR UPDATE SALARY:", err);
+                    console.log("BACKEND RESPONSE:", err.error);
+                    this.shared.setLoading(false);
+                }
+
             });
         } else {
+
+            // Crear salario
             this.api.create(payload).subscribe({
-                next: () => { this.showModal = false; this.load(); this.shared.setLoading(false); },
-                error: () => this.shared.setLoading(false)
+
+                next: () => {
+                    this.showModal = false;
+                    this.load();
+                    this.shared.setLoading(false);
+                },
+
+                error: (err) => {
+                    console.error("ERROR CREATE SALARY:", err);
+                    this.shared.setLoading(false);
+                }
+
             });
+
         }
     }
 }

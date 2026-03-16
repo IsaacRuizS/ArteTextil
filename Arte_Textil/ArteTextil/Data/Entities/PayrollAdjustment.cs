@@ -16,4 +16,6 @@ public class PayrollAdjustment : EntityBase
     public string? Reason { get; set; }
 
     public bool IsActive { get; set; }
+
+    public bool Applied { get; set; } = false;
 }

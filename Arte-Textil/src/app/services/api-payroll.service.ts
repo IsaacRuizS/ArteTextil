@@ -9,11 +9,16 @@ export class ApiPayrollService extends ApiBaseService {
     constructor(public override http: HttpClient) { super(http); }
 
     // Generar nómina mensual (backend: POST /api/payroll/generate)
-    generate(period: string): Observable<PayrollMonthlyModel[]> {
-        return this.http.post<any>(`${this.baseUrl}/api/payroll/generate`, { period }, this.getHttpOptions()).pipe(
+    generate(year: number, month: number): Observable<boolean> {
+
+        return this.http.post<any>(
+            `${this.baseUrl}/api/payroll/generate`,
+            { year, month },
+            this.getHttpOptions()
+        ).pipe(
             map((res: any) => {
                 if (!res?.success) throw new Error(res?.message);
-                return (res.data || []).map((x: any) => new PayrollMonthlyModel(x));
+                return true;
             }),
             catchError(err => throwError(() => err))
         );

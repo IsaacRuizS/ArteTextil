@@ -6,7 +6,7 @@ public class PaymentDto
 
     public int payrollId { get; set; }
 
-    public string userName { get; set; }
+    public string? userName { get; set; }
 
     public decimal amount { get; set; }
 

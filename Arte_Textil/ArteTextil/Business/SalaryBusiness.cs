@@ -90,4 +90,42 @@ public class SalaryBusiness
 
         return response;
     }
+
+    // Actualizar salario
+    public async Task<ApiResponse<SalaryDto>> Update(int id, SalaryDto dto)
+    {
+        var response = new ApiResponse<SalaryDto>();
+
+        try
+        {
+            var salary = await _repository.FirstOrDefaultAsync(x =>
+                x.SalaryId == id &&
+                x.DeletedAt == null);
+
+            if (salary == null)
+            {
+                response.Success = false;
+                response.Message = "Salario no encontrado";
+                return response;
+            }
+
+            salary.UserId = dto.userId;
+            salary.BaseSalary = dto.baseSalary;
+            salary.UpdatedAt = DateTime.UtcNow;
+
+            _repository.Update(salary);
+            await _repository.SaveAsync();
+
+            response.Data = _mapper.Map<SalaryDto>(salary);
+            response.Message = "Salario actualizado";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
 }

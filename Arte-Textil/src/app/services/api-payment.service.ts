@@ -8,12 +8,23 @@ import { PaymentModel } from '../shared/models/payment.model';
 export class ApiPaymentService extends ApiBaseService {
     constructor(public override http: HttpClient) { super(http); }
 
-    create(data: { payrollId: number; method?: string; amount?: number }): Observable<PaymentModel> {
-        return this.http.post<any>(`${this.baseUrl}/api/payment`, data, this.getHttpOptions()).pipe(
+    create(data: any) {
+
+        return this.http.post<any>(
+            `${this.baseUrl}/api/payment`,
+            data,
+            this.getHttpOptions()
+        ).pipe(
+
             map((res: any) => {
-                if (!res?.success) throw new Error(res?.message);
-                return new PaymentModel(res.data);
+
+                if (!res?.success)
+                    throw new Error(res?.message);
+
+                return res.data;
+
             }),
+
             catchError(err => throwError(() => err))
         );
     }

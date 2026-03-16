@@ -25,38 +25,36 @@ public class PaymentBusiness
 
         try
         {
-            var payroll = await _context.PayrollMonthly
-                .FirstOrDefaultAsync(p => p.PayrollId == dto.payrollId);
+            // bloquear pago si la planilla ya fue pagada
+            var exists = await _context.Payments
+                .AnyAsync(p =>
+                    p.PayrollId == dto.payrollId &&
+                    p.DeletedAt == null);
 
-            if (payroll == null)
+            if (exists)
             {
                 response.Success = false;
-                response.Message = "Payroll no encontrado";
+                response.Message = "Esta planilla ya fue pagada";
                 return response;
             }
 
-            var payment = new Payment
+            var entity = new Payment
             {
                 PayrollId = dto.payrollId,
-                Amount = payroll.Total,
-                PaymentDate = DateTime.UtcNow,
+                Amount = dto.amount,
                 Method = dto.method,
+                PaymentDate = dto.paymentDate,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _repository.AddAsync(payment);
+            await _context.Payments.AddAsync(entity);
 
-            response.Data = new PaymentDto
-            {
-                paymentId = payment.PaymentId,
-                payrollId = payment.PayrollId,
-                amount = payment.Amount,
-                paymentDate = payment.PaymentDate,
-                method = payment.Method,
-                isActive = payment.IsActive
-            };
+            await _context.SaveChangesAsync();
 
+            dto.paymentId = entity.PaymentId;
+
+            response.Data = dto;
             response.Message = "Pago registrado correctamente";
         }
         catch (Exception ex)

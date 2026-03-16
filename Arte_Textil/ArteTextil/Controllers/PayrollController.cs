@@ -1,4 +1,5 @@
 ﻿using ArteTextil.Business;
+using ArteTextil.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,11 +18,12 @@ public class PayrollController : ControllerBase
     }
 
     [HttpPost("generate")]
-    public async Task<IActionResult> Generate(int year, int month)
+    public async Task<IActionResult> Generate([FromBody] PayrollGenerateDto dto)
     {
-        var result = await _business.GeneratePayroll(year, month);
+        var result = await _business.GeneratePayroll(dto.Year, dto.Month);
 
-        if (!result.Success) return BadRequest(result);
+        if (!result.Success)
+            return BadRequest(result);
 
         return Ok(result);
     }

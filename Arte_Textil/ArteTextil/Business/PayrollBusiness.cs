@@ -18,7 +18,8 @@ public class PayrollBusiness
         _repository = new RepositoryPayrollMonthly(context);
     }
 
-    // Generar payroll del mes
+
+    // Generar planilla del mes
     public async Task<ApiResponse<bool>> GeneratePayroll(int year, int month)
     {
         var response = new ApiResponse<bool>();
@@ -31,14 +32,28 @@ public class PayrollBusiness
 
             foreach (var user in users)
             {
+                // Verificar si YA existe payroll para este usuario en este mes
+                var payrollExists = await _context.PayrollMonthly
+                    .AnyAsync(p =>
+                        p.UserId == user.UserId &&
+                        p.Year == year &&
+                        p.Month == month &&
+                        p.DeletedAt == null);
+
+                if (payrollExists)
+                    continue; // saltar usuario (evita duplicado)
+
                 var salary = await _context.Salaries
                     .Where(s => s.UserId == user.UserId && s.IsActive)
                     .FirstOrDefaultAsync();
 
-                if (salary == null) continue;
+                if (salary == null)
+                    continue;
 
                 var adjustments = await _context.PayrollAdjustments
-                    .Where(a => a.UserId == user.UserId && a.DeletedAt == null)
+                    .Where(a =>
+                        a.UserId == user.UserId &&
+                        a.DeletedAt == null)
                     .ToListAsync();
 
                 decimal extras = adjustments
@@ -50,9 +65,10 @@ public class PayrollBusiness
                     .Sum(a => a.Amount);
 
                 decimal total =
-                    salary.BaseSalary
-                    + extras
-                    - deductions;
+                    salary.BaseSalary +
+                    extras -
+                    deductions;
+        
 
                 var payroll = new PayrollMonthly
                 {
@@ -67,8 +83,10 @@ public class PayrollBusiness
                     CreatedAt = DateTime.UtcNow
                 };
 
-                await _repository.AddAsync(payroll);
+                await _context.PayrollMonthly.AddAsync(payroll);
             }
+
+            await _context.SaveChangesAsync();
 
             response.Data = true;
             response.Message = "Payroll generado correctamente";
@@ -82,7 +100,7 @@ public class PayrollBusiness
         return response;
     }
 
-    // Ver payroll
+    // Ver planillas generadas
     public async Task<ApiResponse<List<PayrollMonthlyDto>>> GetAll()
     {
         var response = new ApiResponse<List<PayrollMonthlyDto>>();
@@ -123,7 +141,7 @@ public class PayrollBusiness
         return response;
     }
 
-    // Aprobar payroll
+    // Aprobar planillas
     public async Task<ApiResponse<bool>> Approve(int payrollId, int adminId)
     {
         var response = new ApiResponse<bool>();
