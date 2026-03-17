@@ -42,7 +42,11 @@ export class LeftSidebarComponent {
             children: [
                 { label: 'Asistencia', link: '/hr/attendance' },
                 { label: 'Vacaciones', link: '/hr/vacations' },
-                { label: 'Planillas', link: '/hr/payroll' }
+
+                { label: 'Ajustes de Planilla', link: '/hr/payroll' },
+                { label: 'Salarios', link: '/hr/payroll/salaries' },
+                { label: 'Planillas Mensuales', link: '/hr/payroll/monthly' },
+                { label: 'Pagos', link: '/hr/payroll/payments' }
             ]
         },
         {
@@ -52,7 +56,6 @@ export class LeftSidebarComponent {
                 { label: 'Cotizaciones y Predicciones', link: '/analytics' },
                 { label: 'Predicción de Demanda', link: '/analytics/demand' },
                 { label: 'Analítica de Clientes', link: '/customer-analytics' },
-                { label: 'Reportes', link: '/reports' },
                 { label: 'Alertas', link: '/analytics/alerts' }
             ]
         }

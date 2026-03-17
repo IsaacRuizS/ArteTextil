@@ -24,16 +24,19 @@ export class ApiBaseService {
 
         const headers: any = {
             "Cache-Control": "no-cache",
-            "Content-Type": "application/json, text/plain, */*", // DEFAULT
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "GET,POST,UPDATE,DELETE,OPTIONS",
-            "Access-Control-Allow-Origin": "*"
+            "Content-Type": "application/json"
         };
 
-        const token = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        let token: string | null = null;
+
+        if (typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function') {
+            token = localStorage.getItem('auth_token');
+        }
+
         if (token) {
             headers["Authorization"] = `Bearer ${token}`;
         }
+
         return headers;
     }
 

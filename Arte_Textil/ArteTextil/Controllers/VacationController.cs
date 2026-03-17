@@ -22,15 +22,23 @@ public class VacationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] VacationRequestDto dto)
     {
-        Console.WriteLine("CONTROLLER NOTES: " + dto.notes);
-
         var claim = User.FindFirst("id");
         if (claim == null) return Unauthorized("Token sin id");
 
-        dto.userId = int.Parse(claim.Value);
+        var tokenUserId = int.Parse(claim.Value);
+        var roleClaim = User.FindFirst("roleId");
+
+        bool isAdmin = roleClaim?.Value == "1";
+
+        // Si NO es admin, siempre usar el usuario del token
+        if (!isAdmin)
+        {
+            dto.userId = tokenUserId;
+        }
 
         var result = await _business.Create(dto);
 
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 

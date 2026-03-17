@@ -19,30 +19,50 @@ export class ApiAttendanceService extends ApiBaseService {
     }
 
     checkIn(): Observable<boolean> {
-    return this.http.post<any>(
-        `${this.baseUrl}/api/attendance/check-in`,
-        {},
-        this.getHttpOptions()
-    ).pipe(
-        map((res: any) => {
-            if (!res?.success) throw new Error(res?.message || 'Error al marcar entrada');
-            return res.data === true;
-        }),
-        catchError(err => throwError(() => err))
-    );
-}
+        return this.http.post<any>(
+            `${this.baseUrl}/api/attendance/check-in`,
+            {},
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) throw new Error(res?.message || 'Error al marcar entrada');
+                return res.data === true;
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
 
     checkOut(): Observable<boolean> {
-    return this.http.post<any>(
-        `${this.baseUrl}/api/attendance/check-out`,
-        {},
-        this.getHttpOptions()
-    ).pipe(
-        map((res: any) => {
-            if (!res?.success) throw new Error(res?.message || 'Error al marcar salida');
-            return res.data === true;
-        }),
-        catchError(err => throwError(() => err))
-    );
-}
+        return this.http.post<any>(
+            `${this.baseUrl}/api/attendance/check-out`,
+            {},
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) throw new Error(res?.message || 'Error al marcar salida');
+                return res.data === true;
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
+
+    createForUser(data: any) {
+
+        return this.http.post<any>(
+            `${this.baseUrl}/api/attendance/admin`,
+            data,
+            this.getHttpOptions()
+        );
+    }
+
+    updateAttendance(id: number, data: any) {
+
+        return this.http.put<any>(
+            `${this.baseUrl}/api/attendance/${id}`,
+            data,
+            this.getHttpOptions()
+        );
+
+    }
+
 }

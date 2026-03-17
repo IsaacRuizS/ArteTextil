@@ -1,0 +1,57 @@
+<div class="hr-wrapper p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">Salarios</h2>
+    <button class="btn btn-primary" (click)="openCreate()"><i class="mdi mdi-plus-circle me-1"></i>Nuevo salario</button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th>Usuario</th>
+            <th>Salario base</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of salaries">
+            <td>{{ s.userName || s.userId }}</td>
+            <td>₡ {{ s.baseSalary }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-light" (click)="edit(s)"><i class="mdi mdi-pencil"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showModal" class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Salario</h5><button class="btn-close" (click)="showModal=false"></button></div>
+        <div class="modal-body">
+          <form [formGroup]="form">
+            <div class="mb-3">
+              <label class="form-label">Usuario</label>
+              <select class="form-select" formControlName="userId">
+                <option value="">Seleccione usuario</option>
+                <option *ngFor="let u of users" [value]="u.userId">{{ u.fullName }}</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Salario base</label>
+              <input type="number" class="form-control" formControlName="baseSalary">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button class="btn btn-light" (click)="showModal=false">Cancelar</button>
+          <button class="btn btn-primary" (click)="save()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

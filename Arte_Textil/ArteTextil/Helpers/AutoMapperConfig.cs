@@ -68,6 +68,12 @@ namespace ArteTextil.Helpers
                 .ForMember(d => d.VacationId, o => o.MapFrom(s => s.vacationRequestId))
                 .ForMember(d => d.Notes, o => o.MapFrom(s => s.notes));
 
+            cfg.CreateMap<Salary, SalaryDto>().ReverseMap();
+
+            cfg.CreateMap<PayrollMonthly, PayrollMonthlyDto>().ReverseMap();
+
+            cfg.CreateMap<Payment, PaymentDto>().ReverseMap();
+
             cfg.CreateMap<PayrollAdjustment, PayrollAdjustmentDto>()
                 .ForMember(d => d.adjustmentId, o => o.MapFrom(s => s.AdjustmentId));
 
