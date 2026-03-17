@@ -1,0 +1,245 @@
+<div class="customers-wrapper p-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Gestión de Clientes</h2>
+
+        <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="mdi mdi-plus-circle me-1"></i>Nuevo Cliente
+        </button>
+    </div>
+
+    <!-- FILTER -->
+    <div class="row mb-4 g-2">
+
+        <div class="col-md-8">
+            <input type="text" class="form-control" placeholder="Buscar por nombre, email o teléfono..."
+                (input)="onSearch($event)">
+        </div>
+
+        <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
+                <option value="0">Todos</option>
+                <option value="1">Activos</option>
+                <option value="2">Inactivos</option>
+            </select>
+        </div>
+
+    </div>
+
+    <!-- LIST -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Clasificación</th>
+                        <th>Score</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr *ngFor="let c of customers | paginate: { itemsPerPage: 50, currentPage: page }">
+
+                        <td class="ps-4 fw-semibold">
+                            {{ c.fullName }}
+                        </td>
+
+                        <td>{{ c.email }}</td>
+
+                        <td>{{ c.phone }}</td>
+
+                        <td>{{ c.classification }}</td>
+
+                        <td>{{ c.activityScore }}</td>
+
+                        <td>
+                            <span class="badge rounded-pill" [class.bg-success-subtle]="c.isActive"
+                                [class.text-success]="c.isActive" [class.bg-secondary-subtle]="!c.isActive"
+                                [class.text-secondary]="!c.isActive">
+                                {{ c.isActive ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
+
+                        <td class="text-end pe-4">
+
+                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(c)">
+                                <i class="mdi mdi-pencil"></i>
+                            </button>
+
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)">
+                                @if (c.isActive) {
+                                <i class="mdi mdi-eye-off"></i>
+                                }@else {
+                                <i class="mdi mdi-eye-outline"></i>
+                                }
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
+
+        </div>
+    </div>
+
+</div>
+
+@if (showFormModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    {{ isEditing ? 'Editar' : 'Nuevo' }} Cliente
+                </h5>
+
+                <button type="button" class="btn-close" (click)="showFormModal = false">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form [formGroup]="customerForm">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">
+                            Nombre completo
+                        </label>
+
+                        <input type="text" class="form-control" formControlName="fullName"
+                            [class.is-invalid]="customerForm.get('fullName')?.invalid && customerForm.get('fullName')?.touched">
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label small fw-bold text-muted">
+                                Email
+                            </label>
+
+                            <input type="email" class="form-control" formControlName="email"
+                                [class.is-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label small fw-bold text-muted">
+                                Teléfono
+                            </label>
+
+                            <input type="text" class="form-control" formControlName="phone">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label small fw-bold text-muted">
+                                Clasificación
+                            </label>
+
+                            <select class="form-select" formControlName="classification">
+                                <option value="">Seleccione una clasificación</option>
+                                <option value="Cliente Nuevo">Cliente Nuevo</option>
+                                <option value="Cliente Frecuente">Cliente Frecuente</option>
+                                <option value="Cliente Premium">Cliente Premium</option>
+                                <option value="Cliente Inactivo">Cliente Inactivo</option>
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label small fw-bold text-muted">
+                                Activity Score
+                            </label>
+
+                            <input type="number" class="form-control" formControlName="activityScore">
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+
+                <button type="button" class="btn btn-light" (click)="showFormModal = false">
+                    Cancelar
+                </button>
+
+                <button type="button" class="btn btn-primary px-4" (click)="saveCustomer()">
+                    Guardar
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+}
+
+@if (showDeleteModal) {
+<div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+
+        <div class="modal-content text-center p-3">
+
+            <div class="modal-body">
+
+                <div class="mb-3 text-danger display-4">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+
+                <h5 class="mb-2 fw-bold">
+                    ¿Modificar estado?
+                </h5>
+
+                <p class="text-muted small">
+                    ¿Estás seguro de que deseas modificar el estado del cliente?
+                </p>
+
+                <div class="d-flex justify-content-center gap-2 mt-4">
+
+                    <button class="btn btn-light" (click)="showDeleteModal = false">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">
+                        Modificar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+}

@@ -4,7 +4,9 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 
 namespace ArteTextil.Business;
@@ -12,6 +14,7 @@ namespace ArteTextil.Business;
 public class CustomerBusiness
 {
     private readonly IRepositoryCustomer _repositoryCustomer;
+    private readonly IRepositoryUser _repositoryUser;
     private readonly ArteTextilDbContext _context;
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
@@ -23,6 +26,7 @@ public class CustomerBusiness
     {
         _context = context;
         _repositoryCustomer = new RepositoryCustomer(context);
+        _repositoryUser = new RepositoryUser(context);
         _mapper = mapper;
         _logHelper = logHelper;
     }
@@ -79,34 +83,86 @@ public class CustomerBusiness
         return response;
     }
 
-        // CREATE
-        public async Task<ApiResponse<CustomerDto>> Create(CustomerDto dto)
+    // CREATE
+    public async Task<ApiResponse<CustomerDto>> Create(CustomerDto dto)
     {
         var response = new ApiResponse<CustomerDto>();
 
         try
         {
-            if (string.IsNullOrWhiteSpace(dto.fullName))
+            if (string.IsNullOrWhiteSpace(dto.fullName) || string.IsNullOrWhiteSpace(dto.email))
             {
                 response.Success = false;
-                response.Message = "El nombre del cliente es obligatorio";
+                response.Message = "El nombre y correo del cliente son obligatorios";
                 return response;
             }
 
-            var customer = _mapper.Map<Customer>(dto);
-            customer.IsActive = true;
-            customer.CreatedAt = DateTime.UtcNow;
+            if (!new EmailAddressAttribute().IsValid(dto.email))
+            {
+                response.Success = false;
+                response.Message = "El correo no tiene un formato válido.";
+                return response;
+            }
 
-            await _repositoryCustomer.AddAsync(customer);
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _logHelper.LogCreate(
-                tableName: "Customers",
-                recordId: customer.CustomerId,
-                newValue: JsonSerializer.Serialize(customer)
-            );
+            try
+            {
+                // Buscar si ya existe un usuario con ese correo
+                var user = await _repositoryUser
+                    .FirstOrDefaultAsync(u => u.Email == dto.email && u.DeletedAt == null);
 
-            response.Data = _mapper.Map<CustomerDto>(customer);
-            response.Message = "Cliente creado correctamente";
+                if (user == null)
+                {
+                    var hasher = new PasswordHasher<User>();
+
+                    user = new User
+                    {
+                        FullName = dto.fullName,
+                        Email = dto.email,
+                        Phone = dto.phone ?? "",
+                        PasswordHash = "temp",
+                        RoleId = 3, // Cliente
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    // contraseña por defecto
+                    user.PasswordHash = hasher.HashPassword(user, "12345678");
+
+                    await _repositoryUser.AddAsync(user);
+
+                    await _logHelper.LogCreate(
+                        tableName: "Users",
+                        recordId: user.UserId,
+                        newValue: JsonSerializer.Serialize(user)
+                    );
+                }
+
+                // Crear Customer
+                var customer = _mapper.Map<Customer>(dto);
+                customer.IsActive = true;
+                customer.UserId = user.UserId;
+                customer.CreatedAt = DateTime.UtcNow;
+
+                await _repositoryCustomer.AddAsync(customer);
+
+                await _logHelper.LogCreate(
+                    tableName: "Customers",
+                    recordId: customer.CustomerId,
+                    newValue: JsonSerializer.Serialize(customer)
+                );
+
+                await transaction.CommitAsync();
+
+                response.Data = _mapper.Map<CustomerDto>(customer);
+                response.Message = "Cliente creado correctamente";
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
         catch (Exception ex)
         {
@@ -117,8 +173,8 @@ public class CustomerBusiness
         return response;
     }
 
-        // UPDATE
-        public async Task<ApiResponse<CustomerDto>> Update(CustomerDto dto)
+    // UPDATE
+    public async Task<ApiResponse<CustomerDto>> Update(CustomerDto dto)
     {
         var response = new ApiResponse<CustomerDto>();
 

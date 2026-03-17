@@ -8,6 +8,9 @@ export class DemandModel {
 
     productId!: number;
     productName!: string;
+    year!: number;
+    monthNumber!: number;
     month!: string;
     totalQuantity!: number;
+    isForecast!: boolean;
 }

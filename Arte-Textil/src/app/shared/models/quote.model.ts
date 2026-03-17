@@ -1,5 +1,6 @@
 import { QuoteItemModel } from './quote-item.model';
 import { CustomerModel } from './customer.model';
+import { UserModel } from './user.model';
 
 export class QuoteModel {
 
@@ -12,6 +13,10 @@ export class QuoteModel {
 
             if (init?.customer) {
                 init.customer = new CustomerModel(init.customer);
+            }
+
+            if (init?.createdByUser) {
+                init.createdByUser = new UserModel(init.createdByUser);
             }
 
             if (typeof init.createdAt === 'string') {
@@ -41,6 +46,7 @@ export class QuoteModel {
 
     items?: QuoteItemModel[];
     customer?: CustomerModel;
+    createdByUser?: UserModel;
 
     createdAt?: Date;
     updatedAt?: Date;

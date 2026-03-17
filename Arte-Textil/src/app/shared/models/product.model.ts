@@ -46,6 +46,7 @@ export class ProductModel {
     deletedAt?: Date;
 
     quantitySelected: number = 1;
+    cartItemId?: number;
     categoryName = '';
     supplierName = '';
 

@@ -67,43 +67,43 @@ export class ProductDetailComponent {
 
     addToCart() {
 
-        this.cartService.addProduct(this.product);
-
-        this.added = true;
-
-        setTimeout(() => {
-            this.added = false;
-            this.cdr.markForCheck();
-        }, 1500);
-
+        // Animación visual (inmediata, independiente de la llamada API)
         const img = document.querySelector('.image-main img') as HTMLElement;
         const cartIcon = document.querySelector('.cart-icon') as HTMLElement;
 
-        if (!img || !cartIcon) return;
+        if (img && cartIcon) {
+            const clone = img.cloneNode(true) as HTMLElement;
+            const imgRect = img.getBoundingClientRect();
+            const cartRect = cartIcon.getBoundingClientRect();
 
-        const clone = img.cloneNode(true) as HTMLElement;
-        const imgRect = img.getBoundingClientRect();
-        const cartRect = cartIcon.getBoundingClientRect();
+            clone.style.position = 'fixed';
+            clone.style.left = imgRect.left + 'px';
+            clone.style.top = imgRect.top + 'px';
+            clone.style.width = imgRect.width + 'px';
+            clone.style.transition = 'all 0.7s ease-in-out';
+            clone.style.zIndex = '1000';
 
-        clone.style.position = 'fixed';
-        clone.style.left = imgRect.left + 'px';
-        clone.style.top = imgRect.top + 'px';
-        clone.style.width = imgRect.width + 'px';
-        clone.style.transition = 'all 0.7s ease-in-out';
-        clone.style.zIndex = '1000';
+            document.body.appendChild(clone);
 
-        document.body.appendChild(clone);
+            setTimeout(() => {
+                clone.style.left = cartRect.left + 'px';
+                clone.style.top = cartRect.top + 'px';
+                clone.style.width = '40px';
+                clone.style.opacity = '0';
+            }, 10);
 
-        setTimeout(() => {
-            clone.style.left = cartRect.left + 'px';
-            clone.style.top = cartRect.top + 'px';
-            clone.style.width = '40px';
-            clone.style.opacity = '0';
-        }, 10);
+            setTimeout(() => clone.remove(), 800);
+        }
 
-        setTimeout(() => {
-            clone.remove();
-        }, 800);
+        this.cartService.addProduct(this.product).subscribe({
+            next: () => {
+                this.added = true;
+                setTimeout(() => {
+                    this.added = false;
+                    this.cdr.markForCheck();
+                }, 1500);
+            }
+        });
     }
 
     onBackToMarketplace() {
