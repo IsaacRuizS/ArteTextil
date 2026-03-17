@@ -106,6 +106,7 @@ export class QuotesComponent implements OnInit {
             this.quotes = this.quotes.filter(q =>
                 q.customer?.fullName?.toLowerCase().includes(term) ||
                 q.notes?.toLowerCase().includes(term) ||
+                q.quoteNumber?.toLowerCase().includes(term) ||
                 q.status?.toLowerCase().includes(term)
             );
 

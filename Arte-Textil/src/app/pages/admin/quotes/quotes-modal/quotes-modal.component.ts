@@ -112,6 +112,9 @@ export class QuotesModalComponent implements OnInit {
 
         } else {
 
+
+            this.quoteForm.sentToEmail = this.customers.find(c => c.customerId == this.quoteForm.customerId)?.email;
+
             this.apiQuoteService.create(this.quoteForm).subscribe({
 
                 next: () => {

@@ -50,7 +50,7 @@
                         <option [value]="null">Seleccione</option>
                         @for (q of quotes; track q.quoteId) {
                         <option [value]="q.quoteId">
-                            #{{ q.quoteId }} — ₡{{ q.total }}
+                            #{{ q.quoteNumber }} — ₡{{ q.total }}
                         </option>
                         }
                     </select>

@@ -49,7 +49,7 @@
                         </td>
 
                         <td class="cursor-pointer" (click)="openQuoteModal(o.quote)">
-                            #{{ o.quoteId }}
+                            #{{ o.quote?.quoteNumber }}
                         </td>
                         <td>{{ o.deliveryDate | date:'yyyy-MM-dd' }}</td>
                         <td>

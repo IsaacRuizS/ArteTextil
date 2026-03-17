@@ -48,6 +48,8 @@ export class QuoteModel {
     customer?: CustomerModel;
     createdByUser?: UserModel;
 
+    quoteNumber!: string;
+
     createdAt?: Date;
     updatedAt?: Date;
     deletedAt?: Date;
