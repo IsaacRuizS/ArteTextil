@@ -11,6 +11,8 @@ public class QuoteDto : DtoBase
     public string? sentToEmail { get; set; }
     public bool isActive { get; set; }
 
+    public string? quoteNumber { get; set; }
+
     public List<QuoteItemDto>? items { get; set; }
     public CustomerDto? customer { get; set; }
     public UserDto? createdByUser { get; set; }

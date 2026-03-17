@@ -19,6 +19,7 @@ public class Quote : EntityBase
     public int? CreatedByUserId { get; set; }
 
     public string? SentToEmail { get; set; }
+    public string? QuoteNumber { get; set; }
 
     public bool IsActive { get; set; } = true;
 

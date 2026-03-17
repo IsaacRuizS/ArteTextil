@@ -21,13 +21,14 @@ public class QuoteBusiness
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
     private readonly IEmailService _emailService;
-
+    private readonly QuoteRandomNumber _quoteRandomNumber;
 
     public QuoteBusiness(
         ArteTextilDbContext context,
         IMapper mapper,
         ISystemLogHelper logHelper,
-        IEmailService emailService
+        IEmailService emailService,
+        QuoteRandomNumber quoteRandomNumber
         )
     {
         _context = context;
@@ -38,6 +39,7 @@ public class QuoteBusiness
         _mapper = mapper;
         _logHelper = logHelper;
         _emailService = emailService;
+        _quoteRandomNumber = quoteRandomNumber;
     }
 
     // GET ALL
@@ -186,10 +188,14 @@ public class QuoteBusiness
                 response.Message = "No se pudo determinar el cliente.";
                 return response;
             }
+
             //CREAR QUOTE
+
+            var quoteNumber = await _quoteRandomNumber.GenerateUniqueQuoteNumber();
 
             var quote = new Quote
             {
+                QuoteNumber = quoteNumber,
                 CustomerId = dto.customerId,
                 Status = dto.status ?? "Pendiente",
                 Total = dto.total, 

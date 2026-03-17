@@ -77,6 +77,7 @@ builder.Services.AddScoped<CartItemBusiness>();
 builder.Services.AddScoped<OrderBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtHelper>();
+builder.Services.AddScoped<QuoteRandomNumber>();
 
 builder.Services.AddAuthorization(options =>
 {

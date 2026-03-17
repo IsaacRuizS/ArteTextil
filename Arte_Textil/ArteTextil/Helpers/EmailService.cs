@@ -52,7 +52,7 @@ namespace ArteTextil.Helpers
                                     <!-- HEADER -->
                                     <tr>
                                         <td style='background:#111827;color:#ffffff;padding:20px;'>
-                                            <h2 style='margin:0;'>Cotización #{quote.QuoteId}</h2>
+                                            <h2 style='margin:0;'>Cotización #{quote.QuoteNumber}</h2>
                                             <p style='margin:5px 0 0;font-size:14px;'>Arte Textil</p>
                                         </td>
                                     </tr>
@@ -115,7 +115,7 @@ namespace ArteTextil.Helpers
 
             var mail = new MailMessage
             {
-                Subject = $"Cotización #{quote.QuoteId} - Arte Textil",
+                Subject = $"Cotización #{quote.QuoteNumber} - Arte Textil",
                 Body = body,
                 IsBodyHtml = true,
                 From = new MailAddress("no-reply@artetextil.com")
