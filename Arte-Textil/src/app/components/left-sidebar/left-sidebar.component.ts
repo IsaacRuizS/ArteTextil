@@ -52,7 +52,6 @@ export class LeftSidebarComponent {
                 { label: 'Cotizaciones y Predicciones', link: '/analytics' },
                 { label: 'Predicción de Demanda', link: '/analytics/demand' },
                 { label: 'Analítica de Clientes', link: '/customer-analytics' },
-                { label: 'Reportes', link: '/reports' },
                 { label: 'Alertas', link: '/analytics/alerts' }
             ]
         }

@@ -81,18 +81,10 @@ export class DashboardComponent implements OnInit {
 
   // Productividad (mock — requiere endpoint backend)
   productivityByEmployee = [
-    { name: 'Ana López', area: 'Costura', units: 42, efficiency: 88 },
-    { name: 'Carlos Mora', area: 'Corte', units: 35, efficiency: 81 },
-    { name: 'María Rojas', area: 'Acabado', units: 29, efficiency: 76 },
-    { name: 'José Vega', area: 'Empaque', units: 25, efficiency: 72 },
-  ];
-
-  productivityByArea = [
-    { area: 'Diseño', units: 55, efficiency: 84 },
-    { area: 'Corte', units: 78, efficiency: 80 },
-    { area: 'Costura', units: 96, efficiency: 86 },
-    { area: 'Acabado', units: 62, efficiency: 74 },
-    { area: 'Empaque', units: 41, efficiency: 70 },
+    { name: 'Ana López',  units: 42, efficiency: 88 },
+    { name: 'Carlos Mora', units: 35, efficiency: 81 },
+    { name: 'María Rojas', units: 29, efficiency: 76 },
+    { name: 'José Vega', units: 25, efficiency: 72 },
   ];
 
   alerts: AlertModel[] = [];
