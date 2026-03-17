@@ -1,8 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
-type AlertType = 'danger' | 'warning' | 'info';
+import { ApiAlertService } from '../../services/api-alert.service';
+import { ApiOrderService } from '../../services/api-order.service';
+import { ApiProductService } from '../../services/api-product.service';
+import { ApiQuoteService } from '../../services/api-quote.service';
+import { AlertModel } from '../../shared/models/alert.model';
+import { SharedService } from '../../services/shared.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +17,48 @@ type AlertType = 'danger' | 'warning' | 'info';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
+
+  constructor(
+    private alertApi: ApiAlertService,
+    private orderApi: ApiOrderService,
+    private productApi: ApiProductService,
+    private quoteApi: ApiQuoteService,
+    private shared: SharedService
+  ) {}
+
+  ngOnInit(): void {
+    this.shared.setLoading(true);
+
+    forkJoin({
+      allOrders: this.orderApi.getAll(),
+      products: this.productApi.getAll(),
+      quotes: this.quoteApi.getAll(),
+      alerts: this.alertApi.getAll(),
+    }).subscribe({
+      next: ({ allOrders, products, quotes, alerts }) => {
+        const terminalStatuses = ['Entregado', 'Cancelado'];
+        this.kpis.activeOrders = allOrders.filter(o => !terminalStatuses.includes(o.status)).length;
+        this.kpis.finishedOrders = allOrders.filter(o => o.status === 'Entregado').length;
+        this.kpis.stockAvailable = products.reduce((sum, p) => sum + (p.stock ?? 0), 0);
+        this.kpis.totalSales = quotes.filter(q => q.isActive).reduce((sum, q) => sum + (q.total ?? 0), 0);
+        this.alerts = alerts.slice(0, 4);
+
+        const total = allOrders.length || 1;
+        this.productionStages = [
+          'Nuevo', 'Corte', 'Estampado', 'Procesando', 'En camino', 'Entregado', 'Cancelado'
+        ].map(name => ({
+          name,
+          active: allOrders.filter(o => o.status === name).length,
+          total
+        }));
+
+        this.shared.setLoading(false);
+      },
+      error: () => this.shared.setLoading(false)
+    });
+  }
+
   // Filtros (solo UI)
   filter = {
     from: '',
@@ -23,46 +70,24 @@ export class DashboardComponent {
   categories = ['Todas', 'Camisas', 'Pantalones', 'Uniformes'];
   statuses = ['Todos', 'Activo', 'Finalizado', 'Atrasado'];
 
-  // Indicadores (mock; luego los conectas a datos reales)
   kpis = {
-    activeOrders: 12,
-    finishedOrders: 48,
-    stockAvailable: 320,
-    totalSales: 1850000, // CRC
+    activeOrders: 0,
+    finishedOrders: 0,
+    stockAvailable: 0,
+    totalSales: 0,
   };
 
-  // Producción en curso (mock)
-  productionStages = [
-    { name: 'Diseño', active: 4, total: 10 },
-    { name: 'Corte', active: 6, total: 10 },
-    { name: 'Costura', active: 5, total: 10 },
-    { name: 'Acabado', active: 3, total: 10 },
-    { name: 'Empaque', active: 2, total: 10 },
-  ];
+  productionStages: { name: string; active: number; total: number }[] = [];
 
-  // Productividad (mock)
+  // Productividad (mock — requiere endpoint backend)
   productivityByEmployee = [
-    { name: 'Ana López', area: 'Costura', units: 42, efficiency: 88 },
-    { name: 'Carlos Mora', area: 'Corte', units: 35, efficiency: 81 },
-    { name: 'María Rojas', area: 'Acabado', units: 29, efficiency: 76 },
-    { name: 'José Vega', area: 'Empaque', units: 25, efficiency: 72 },
+    { name: 'Ana López',  units: 42, efficiency: 88 },
+    { name: 'Carlos Mora', units: 35, efficiency: 81 },
+    { name: 'María Rojas', units: 29, efficiency: 76 },
+    { name: 'José Vega', units: 25, efficiency: 72 },
   ];
 
-  productivityByArea = [
-    { area: 'Diseño', units: 55, efficiency: 84 },
-    { area: 'Corte', units: 78, efficiency: 80 },
-    { area: 'Costura', units: 96, efficiency: 86 },
-    { area: 'Acabado', units: 62, efficiency: 74 },
-    { area: 'Empaque', units: 41, efficiency: 70 },
-  ];
+  alerts: AlertModel[] = [];
 
-  // Alertas (mock)
-  alerts: { type: AlertType; title: string; detail: string; time: string }[] = [
-    { type: 'danger', title: 'Pedidos atrasados', detail: '3 pedidos superaron la fecha estimada.', time: 'Hoy 10:15' },
-    { type: 'warning', title: 'Inventario bajo', detail: 'Tela blanca: 8 unidades restantes.', time: 'Hoy 09:40' },
-    { type: 'info', title: 'Promoción por vencer', detail: 'Descuento “Regreso a clases” vence en 2 días.', time: 'Ayer 18:05' },
-    { type: 'warning', title: 'Datos inconsistentes', detail: '1 pedido sin categoría asignada.', time: 'Ayer 16:22' },
-  ];
-
-  lastUpdateLabel = 'Hace 15s'; // UI placeholder (luego lo conectas a “tiempo real”)
+  lastUpdateLabel = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
 }
