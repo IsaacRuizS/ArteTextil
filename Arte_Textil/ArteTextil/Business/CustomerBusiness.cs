@@ -197,7 +197,6 @@ public class CustomerBusiness
             customer.Phone = dto.phone;
             customer.Classification = dto.classification;
             customer.ActivityScore = dto.activityScore;
-            customer.LastQuoteDate = dto.lastQuoteDate;
             customer.UserId = dto.userId;
             customer.IsActive = dto.isActive;
             customer.UpdatedAt = DateTime.UtcNow;

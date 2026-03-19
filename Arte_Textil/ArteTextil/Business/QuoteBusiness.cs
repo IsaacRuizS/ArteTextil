@@ -132,6 +132,19 @@ public class QuoteBusiness
                     existingCustomer.ActivityScore =
                         (existingCustomer.ActivityScore ?? 0) + 1;
 
+                    if(existingCustomer.ActivityScore > 3)
+                    {
+                        existingCustomer.Classification = "Cliente Frecuente";
+                    }
+                    else if(existingCustomer.ActivityScore > 6)
+                    {
+                        existingCustomer.Classification = "Cliente Premium";
+                    } 
+                    else
+                    {
+                        existingCustomer.Classification = "Cliente Nuevo";
+                    }
+
                     _repositoryCustomer.Update(existingCustomer);
                 }
                 else
@@ -172,7 +185,10 @@ public class QuoteBusiness
                         Email = dto.customer.email,
                         Phone = dto.customer.phone,
                         IsActive = true,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = DateTime.UtcNow,
+                        LastQuoteDate = DateTime.UtcNow,
+                        ActivityScore = 1,
+                        Classification = "Cliente Nuevo"
                     };
 
                     await _repositoryCustomer.AddAsync(newCustomer);
