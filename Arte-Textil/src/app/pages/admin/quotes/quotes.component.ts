@@ -7,14 +7,14 @@ import { QuoteModel } from '../../../shared/models/quote.model';
 import { ApiQuoteService } from '../../../services/api-quote.service';
 import { SharedService } from '../../../services/shared.service';
 import { QuotesModalComponent } from './quotes-modal/quotes-modal.component';
-import { CustomCurrencyPipe } from "../../../shared/pipes/crc-currency.pipe";
+import { QuotesSmartListComponent } from '../../../components/quotes-smart-list/quotes-smart-list.component';
 
 
 @Component({
     selector: 'app-quotes',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, NgxPaginationModule, FormsModule, QuotesModalComponent, CustomCurrencyPipe],
+    imports: [CommonModule, NgxPaginationModule, FormsModule, QuotesModalComponent, QuotesSmartListComponent],
     templateUrl: './quotes.component.html',
     styleUrls: ['./quotes.component.scss']
 })

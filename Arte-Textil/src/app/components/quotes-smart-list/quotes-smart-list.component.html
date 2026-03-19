@@ -1,0 +1,96 @@
+<div class="card shadow-sm border-0">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Cliente</th>
+                    <th>Status</th>
+                    <th>Notas</th>
+                    <th>Total</th>
+                    <th>Creado por</th>
+                    <th>Fecha</th>
+                    <th *ngIf="showActions" class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr *ngFor="let q of quotes | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
+
+                    <td class="ps-4 fw-semibold">
+                        {{ q.quoteNumber }}
+                    </td>
+
+                    <td>
+                        {{ q.customer?.fullName }}
+                    </td>
+
+                    <!-- STATUS -->
+                    <td>
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" [ngClass]="getStatusClass(q.status)">
+                            {{ q.status }}
+                        </span>
+                    </td>
+
+                    <!-- NOTES -->
+                    <td>
+                        <span *ngIf="(q.notes?.length ?? 0) <= 40">
+                            {{ q.notes }}
+                        </span>
+
+                        <span *ngIf="(q.notes?.length ?? 0) > 40" [title]="q.notes">
+                            {{ q.notes?.substring(0,40) + '...' }}
+                        </span>
+                    </td>
+
+                    <!-- TOTAL -->
+                    <td>
+                        {{ q.total | customCurrency:'₡' }}
+                    </td>
+
+                    <!-- CREATED BY -->
+                    <td>
+                        {{ q.createdByUser?.fullName ?? "N/A" }}
+                    </td>
+
+                    <!-- DATE -->
+                    <td>
+                        {{ q.createdAt | date:'short' }}
+                    </td>
+
+                    <!-- ACTIONS -->
+                    <td *ngIf="showActions" class="text-end pe-4">
+
+                        <button class="btn btn-sm btn-light text-primary me-2" (click)="onEdit(q)">
+                            <i class="mdi mdi-pencil"></i>
+                        </button>
+
+                        <button class="btn btn-sm btn-light" (click)="onToggle(q)">
+
+                            @if (q.isActive) {
+                            <i class="mdi mdi-eye-off"></i>
+                            } @else {
+                            <i class="mdi mdi-eye-outline"></i>
+                            }
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <pagination-controls (pageChange)="pageChange.emit($event)" previousLabel="‹" nextLabel="›"
+            class="d-flex justify-content-end mt-3">
+        </pagination-controls>
+
+    </div>
+
+</div>

@@ -28,75 +28,13 @@
     </div>
 
     <!-- LIST -->
-    <div class="card shadow-sm border-0">
-        <div class="table-responsive">
-
-            <table class="table table-hover align-middle mb-0">
-
-                <thead class="bg-light text-center">
-                    <tr>
-                        <th class="ps-4">Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Clasificación</th>
-                        <th>Score</th>
-                        <th>Estado</th>
-                        <th class="text-end pe-4">Acciones</th>
-                    </tr>
-                </thead>
-
-                <tbody class="text-center">
-
-                    <tr *ngFor="let c of customers | paginate: { itemsPerPage: 50, currentPage: page }">
-
-                        <td class="ps-4 fw-semibold">
-                            {{ c.fullName }}
-                        </td>
-
-                        <td>{{ c.email }}</td>
-
-                        <td>{{ c.phone }}</td>
-
-                        <td>{{ c.classification }}</td>
-
-                        <td>{{ c.activityScore }}</td>
-
-                        <td>
-                            <span class="badge rounded-pill" [class.bg-success-subtle]="c.isActive"
-                                [class.text-success]="c.isActive" [class.bg-secondary-subtle]="!c.isActive"
-                                [class.text-secondary]="!c.isActive">
-                                {{ c.isActive ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </td>
-
-                        <td class="text-end pe-4">
-
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(c)">
-                                <i class="mdi mdi-pencil"></i>
-                            </button>
-
-                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)">
-                                @if (c.isActive) {
-                                <i class="mdi mdi-eye-off"></i>
-                                } @else {
-                                <i class="mdi mdi-eye-outline"></i>
-                                }
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
-                class="d-flex justify-content-end mt-3">
-            </pagination-controls>
-
-        </div>
-    </div>
+    <app-customers-smart-list
+        [customers]="customers"
+        [page]="page"
+        (pageChange)="page = $event"
+        (edit)="openEditModal($event)"
+        (toggleStatus)="openDeleteModal($event)">
+    </app-customers-smart-list>
 
 </div>
 

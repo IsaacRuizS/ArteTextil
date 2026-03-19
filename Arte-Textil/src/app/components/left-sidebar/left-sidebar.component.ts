@@ -21,10 +21,7 @@ export class LeftSidebarComponent {
                 { label: 'Categorías', link: '/categories' },
                 { label: 'Inventario', link: '/inventory' },
                 { label: 'Productos', link: '/admin/products' },
-                { label: 'Promociones', link: '/promotions' },
-                { label: 'Pedidos', link: '/orders-management' },
-                { label: 'Cotizaciones', link: '/quotes' },
-                { label: 'Clientes', link: '/customers' },
+                { label: 'Promociones', link: '/promotions' }, 
             ]
         },
 
@@ -34,6 +31,9 @@ export class LeftSidebarComponent {
             children: [
                 { label: 'Roles', link: '/admin/roles' },
                 { label: 'Usuarios', link: '/admin/users' },
+                { label: 'Pedidos', link: '/orders-management' },
+                { label: 'Cotizaciones', link: '/quotes' },
+                { label: 'Clientes', link: '/customers' },
             ]
         },
         {

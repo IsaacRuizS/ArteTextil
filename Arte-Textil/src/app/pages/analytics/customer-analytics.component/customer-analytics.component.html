@@ -21,9 +21,10 @@
                 <label class="form-label fw-semibold">Clasificación</label>
                 <select class="form-select" [(ngModel)]="filtros.clasificacion">
                     <option value="">Todas</option>
-                    <option value="frecuente">Frecuentes</option>
-                    <option value="nuevo">Nuevos</option>
-                    <option value="inactivo">Inactivos</option>
+                    <option value="Cliente Nuevo">Cliente Nuevo</option>
+                    <option value="Cliente Frecuente">Cliente Frecuente</option>
+                    <option value="Cliente Premium">Cliente Premium</option>
+                    <option value="Cliente Inactivo">Cliente Inactivo</option>
                 </select>
             </div>
 
@@ -36,32 +37,12 @@
                     <option value="180">Últimos 6 meses</option>
                 </select>
             </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Producto</label>
-                <select class="form-select" [(ngModel)]="filtros.producto">
-                    <option value="">Todos</option>
-                    @for (p of productos; track p) {
-                        <option [value]="p">{{ p }}</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Categoría</label>
-                <select class="form-select" [(ngModel)]="filtros.categoria">
-                    <option value="">Todas</option>
-                    @for (c of categorias; track c) {
-                        <option [value]="c">{{ c }}</option>
-                    }
-                </select>
-            </div>
         </div>
 
         <div class="mt-4 d-flex gap-3">
             <button class="btn btn-primary" (click)="aplicarFiltros()">Aplicar filtros</button>
             <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">Limpiar</button>
-            <button class="btn btn-success ms-auto">
+            <button class="btn btn-success ms-auto" (click)="downloadReport()">
                 <i class="mdi mdi-download"></i> Descargar Reporte
             </button>
         </div>
@@ -70,12 +51,12 @@
     <!-- MÉTRICAS -->
     <div class="row g-4 mb-4">
         @for (card of metricCards; track card.title) {
-            <div class="col-md-3">
-                <div class="metric-card card shadow-sm p-3 text-center">
-                    <h6 class="fw-semibold">{{ card.title }}</h6>
-                    <h3 class="fw-bold text-primary">{{ card.value }}</h3>
-                </div>
+        <div class="col-md-3">
+            <div class="metric-card card shadow-sm p-3 text-center">
+                <h6 class="fw-semibold">{{ card.title }}</h6>
+                <h3 class="fw-bold text-primary">{{ card.value }}</h3>
             </div>
+        </div>
         }
     </div>
 
@@ -83,95 +64,25 @@
     <div class="row g-4 mb-4">
 
         <div class="col-md-6">
-            <div class="card shadow-sm p-3">
+            <div class="card shadow-sm p-3 chart-container">
                 <h6 class="fw-semibold mb-3">Cotizaciones por tipo de cliente</h6>
                 <canvas #barChartCanvas></canvas>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card shadow-sm p-3">
+            <div class="card shadow-sm p-3 chart-container">
                 <h6 class="fw-semibold mb-3">Actividad por mes</h6>
                 <canvas #lineChartCanvas></canvas>
             </div>
         </div>
-
     </div>
 
-    <!-- PIE -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <h6 class="fw-semibold mb-3">Distribución de clientes</h6>
-                <canvas #pieChartCanvas></canvas>
-            </div>
-        </div>
-    </div>
-
-
-
-
-    <!-- =======================
-         TABLA DE CLIENTES
-    ======================== -->
-    <div class="card shadow-sm p-4 mb-5">
-
-        <h5 class="fw-semibold mb-3">Listado de clientes</h5>
-
-        <table class="table table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Teléfono</th>
-                    <th>Clasificación</th>
-                    <th>Última actividad</th>
-                    <th>Cotizaciones</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @for (client of clientes; track client.id) {
-                    <tr>
-                        <td>{{ client.nombre }}</td>
-                        <td>{{ client.correo }}</td>
-                        <td>{{ client.telefono }}</td>
-                        <td>
-                            <span class="badge"
-                                  [class.bg-success]="client.tipo === 'Frecuente'"
-                                  [class.bg-primary]="client.tipo === 'Nuevo'"
-                                  [class.bg-secondary]="client.tipo === 'Inactivo'">
-                                  {{ client.tipo }}
-                            </span>
-                        </td>
-                        <td>{{ client.ultimaActividad }}</td>
-                        <td>{{ client.cotizaciones }}</td>
-                    </tr>
-                }
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-
-
-    <!-- =======================
-         CAMBIOS RECIENTES
-    ======================== -->
-    <div class="card shadow-sm p-4 mb-5">
-        <h5 class="fw-semibold mb-3">Cambios recientes de clientes</h5>
-
-        @for (c of cambiosRecientes; track c.fecha) {
-        <div class="timeline-item mb-3">
-            <div class="dot"></div>
-            <div>
-                <strong>{{ c.cliente }}</strong><br>
-                <span class="text-muted small">{{ c.detalle }} – {{ c.fecha }}</span>
-            </div>
-        </div>
-        }
+    <!-- LIST of customers -->
+    <div style="margin-top: 50px;">
+        <app-customers-smart-list [customers]="customers" [page]="page" [showActions]="false" [itemsPerPage]="15"
+            (pageChange)="page = $event">
+        </app-customers-smart-list>
     </div>
 
 </div>

@@ -13,13 +13,14 @@ import { ApiCategoryService } from '../../services/api-category.service';
 import { SharedService } from '../../services/shared.service';
 import { QuoteModel } from '../../shared/models/quote.model';
 import { DemandModel } from '../../shared/models/demand.model';
+import { QuotesSmartListComponent } from '../../components/quotes-smart-list/quotes-smart-list.component';
 
 const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 @Component({
     selector: 'app-analytics.component',
     standalone: true,
-    imports: [CommonModule, FormsModule, CustomCurrencyPipe],
+    imports: [CommonModule, FormsModule, CustomCurrencyPipe, QuotesSmartListComponent],
     templateUrl: './analytics.component.html',
     styleUrl: './analytics.component.scss',
 })
@@ -34,10 +35,12 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     predictionChart: Chart | null = null;
 
     // Datos crudos
-    private allQuotes: QuoteModel[] = [];
     private demandData: DemandModel[] = [];
     private chartsReady = false;
     private dataReady = false;
+
+    quotes: QuoteModel[] = [];
+    quotesOrigins: QuoteModel[] = [];
 
     // Filtros
     filtros = { fechaInicio: '', fechaFin: '', producto: '', categoria: '' };
@@ -52,9 +55,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         tendencia: '—',
         tendenciaPositiva: true,
     };
-
-    // Tabla
-    cotizaciones: { fecha: Date | undefined; producto: string; cantidad: number; total: number }[] = [];
+    
+    page = 1;
 
     constructor(
         private quoteApi: ApiQuoteService,
@@ -73,7 +75,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
             categories: this.categoryApi.getAll().pipe(catchError(() => of([]))),
         }).subscribe({
             next: ({ quotes, demand, products, categories }) => {
-                this.allQuotes = quotes;
+                this.quotesOrigins = quotes;
+                this.quotes = quotes;
                 this.demandData = demand;
                 this.productos = [...new Set(
                     products.filter(p => p.isActive).map(p => p.name)
@@ -95,14 +98,14 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private tryRender(): void {
         if (this.chartsReady && this.dataReady) {
-            this.compute(this.allQuotes);
+            this.compute(this.quotesOrigins);
         }
     }
 
     // ── Filtros ──────────────────────────────────────────────────────────────
 
     aplicarFiltros(): void {
-        let filtered = this.allQuotes;
+        let filtered = this.quotesOrigins;
 
         if (this.filtros.fechaInicio) {
             const from = new Date(this.filtros.fechaInicio);
@@ -124,7 +127,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     limpiarFiltros(): void {
         this.filtros = { fechaInicio: '', fechaFin: '', producto: '', categoria: '' };
-        this.compute(this.allQuotes);
+        this.compute(this.quotesOrigins);
     }
 
     // ── Cómputo de KPIs, tabla y gráficas ────────────────────────────────────
@@ -141,17 +144,9 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.kpi.tendencia = label;
         this.kpi.tendenciaPositiva = positive;
 
-        // Tabla (ordenada por fecha desc)
-        this.cotizaciones = [...active]
-            .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))
-            .map(q => ({
-                fecha: q.createdAt,
-                producto: q.items?.length
-                    ? q.items[0].productName + (q.items.length > 1 ? ` +${q.items.length - 1} más` : '')
-                    : '—',
-                cantidad: q.items?.reduce((s, i) => s + i.quantity, 0) ?? 0,
-                total: q.total ?? 0,
-            }));
+        this.quotes = [...active].sort(
+            (a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0)
+        );
 
         // Gráficas
         this.updateLineChart(active);

@@ -8,10 +8,6 @@
     transition: 0.2s ease;
 }
 
-.metric-card:hover {
-    transform: translateY(-4px);
-}
-
 .timeline-item {
     display: flex;
     align-items: center;
@@ -27,4 +23,9 @@
 
 .table-hover tbody tr:hover {
     background-color: #f7f7f7;
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
 }

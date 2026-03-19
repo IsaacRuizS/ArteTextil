@@ -6,12 +6,13 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CustomerModel } from '../../../shared/models/customer.model';
 import { ApiCustomerService } from '../../../services/api-customer.service';
 import { SharedService } from '../../../services/shared.service';
+import { CustomersSmartListComponent } from '../../../components/customers-smart-list/customers-smart-list.component';
 
 @Component({
     selector: 'app-customers',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule, CustomersSmartListComponent],
     providers: [FormBuilder],
     templateUrl: './customers.component.html',
     styleUrls: ['./customers.component.scss']
