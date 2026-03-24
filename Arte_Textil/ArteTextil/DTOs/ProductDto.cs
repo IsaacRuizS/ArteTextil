@@ -8,6 +8,7 @@ namespace ArteTextil.DTOs
         public string? productCode { get; set; }
         public decimal price { get; set; }
         public int stock { get; set; }
+        public int quantityReserved { get; set; }
         public int minStock { get; set; }
         public string? status { get; set; }
         public int categoryId { get; set; }

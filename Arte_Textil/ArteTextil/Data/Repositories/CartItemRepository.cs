@@ -2,13 +2,13 @@ using ArteTextil.Data.Entities;
 
 namespace ArteTextil.Data.Repositories;
 
-public interface IRepositoryCartItem : IRepositoryBase<CartItem>
+public interface IRepositoryAlert : IRepositoryBase<Alert>
 {
 }
 
-public class RepositoryCartItem : RepositoryBase<CartItem>, IRepositoryCartItem
+public class RepositoryAlert : RepositoryBase<Alert>, IRepositoryAlert
 {
-    public RepositoryCartItem(ArteTextilDbContext context) : base(context)
+    public RepositoryAlert(ArteTextilDbContext context) : base(context)
     {
     }
 }

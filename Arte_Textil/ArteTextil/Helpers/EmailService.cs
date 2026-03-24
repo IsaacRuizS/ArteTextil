@@ -191,5 +191,272 @@ namespace ArteTextil.Helpers
 
             await _smtp.SendMailAsync(mail);
         }
+
+        public async Task SendPromotionsExpiringAsync(List<string>? emails, List<Promotion> promotions)
+        {
+            if (emails == null || !emails.Any() || promotions == null || !promotions.Any())
+                return;
+
+            var orderedPromotions = promotions.OrderBy(p => p.EndDate).ToList();
+
+            var promotionsHtml = string.Join("", orderedPromotions.Select(p => $@"
+                <tr>
+                    <td style='padding:10px;border-bottom:1px solid #eee;'>{p.Name}</td>
+                    <td style='padding:10px;border-bottom:1px solid #eee;text-align:center;'>{p.DiscountPercent}%</td>
+                    <td style='padding:10px;border-bottom:1px solid #eee;text-align:center;'>{p.StartDate:dd/MM/yyyy}</td>
+                    <td style='padding:10px;border-bottom:1px solid #eee;text-align:center;color:#dc2626;font-weight:bold;'>{p.EndDate:dd/MM/yyyy}</td>
+                </tr>
+            "));
+
+            var body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset='UTF-8'>
+                </head>
+                <body style='font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;'>
+                    <table width='100%' cellpadding='0' cellspacing='0'>
+                        <tr>
+                            <td align='center'>
+                                <table width='600' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td style='background:#111827;color:#ffffff;padding:20px;'>
+                                            <h2 style='margin:0;'>Promociones por vencer</h2>
+                                            <p style='margin:5px 0 0;font-size:14px;'>Arte Textil</p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- INFO -->
+                                    <tr>
+                                        <td style='padding:20px;'>
+                                            <p>Hola,</p>
+                                            <p>Aprovecha estas promociones que están próximas a vencer en las próximas 24 horas:</p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- TABLE -->
+                                    <tr>
+                                        <td style='padding:0 20px 20px;'>
+                                            <table width='100%' cellpadding='0' cellspacing='0' style='border-collapse:collapse;font-size:14px;'>
+                                                <thead>
+                                                    <tr style='background:#f3f4f6;'>
+                                                        <th style='padding:10px;text-align:left;'>Promoción</th>
+                                                        <th style='padding:10px;text-align:center;'>Descuento</th>
+                                                        <th style='padding:10px;text-align:center;'>Inicio</th>
+                                                        <th style='padding:10px;text-align:center;'>Fin</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {promotionsHtml}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td style='background:#f9fafb;padding:15px;text-align:center;font-size:12px;color:#6b7280;'>
+                                            Este correo fue generado automáticamente.<br/>
+                                            © {DateTime.UtcNow.Year} Arte Textil
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            ";
+
+            foreach (var email in emails)
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                    continue;
+
+                var mail = new MailMessage
+                {
+                    Subject = "Promociones por vencer - Arte Textil",
+                    Body = body,
+                    IsBodyHtml = true,
+                    From = new MailAddress("no-reply@artetextil.com")
+                };
+
+                mail.To.Add(email);
+
+                await _smtp.SendMailAsync(mail);
+            }
+        }
+
+        public async Task SendDailyAlertsToAdminsAsync(List<string> emails, List<Promotion> promotions, List<Product> products, List<Order> orders)
+        {
+            if (emails == null || !emails.Any())
+                return;
+
+            // PROMOCIONES
+            var promotionsHtml = string.Join("", promotions.Select(p => $@"
+                <tr>
+                    <td style='padding:8px;border-bottom:1px solid #eee;'>{p.Name}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{p.Product?.Name}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{p.DiscountPercent}%</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;color:#dc2626;font-weight:bold;'>{p.EndDate:dd/MM/yyyy}</td>
+                </tr>
+            "));
+
+            // PRODUCTOS
+            var productsHtml = string.Join("", products.Select(p => $@"
+                <tr>
+                    <td style='padding:8px;border-bottom:1px solid #eee;'>{p.Name}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{p.Stock}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{p.QuantityReserved}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;color:#dc2626;font-weight:bold;'>{p.MinStock}</td>
+                </tr>
+            "));
+
+            // ORDENES
+            var now = DateTime.Now;
+
+            var ordersHtml = string.Join("", orders.Select(o => $@"
+                <tr>
+                    <td style='padding:8px;border-bottom:1px solid #eee;'>#{o.OrderId}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{o.Status}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>{o.DeliveryDate:dd/MM/yyyy}</td>
+                    <td style='padding:8px;border-bottom:1px solid #eee;text-align:center;
+                        color:{(o.DeliveryDate < now ? "#dc2626" : "#f59e0b")};
+                        font-weight:bold;'>
+                        {(o.DeliveryDate < now ? "VENCIDA" : "POR VENCER")}
+                    </td>
+                </tr>
+            "));
+
+            var body = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset='UTF-8'>
+                </head>
+                <body style='font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;'>
+
+                    <table width='100%' cellpadding='0' cellspacing='0'>
+                        <tr>
+                            <td align='center'>
+
+                                <table width='700' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+                                    <!-- HEADER -->
+                                    <tr>
+                                        <td style='background:#111827;color:#ffffff;padding:20px;'>
+                                            <h2 style='margin:0;'>Reporte de Alertas</h2>
+                                            <p style='margin:5px 0 0;font-size:14px;'>Arte Textil</p>
+                                        </td>
+                                    </tr>
+
+                                    <!-- RESUMEN -->
+                                    <tr>
+                                        <td style='padding:20px;'>
+                                            <p><b>Resumen:</b></p>
+                                            <ul>
+                                                <li>Promociones por vencer: <b>{promotions.Count}</b></li>
+                                                <li>Productos con bajo stock: <b>{products.Count}</b></li>
+                                                <li>Órdenes críticas: <b>{orders.Count}</b></li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+                                    <!-- PROMOCIONES -->
+                                    <tr>
+                                        <td style='padding:0 20px 20px;'>
+                                            <h3>Promociones por vencer</h3>
+                                            <table width='100%' style='border-collapse:collapse;font-size:13px;'>
+                                                <thead>
+                                                    <tr style='background:#f3f4f6;'>
+                                                        <th style='padding:8px;text-align:left;'>Promoción</th>
+                                                        <th style='padding:8px;text-align:center;'>Producto</th>
+                                                        <th style='padding:8px;text-align:center;'>Descuento</th>
+                                                        <th style='padding:8px;text-align:center;'>Fin</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {promotionsHtml}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- PRODUCTOS -->
+                                    <tr>
+                                        <td style='padding:0 20px 20px;'>
+                                            <h3>Productos con bajo stock</h3>
+                                            <table width='100%' style='border-collapse:collapse;font-size:13px;'>
+                                                <thead>
+                                                    <tr style='background:#f3f4f6;'>
+                                                        <th style='padding:8px;text-align:left;'>Producto</th>
+                                                        <th style='padding:8px;text-align:center;'>Stock</th>
+                                                        <th style='padding:8px;text-align:center;'>Reservado</th>
+                                                        <th style='padding:8px;text-align:center;'>Mínimo</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {productsHtml}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- ORDENES -->
+                                    <tr>
+                                        <td style='padding:0 20px 20px;'>
+                                            <h3>Órdenes críticas</h3>
+                                            <table width='100%' style='border-collapse:collapse;font-size:13px;'>
+                                                <thead>
+                                                    <tr style='background:#f3f4f6;'>
+                                                        <th style='padding:8px;text-align:left;'>Orden</th>
+                                                        <th style='padding:8px;text-align:center;'>Estado</th>
+                                                        <th style='padding:8px;text-align:center;'>Entrega</th>
+                                                        <th style='padding:8px;text-align:center;'>Condición</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {ordersHtml}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- FOOTER -->
+                                    <tr>
+                                        <td style='background:#f9fafb;padding:15px;text-align:center;font-size:12px;color:#6b7280;'>
+                                            Este reporte fue generado automáticamente.<br/>
+                                            © {DateTime.UtcNow.Year} Arte Textil
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                </body>
+                </html>
+                ";
+
+            foreach (var email in emails)
+            {
+                var mail = new MailMessage
+                {
+                    Subject = "Reporte de alertas - Arte Textil",
+                    Body = body,
+                    IsBodyHtml = true,
+                    From = new MailAddress("no-reply@artetextil.com")
+                };
+
+                mail.To.Add(email);
+
+                await _smtp.SendMailAsync(mail);
+            }
+        }
     }
 }

@@ -78,6 +78,8 @@ builder.Services.AddScoped<OrderBusiness>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtHelper>();
 builder.Services.AddScoped<QuoteRandomNumber>();
+builder.Services.AddScoped<IJobBusiness, JobBusiness>();
+builder.Services.AddHostedService<DailyAlertsJobService>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -158,13 +160,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(corsPolicy);
 app.UseAuthentication();
-app.UseHangfireDashboard("/hangfire");
-
-RecurringJob.AddOrUpdate<AlertBusiness>(
-    "check-massive-quotes",
-    x => x.CheckMassiveQuotes(),
-    Cron.MinuteInterval(50)
-);
 
 app.UseAuthorization();
 app.MapControllers();

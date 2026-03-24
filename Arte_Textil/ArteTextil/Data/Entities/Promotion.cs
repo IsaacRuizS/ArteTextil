@@ -20,4 +20,8 @@ public class Promotion : EntityBase
     public int? ProductId { get; set; }
 
     public bool IsActive { get; set; }
+
+    //relacion
+    public Product? Product { get; set; }
+
 }
