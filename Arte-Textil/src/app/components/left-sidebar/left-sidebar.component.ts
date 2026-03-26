@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-left-sidebar',
@@ -10,58 +11,79 @@ export class LeftSidebarComponent {
 
     @Input() isClosed = false;
 
+    filteredMenu: any[] = [];
     menu: any[] = [
-        { label: 'Dashboard', link: '/dashboard' },
-        { label: 'Marketplace', link: '/marketplace' },
+        { label: 'Dashboard', link: '/dashboard', roles: [1, 4] },
+        { label: 'Marketplace', link: '/marketplace', roles: [1, 2, 3, 4] },
+
         {
             label: 'Configuración de Catálogo',
             collapsed: true,
+            roles: [1, 4, 2],
             children: [
-                { label: 'Proveedores', link: '/suppliers' },
-                { label: 'Categorías', link: '/categories' },
-                { label: 'Inventario', link: '/inventory' },
-                { label: 'Productos', link: '/admin/products' },
-                { label: 'Promociones', link: '/promotions' }, 
+                { label: 'Proveedores', link: '/suppliers', roles: [1, 4] },
+                { label: 'Categorías', link: '/categories', roles: [1, 4] },
+                { label: 'Inventario', link: '/inventory', roles: [1, 4] },
+                { label: 'Productos', link: '/admin/products', roles: [1, 2, 4] },
+                { label: 'Promociones', link: '/promotions', roles: [1, 4] },
             ]
         },
 
         {
             label: 'Administración General',
             collapsed: true,
+            roles: [1, 4, 2],
             children: [
-                { label: 'Roles', link: '/admin/roles' },
-                { label: 'Usuarios', link: '/admin/users' },
-                { label: 'Pedidos', link: '/orders-management' },
-                { label: 'Cotizaciones', link: '/quotes' },
-                { label: 'Clientes', link: '/customers' },
+                { label: 'Roles', link: '/admin/roles', roles: [1] },
+                { label: 'Usuarios', link: '/admin/users', roles: [1, 4] },
+                { label: 'Pedidos', link: '/orders-management', roles: [1, 2, 4] },
+                { label: 'Cotizaciones', link: '/quotes', roles: [1, 2, 4] },
+                { label: 'Clientes', link: '/customers', roles: [1, 2, 4] },
             ]
         },
+
         {
             label: 'Recursos Humanos',
             collapsed: true,
+            roles: [1, 2, 4],
             children: [
-                { label: 'Asistencia', link: '/hr/attendance' },
-                { label: 'Vacaciones', link: '/hr/vacations' },
-
-                { label: 'Ajustes de Planilla', link: '/hr/payroll' },
-                { label: 'Salarios', link: '/hr/payroll/salaries' },
-                { label: 'Planillas Mensuales', link: '/hr/payroll/monthly' },
-                { label: 'Pagos', link: '/hr/payroll/payments' }
+                { label: 'Asistencia', link: '/hr/attendance', roles: [1, 2, 4] },
+                { label: 'Vacaciones', link: '/hr/vacations', roles: [1, 2, 4] },
+                { label: 'Ajustes de Planilla', link: '/hr/payroll', roles: [1] },
             ]
         },
+
         {
             label: 'Analítica',
             collapsed: true,
+            roles: [1, 4],
             children: [
-                { label: 'Cotizaciones y Predicciones', link: '/analytics' },
-                { label: 'Predicción de Demanda', link: '/analytics/demand' },
-                { label: 'Analítica de Clientes', link: '/customer-analytics' },
-                { label: 'Alertas', link: '/analytics/alerts' }
+                { label: 'Cotizaciones', link: '/analytics', roles: [1, 4] },
+                { label: 'Alertas', link: '/analytics/alerts', roles: [1, 4] }
             ]
         }
     ];
 
-    constructor() { }
+    constructor(private authService: AuthService) { }
+
+    ngOnInit() {
+        this.filteredMenu = this.menu
+            .map(item => {
+
+                if (!this.hasAccess(item)) return null;
+
+                if (item.children) {
+                    const filteredChildren = item.children.filter((c: any) => this.hasAccess(c));
+
+                    if (filteredChildren.length === 0) return null;
+
+                    return { ...item, children: filteredChildren };
+                }
+
+                return item;
+            })
+            .filter(x => x !== null);
+    }
 
     onOpen(item: any) {
         if (item.children) {
@@ -69,5 +91,14 @@ export class LeftSidebarComponent {
         } else if (item.link) {
             window.location.href = item.link;
         }
+    }
+
+    hasAccess(item: any): boolean {
+        if (!item.roles) return true;
+        return item.roles.includes(this.userRole);
+    }
+
+    get userRole(): number | undefined {
+        return this.authService.currentUserValue?.roleId;
     }
 }

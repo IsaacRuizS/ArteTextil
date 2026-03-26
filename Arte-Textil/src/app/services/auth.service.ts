@@ -60,13 +60,13 @@ export class AuthService {
             localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
             localStorage.setItem(this.USER_KEY, JSON.stringify(user));
         }
-        
+
         this.currentUserSubject.next(user);
 
         if (user.roleId === 3) {
             this.router.navigate(['/marketplace']);
         } else {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/orders-management']);
         }
     }
 
@@ -91,7 +91,7 @@ export class AuthService {
         const rt = this.refreshToken;
         if (rt) {
             // Invalidar refresh token en el servidor (fire & forget)
-            this.apiUser.logout(rt).catch(() => {});
+            this.apiUser.logout(rt).catch(() => { });
         }
         if (this.isBrowser) {
             localStorage.removeItem(this.TOKEN_KEY);
@@ -108,5 +108,9 @@ export class AuthService {
 
     isCustomer(): boolean {
         return this.currentUserValue?.roleId === 3;
+    }
+
+    hasRole(roles: number[]): boolean {
+        return !!this.currentUserValue && roles.includes(this.currentUserValue.roleId);
     }
 }

@@ -25,7 +25,6 @@ export class AlertsComponent implements OnInit {
     }
 
     load() {
-
         this.shared.setLoading(true);
 
         this.api.getAll().subscribe({
@@ -34,6 +33,15 @@ export class AlertsComponent implements OnInit {
                 this.shared.setLoading(false);
             },
             error: () => this.shared.setLoading(false)
+        });
+    }
+
+    markAsRead(alert: AlertModel) {
+
+        this.api.markAsRead(alert.alertId).subscribe({
+            next: () => {
+                this.alerts = this.alerts.filter(x => x.alertId !== alert.alertId);
+            }
         });
     }
 }

@@ -40,7 +40,7 @@ export class UsersComponent implements OnInit {
             fullName: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required, Validators.minLength(8)]],
-            passwordHash: ['', [Validators.required, Validators.minLength(8)]],
+            passwordHash: ['',],
             roleId: [null, Validators.required],
             lastLoginAt: [null],
             isActive: [true]
@@ -49,12 +49,15 @@ export class UsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers();
-        this.loadRoles();
     }
 
     loadRoles() {
         this.apiRolService.getAll().then(roles => {
             this.roles = roles;
+
+            this.sharedService.setLoading(false);
+            this.cdr.detectChanges();
+
         });
     }
 
@@ -68,9 +71,7 @@ export class UsersComponent implements OnInit {
                 this.users = users;
                 this.usersOrigins = users;
 
-
-                this.sharedService.setLoading(false);
-                this.cdr.detectChanges();
+                this.loadRoles();
             },
             (err: any) => {
                 this.sharedService.setLoading(false);
@@ -78,7 +79,7 @@ export class UsersComponent implements OnInit {
             }
         );
 
-    } 
+    }
 
     getRoleName(roleId: number): string {
         const role = this.roles.find(r => r.roleId === roleId);
@@ -95,9 +96,9 @@ export class UsersComponent implements OnInit {
         this.users = this.usersOrigins;
 
         if (!this.searchTerm || this.searchTerm.trim() === '') return;
-        
+
         const term = this.searchTerm.toLowerCase();
-        
+
         this.users = this.users.filter(s =>
             s.fullName?.toLowerCase().includes(term) ||
             s.email?.toLowerCase().includes(term) ||
@@ -128,22 +129,22 @@ export class UsersComponent implements OnInit {
         this.isEditing = true;
         this.userForm.patchValue(user);
         this.showFormModal = true;
-    } 
+    }
 
     saveUser() {
         if (this.userForm.invalid) {
             this.userForm.markAllAsTouched();
             return;
         }
-        
+
         this.sharedService.setLoading(true);
 
-        if(this.isEditing) {
+        if (this.isEditing) {
             this._editUser(this.userForm.value);
         } else {
             this._createUser(this.userForm.value);
         }
-    } 
+    }
 
     // DELETE
     openDeleteModal(user: UserModel) {
@@ -155,7 +156,7 @@ export class UsersComponent implements OnInit {
 
         if (this.userToDelete) {
 
-            this._deleteUser(this.userToDelete.userId); 
+            this._deleteUser(this.userToDelete.userId);
         }
     }
 
@@ -195,7 +196,7 @@ export class UsersComponent implements OnInit {
 
         this.apiUserService.delete(userId).then(
             (deleted: boolean) => {
-                
+
                 this.showDeleteModal = false;
                 this.userToDelete = null;
                 this.loadUsers();
