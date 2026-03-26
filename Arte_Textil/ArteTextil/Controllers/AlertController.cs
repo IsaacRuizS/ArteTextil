@@ -1,30 +1,43 @@
-﻿using ArteTextil.Data;
+﻿using ArteTextil.Business;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace ArteTextil.Controllers;
-
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class AlertController : ControllerBase
+namespace ArteTextil.Controllers
 {
-    private readonly ArteTextilDbContext _context;
-
-    public AlertController(ArteTextilDbContext context)
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AlertController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly AlertBusiness _alertBusiness;
 
-    [HttpGet]
-    public async Task<IActionResult> Get()
-    {
-        var alerts = await _context.Alerts
-            .Where(a => a.DeletedAt == null)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
+        public AlertController(AlertBusiness alertBusiness)
+        {
+            _alertBusiness = alertBusiness;
+        }
 
-        return Ok(alerts);
+        // GET: api/alert/all-active
+        [HttpGet("all-active")]
+        public async Task<IActionResult> GetAllActive()
+        {
+            var result = await _alertBusiness.GetAllActive();
+
+            if (!result.Success)
+                return StatusCode(500, result);
+
+            return Ok(result);
+        }
+
+        // PATCH: api/alert/{id}/read
+        [HttpPatch("{id}/read")]
+        public async Task<IActionResult> UpdateIsRead(long id, [FromBody] bool isRead)
+        {
+            var result = await _alertBusiness.UpdateIsRead(id, isRead);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 }

@@ -76,7 +76,7 @@ namespace ArteTextil.Data.Repositories
 
         public IQueryable<T> Query()
         {
-            return _set.AsQueryable();
+            return _set.AsQueryable().OrderByDescending(e => EF.Property<DateTime>(e, "CreatedAt"));
         }
     }
 }
