@@ -12,20 +12,47 @@ export class AuthGuard implements CanActivate {
     ) { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-        // En SSR no verificar auth (el browser se encarga al hidratar)
+
         if (!isPlatformBrowser(this.platformId)) {
             return true;
         }
 
-        if (this.authService.isAuthenticated()) {
-            if (this.authService.isCustomer()) {
+        if (!this.authService.isAuthenticated()) {
+            this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+            return false;
+        }
+
+        const user = this.authService.currentUserValue;
+
+        if (!user) {
+            this.router.navigate(['/login']);
+            return false;
+        }
+
+        if (user.roleId === 3) {
+            if (!state.url.startsWith('/marketplace')) {
                 this.router.navigate(['/marketplace']);
                 return false;
             }
             return true;
         }
 
-        this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-        return false;
+        console.log(route)
+
+        let child = route.firstChild;
+        while (child?.firstChild) {
+            child = child.firstChild;
+        }
+
+        const allowedRoles = child?.data?.['roles'] as number[];
+
+        if (allowedRoles && allowedRoles.length > 0) {
+            if (!allowedRoles.includes(user.roleId)) {
+                this.router.navigate(['/dashboard']);
+                return false;
+            }
+        }
+
+        return true;
     }
 }
