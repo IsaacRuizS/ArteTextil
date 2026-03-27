@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ApiDemandService } from '../../../services/api-demand.service';
 import { ApiProductService } from '../../../services/api-product.service';
+import { NotificationService } from '../../../services/notification.service';
 import { DemandModel } from '../../../shared/models/demand.model';
 import { ProductModel } from '../../../shared/models/product.model';
 import Chart from 'chart.js/auto';
@@ -27,7 +28,8 @@ export class DemandComponent implements OnInit, OnDestroy {
 
     constructor(
         private api: ApiDemandService,
-        private productApi: ApiProductService
+        private productApi: ApiProductService,
+        private notificationService: NotificationService
     ) {}
 
     ngOnInit(): void {
@@ -45,6 +47,7 @@ export class DemandComponent implements OnInit, OnDestroy {
                 this.renderChart();
             },
             error: () => {
+                this.notificationService.error('No se pudieron cargar los datos de demanda. Intente de nuevo.');
                 this.loading = false;
                 this.error = true;
             }
@@ -65,6 +68,7 @@ export class DemandComponent implements OnInit, OnDestroy {
                 this.renderChart();
             },
             error: () => {
+                this.notificationService.error('No se pudo filtrar la demanda por producto. Intente de nuevo.');
                 this.loading = false;
                 this.error = true;
             }

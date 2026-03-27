@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { CommonModule } from '@angular/common';
 import { ApiPaymentService } from '../../../services/api-payment.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { PaymentModel } from '../../../shared/models/payment.model';
 
 @Component({
@@ -14,7 +15,7 @@ import { PaymentModel } from '../../../shared/models/payment.model';
 export class PaymentsComponent implements OnInit {
     payments: PaymentModel[] = [];
 
-    constructor(private api: ApiPaymentService, private shared: SharedService, private cdr: ChangeDetectorRef) {}
+    constructor(private api: ApiPaymentService, private shared: SharedService, private notificationService: NotificationService, private cdr: ChangeDetectorRef) {}
 
     ngOnInit(): void { this.load(); }
 
@@ -22,7 +23,10 @@ export class PaymentsComponent implements OnInit {
         this.shared.setLoading(true);
         this.api.getAll().subscribe({
             next: d => { this.payments = d; this.shared.setLoading(false); this.cdr.markForCheck(); },
-            error: () => this.shared.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar los pagos');
+                this.shared.setLoading(false);
+            }
         });
     }
 }

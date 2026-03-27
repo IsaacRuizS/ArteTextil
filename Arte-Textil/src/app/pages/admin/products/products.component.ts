@@ -9,6 +9,7 @@ import { CategoryModel } from '../../../shared/models/category.model';
 import { ApiProductService } from '../../../services/api-product.service';
 import { ApiCategoryService } from '../../../services/api-category.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { SupplierModel } from '../../../shared/models/supplier.model';
 import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -61,6 +62,7 @@ export class ProductsComponent implements OnInit {
         private apiProductService: ApiProductService,
         private apiCategoryService: ApiCategoryService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private apiSupplierService: ApiSupplierService,
         private uploadImageService: UploadImageService,
@@ -105,8 +107,8 @@ export class ProductsComponent implements OnInit {
 
                     this.cdr.markForCheck();
                 },
-                error: (err) => {
-                    // manejar error
+                error: () => {
+                    this.notificationService.error('Error al cargar los productos. Intente de nuevo.');
                 }
             });
     }
@@ -124,8 +126,8 @@ export class ProductsComponent implements OnInit {
                 }
                 this.cdr.markForCheck();
             },
-            error: (err) => {
-                // manejar error
+            error: () => {
+                this.notificationService.error('Error al cargar las categorías. Intente de nuevo.');
             }
         });
     }
@@ -146,8 +148,8 @@ export class ProductsComponent implements OnInit {
 
                 this.cdr.markForCheck();
             },
-            error: (err) => {
-                // manejar error
+            error: () => {
+                this.notificationService.error('Error al cargar los proveedores. Intente de nuevo.');
             }
         });
     }
@@ -299,6 +301,7 @@ export class ProductsComponent implements OnInit {
                 },
                 error: () => {
                     uploadedCount++;
+                    this.notificationService.error('Error al subir la imagen. Intente de nuevo.');
                     this.sharedService.setLoading(false);
                 }
             });
@@ -476,8 +479,8 @@ export class ProductsComponent implements OnInit {
                     this.productToDelete = null;
                     this.loadProducts();
                 },
-                error: (err) => {
-                    // manejar error
+                error: () => {
+                    this.notificationService.error('Error al cambiar el estado del producto. Intente de nuevo.');
                 }
             });
     }

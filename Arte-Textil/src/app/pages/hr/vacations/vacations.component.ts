@@ -5,6 +5,7 @@ import { VacationModel } from '../../../shared/models/vacation.model';
 import { ApiVacationService } from '../../../services/api-vacation.service';
 import { SharedService } from '../../../services/shared.service';
 import { ApiUserService } from '../../../services/api-user.service';
+import { NotificationService } from '../../../services/notification.service';
 import { UserModel } from '../../../shared/models/user.model';
 
 @Component({
@@ -34,6 +35,7 @@ export class VacationsComponent implements OnInit {
         private apiVacation: ApiVacationService,
         private apiUser: ApiUserService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -51,8 +53,6 @@ export class VacationsComponent implements OnInit {
 
         if (token) {
             const payload: any = JSON.parse(atob(token.split('.')[1]));
-
-            console.log("TOKEN PAYLOAD:", payload);
 
             this.isAdmin = payload?.roleId === "1";
         }
@@ -82,7 +82,10 @@ export class VacationsComponent implements OnInit {
                 this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar las vacaciones');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -95,8 +98,8 @@ export class VacationsComponent implements OnInit {
 
                 this.cdr.markForCheck();
             })
-            .catch(err => {
-                console.error("ERROR USERS", err);
+            .catch(() => {
+                this.notificationService.error('Error al cargar los usuarios');
             });
     }
 
@@ -147,13 +150,8 @@ export class VacationsComponent implements OnInit {
         notes: this.vacationForm.get('notes')?.value
     };
 
-    console.log("PAYLOAD FINAL:", payload);
-
     this.apiVacation.create(payload).subscribe({
         next: () => {
-
-            console.log("VACATION CREADA");
-
             this.vacationForm.reset();
             this.showFormModal = false;
 
@@ -161,9 +159,8 @@ export class VacationsComponent implements OnInit {
 
             this.sharedService.setLoading(false);
         },
-        error: (err) => {
-            console.error("ERROR CREAR", err);
-            console.log("RESPUESTA BACKEND:", err.error);
+        error: () => {
+            this.notificationService.error('Error al crear la solicitud de vacaciones');
             this.sharedService.setLoading(false);
         }
     });
@@ -172,18 +169,15 @@ export class VacationsComponent implements OnInit {
     // Admin
     approve(vacation: VacationModel) {
 
-        console.log("APROBAR", vacation);
-
         this.sharedService.setLoading(true);
 
         this.apiVacation.approve(vacation.vacationRequestId).subscribe({
             next: () => {
-                console.log("APROBADO OK");
                 this.loadVacations();
                 this.sharedService.setLoading(false);
             },
-            error: (err) => {
-                console.error("ERROR APROBAR", err);
+            error: () => {
+                this.notificationService.error('Error al aprobar la solicitud de vacaciones');
                 this.sharedService.setLoading(false);
             }
         });
@@ -197,7 +191,10 @@ export class VacationsComponent implements OnInit {
                 this.loadVacations();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al rechazar la solicitud de vacaciones');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 }

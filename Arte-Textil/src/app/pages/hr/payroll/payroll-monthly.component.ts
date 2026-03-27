@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { ApiPayrollService } from '../../../services/api-payroll.service';
 import { ApiPaymentService } from '../../../services/api-payment.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.model';
 
@@ -33,7 +34,8 @@ export class PayrollMonthlyComponent implements OnInit {
         private payments: ApiPaymentService,
         private shared: SharedService,
         private fb: FormBuilder,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private notificationService: NotificationService
     ) {
 
         this.form = this.fb.group({
@@ -105,7 +107,7 @@ export class PayrollMonthlyComponent implements OnInit {
         const monthValue = this.form.get('month')?.value;
 
         if (!monthValue) {
-            alert("Seleccione un mes primero");
+            this.notificationService.warning("Seleccione un mes primero");
             return;
         }
 
@@ -133,7 +135,7 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 this.generating = false;
 
-                alert("Error generando nómina");
+                this.notificationService.error("Error generando nómina");
 
             }
 
@@ -182,7 +184,7 @@ export class PayrollMonthlyComponent implements OnInit {
 
             next: () => {
 
-                alert("Pago registrado correctamente");
+                this.notificationService.success("Pago registrado correctamente");
 
                 const month = this.form.get('month')?.value;
 
@@ -200,7 +202,7 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 this.shared.setLoading(false);
 
-                alert("Error registrando pago");
+                this.notificationService.error("Error registrando pago");
 
             }
 

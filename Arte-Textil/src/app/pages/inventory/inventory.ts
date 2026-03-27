@@ -7,6 +7,7 @@ import { ProductDetailComponent } from './components/product-detail.component';
 import { ApiProductService } from '../../services/api-product.service';
 import { ApiCategoryService } from '../../services/api-category.service';
 import { SharedService } from '../../services/shared.service';
+import { NotificationService } from '../../services/notification.service';
 import { ProductModel } from '../../shared/models/product.model';
 import { CategoryModel } from '../../shared/models/category.model';
 
@@ -45,6 +46,7 @@ export class InventoryComponent implements OnInit {
         private apiProductService: ApiProductService,
         private apiCategoryService: ApiCategoryService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef
     ) {}
 
@@ -63,7 +65,9 @@ export class InventoryComponent implements OnInit {
                     this.applyFilters();
                     this.cdr.markForCheck();
                 },
-                error: () => {}
+                error: () => {
+                    this.notificationService.error('Error al cargar los productos del inventario. Intente de nuevo.');
+                }
             });
     }
 
@@ -73,7 +77,9 @@ export class InventoryComponent implements OnInit {
                 this.categories = cats;
                 this.cdr.markForCheck();
             },
-            error: () => {}
+            error: () => {
+                this.notificationService.error('Error al cargar las categorías. Intente de nuevo.');
+            }
         });
     }
 
@@ -174,6 +180,7 @@ export class InventoryComponent implements OnInit {
                     this.loadProducts();
                 },
                 error: () => {
+                    this.notificationService.error('Error al registrar el movimiento de inventario. Intente de nuevo.');
                     this.movementError = 'Error al registrar el movimiento. Intente de nuevo.';
                 }
             });

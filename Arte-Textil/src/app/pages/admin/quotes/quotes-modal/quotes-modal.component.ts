@@ -11,6 +11,7 @@ import { ApiCustomerService } from '../../../../services/api-customer.service';
 import { ApiProductService } from '../../../../services/api-product.service';
 import { CustomCurrencyPipe } from "../../../../shared/pipes/crc-currency.pipe";
 import { SharedService } from '../../../../services/shared.service';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
     selector: 'app-quotes-modal',
@@ -35,7 +36,8 @@ export class QuotesModalComponent implements OnInit {
         private apiQuoteService: ApiQuoteService,
         private apiCustomerService: ApiCustomerService,
         private apiProductService: ApiProductService,
-        private sharedService: SharedService
+        private sharedService: SharedService,
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit(): void {
@@ -83,7 +85,7 @@ export class QuotesModalComponent implements OnInit {
 
         if (!this.quoteForm.items?.length) {
 
-            alert("Debe agregar al menos un producto");
+            this.notificationService.warning("Debe agregar al menos un producto");
 
             return;
 
@@ -105,7 +107,7 @@ export class QuotesModalComponent implements OnInit {
                 error: (err) => {
 
                     this.sharedService.setLoading(false);
-                    alert(err?.error?.message || 'Ocurrió un error al actualizar la cotización');
+                    this.notificationService.error(err?.error?.message || 'Ocurrió un error al actualizar la cotización');
                 }
 
             });
@@ -126,7 +128,7 @@ export class QuotesModalComponent implements OnInit {
 
 
                     this.sharedService.setLoading(false);
-                    alert(err?.error?.message || 'Ocurrió un error al crear la cotización');
+                    this.notificationService.error(err?.error?.message || 'Ocurrió un error al crear la cotización');
                 }
 
             });

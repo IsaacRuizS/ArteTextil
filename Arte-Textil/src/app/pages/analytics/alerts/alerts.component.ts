@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ApiAlertService } from '../../../services/api-alert.service';
 import { AlertModel } from '../../../shared/models/alert.model';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-alerts',
@@ -17,7 +18,8 @@ export class AlertsComponent implements OnInit {
 
     constructor(
         private api: ApiAlertService,
-        private shared: SharedService
+        private shared: SharedService,
+        private notificationService: NotificationService
     ) {}
 
     ngOnInit(): void {
@@ -32,7 +34,10 @@ export class AlertsComponent implements OnInit {
                 this.alerts = data;
                 this.shared.setLoading(false);
             },
-            error: () => this.shared.setLoading(false)
+            error: () => {
+                this.notificationService.error('No se pudieron cargar las alertas. Intente de nuevo.');
+                this.shared.setLoading(false);
+            }
         });
     }
 

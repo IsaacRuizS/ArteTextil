@@ -12,6 +12,7 @@ import { ProductModel } from '../../shared/models/product.model';
 import { SharedService } from '../../services/shared.service';
 import { AuthService } from '../../services/auth.service';
 import { UserModel } from '../../shared/models/user.model';
+import { NotificationService } from '../../services/notification.service';
 
 
 @Component({
@@ -76,8 +77,7 @@ export class OrderFormModalComponent {
         private customerService: ApiCustomerService,
         private productService: ApiProductService,
         private sharedService: SharedService,
-
-
+        private notificationService: NotificationService,
     ) {
     }
 
@@ -165,7 +165,7 @@ export class OrderFormModalComponent {
         if (!product) return;
 
         if (item.quantity > product.stock) {
-            alert('Stock insuficiente');
+            this.notificationService.warning('Stock insuficiente');
             item.quantity = product.stock;
         }
     }
@@ -190,7 +190,7 @@ export class OrderFormModalComponent {
     createFromScratch() {
 
         if (!this.quoteForm.items?.length) {
-            alert('Debe agregar productos');
+            this.notificationService.warning('Debe agregar productos');
             return;
         }
 
@@ -235,7 +235,7 @@ export class OrderFormModalComponent {
 
                     error: (err) => {
                         console.error('Error creando el pedido:', err);
-                        alert('Error al crear el pedido.');
+                        this.notificationService.error('Error al crear el pedido.');
                         this.sharedService.setLoading(false);
                     }
 
@@ -245,7 +245,7 @@ export class OrderFormModalComponent {
 
             error: (err) => {
                 console.error('Error creando la cotización:', err);
-                alert('Error al crear la cotización.');
+                this.notificationService.error('Error al crear la cotización.');
                 this.sharedService.setLoading(false);
             }
 

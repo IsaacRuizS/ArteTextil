@@ -6,6 +6,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CustomerModel } from '../../../shared/models/customer.model';
 import { ApiCustomerService } from '../../../services/api-customer.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { CustomersSmartListComponent } from '../../../components/customers-smart-list/customers-smart-list.component';
 
 @Component({
@@ -39,6 +40,7 @@ export class CustomersComponent implements OnInit {
     constructor(
         private apiCustomerService: ApiCustomerService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -79,6 +81,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al cargar los clientes. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -194,6 +197,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al crear el cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -216,6 +220,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al actualizar el cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -240,6 +245,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al cambiar el estado del cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
