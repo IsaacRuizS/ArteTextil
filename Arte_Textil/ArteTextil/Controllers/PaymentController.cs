@@ -22,9 +22,6 @@ public class PaymentController : ControllerBase
     {
         var result = await _business.Create(dto);
 
-        if (!result.Success)
-            return BadRequest(result);
-
         return Ok(result);
     }
 

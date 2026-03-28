@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 
 import { ApiPayrollService } from '../../../services/api-payroll.service';
 import { ApiPaymentService } from '../../../services/api-payment.service';
@@ -11,8 +11,9 @@ import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.mode
 @Component({
     selector: 'app-payroll-monthly',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule],
     templateUrl: './payroll-monthly.component.html',
+    styleUrls: ['./payroll-monthly.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
     providers: [FormBuilder]
 })
@@ -20,12 +21,23 @@ export class PayrollMonthlyComponent implements OnInit {
 
     payrolls: PayrollMonthlyModel[] = [];
     payrollsOrigin: PayrollMonthlyModel[] = [];
+    paymentMethod: string = 'Transferencia';
+    showToast = false;
+    toastMessage = '';
+    toastType: 'success' | 'error' | 'warning' = 'success';
 
     form: FormGroup;
 
+    // Modal
+    showMessageModal = false;
+    messageText = '';
+    modalType: 'success' | 'error' = 'success';
+
+    showConfirmPaymentModal = false;
+    selectedPayroll: PayrollMonthlyModel | null = null;
+
     generating = false;
 
-    // total general de planilla
     totalPayroll = 0;
 
     constructor(
@@ -35,28 +47,33 @@ export class PayrollMonthlyComponent implements OnInit {
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef
     ) {
-
         this.form = this.fb.group({
             month: ['']
         });
-
     }
 
-    ngOnInit(): void {
-        // no cargar nada hasta seleccionar mes
+    ngOnInit(): void { }
+
+    // Modal
+    showModal(message: string, type: 'success' | 'error' = 'success') {
+        this.messageText = message;
+        this.modalType = type;
+        this.showMessageModal = true;
     }
 
-    // seleccionar mes
+    closeModal() {
+        this.showMessageModal = false;
+    }
+
+    // Carga de datos
     onMonthChange() {
 
         const month = this.form.get('month')?.value;
-
         if (!month) return;
 
         this.load(month);
     }
 
-    // cargar planillas
     load(period?: string) {
 
         this.shared.setLoading(true);
@@ -68,9 +85,7 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.payrollsOrigin = data;
 
                 if (!period) {
-
                     this.payrolls = data;
-
                 } else {
 
                     const [year, month] = period.split('-');
@@ -79,131 +94,116 @@ export class PayrollMonthlyComponent implements OnInit {
                     const m = Number(month);
 
                     this.payrolls = data.filter(p =>
-                        p.year === y &&
-                        p.month === m
+                        p.year === y && p.month === m
                     );
-
                 }
 
-                // calcular el total general
                 this.totalPayroll = this.payrolls
                     .reduce((sum, p) => sum + p.total, 0);
 
                 this.shared.setLoading(false);
-
                 this.cdr.markForCheck();
             },
 
             error: () => this.shared.setLoading(false)
-
         });
     }
 
-    // generar payroll
+    // Generar planilla
     generate() {
 
         const monthValue = this.form.get('month')?.value;
 
         if (!monthValue) {
-            alert("Seleccione un mes primero");
+            this.showModal("Seleccione un mes primero", 'error');
             return;
         }
 
         const [year, month] = monthValue.split('-');
 
-        console.log("GENERANDO PAYROLL:", year, month);
-
         this.generating = true;
 
         this.api.generate(year, month).subscribe({
 
-            next: () => {
-
-                console.log("PAYROLL GENERADO / ACTUALIZADO");
+            next: (res: any) => {
 
                 this.generating = false;
+
+                if (res.success) {
+                    this.showToastMessage(res.message, 'success');
+                } else {
+                    this.showToastMessage(res.message, 'warning');
+                }
 
                 this.load(monthValue);
-
-            },
-
-            error: (err) => {
-
-                console.error("ERROR GENERANDO PAYROLL:", err);
-
-                this.generating = false;
-
-                alert("Error generando nómina");
-
             }
-
         });
     }
 
+    // Aprobar
     approve(p: PayrollMonthlyModel) {
-
-        if (!confirm('¿Aprobar nómina?')) return;
-
-        this.shared.setLoading(true);
 
         this.api.approve(p.payrollId).subscribe({
 
-            next: () => {
+            next: (res: any) => {
+
+                this.showModal("Nómina aprobada correctamente", 'success');
 
                 const month = this.form.get('month')?.value;
-
                 if (month) this.load(month);
-
-                this.shared.setLoading(false);
-
-            },
-
-            error: () => this.shared.setLoading(false)
-
+            }
         });
     }
 
+    // Modal de pago
     registerPayment(p: PayrollMonthlyModel) {
+        this.selectedPayroll = p;
+        this.showConfirmPaymentModal = true;
+    }
 
-        const method = prompt('Método de pago (ej. Transferencia)') || 'Transferencia';
+    // Confirmar el pago
+    confirmPayment() {
 
-        this.shared.setLoading(true);
+        if (!this.selectedPayroll) return;
 
         const payload = {
-            payrollId: p.payrollId,
+            payrollId: this.selectedPayroll.payrollId,
             paymentDate: new Date(),
-            amount: p.total,
-            method: method
+            amount: this.selectedPayroll.total,
+            method: this.paymentMethod
         };
-
-        console.log("PAYMENT PAYLOAD:", payload);
 
         this.payments.create(payload).subscribe({
 
-            next: () => {
+            next: (res: any) => {
 
-                alert("Pago registrado correctamente");
+                this.showConfirmPaymentModal = false;
+
+                if (res.success) {
+                    this.showToastMessage(res.message, 'success');
+                } else {
+                    this.showToastMessage(res.message, 'warning');
+                }
 
                 const month = this.form.get('month')?.value;
-
                 if (month) this.load(month);
-
-                this.shared.setLoading(false);
-
-            },
-
-            error: (err) => {
-
-                console.error("ERROR PAYMENT:", err);
-
-                console.log("BACKEND:", err.error);
-
-                this.shared.setLoading(false);
-
-                alert("Error registrando pago");
-
             }
-
         });
     }
+
+    // toast para advertencias
+    showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+
+        this.toastMessage = message;
+        this.toastType = type;
+        this.showToast = true;
+
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+            this.showToast = false;
+            this.cdr.detectChanges();
+        }, 3000); // desaparece en 3s
+    }
+
 }

@@ -1,63 +1,179 @@
 <div class="hr-wrapper p-4">
+
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Planillas Mensuales</h2>
-        <form [formGroup]="form" class="d-flex gap-2">
 
+        <form [formGroup]="form" class="d-flex gap-2">
             <input type="month" class="form-control" formControlName="month" (change)="onMonthChange()">
 
-            <button type="button" class="btn btn-primary" (click)="generate()"
-                [disabled]="!form.get('month')?.value || generating">
-
+            <button type="button" class="btn btn-primary" (click)="generate()" [disabled]="generating">
                 Generar
-
             </button>
-
         </form>
     </div>
 
+    <!-- Tabla -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
+
             <table class="table mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>Usuario</th>
+                        <th>Empleado</th>
                         <th>Periodo</th>
+                        <th>Salario Base</th>
+                        <th>Extras</th>
+                        <th>Rebajos</th>
                         <th>Total</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     <tr *ngFor="let p of payrolls">
-                        <td>{{ p.userName || p.userId }}</td>
+
+                        <td class="fw-semibold">{{ p.userName }}</td>
+
                         <td>{{ p.year }}-{{ p.month | number:'2.0' }}</td>
-                        <td>₡ {{ p.total }}</td>
+
+                        <td>₡ {{ p.baseSalary | number:'1.2-2' }}</td>
+
+                        <td class="text-success fw-bold">
+                            + ₡ {{ p.extras | number:'1.2-2' }}
+                        </td>
+
+                        <td class="text-danger fw-bold">
+                            - ₡ {{ p.deductions | number:'1.2-2' }}
+                        </td>
+
+                        <td class="fw-bold fs-6">
+                            ₡ {{ p.total | number:'1.2-2' }}
+                        </td>
+
                         <td>
-                            <span class="badge" [class.bg-warning]="!p.approvedByUserId"
+                            <span class="badge px-3 py-2" [class.bg-warning]="!p.approvedByUserId"
                                 [class.bg-success]="p.approvedByUserId">
-
                                 {{ p.approvedByUserId ? 'Aprobada' : 'Pendiente' }}
-
                             </span>
                         </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-success me-2" (click)="approve(p)"
-                                [disabled]="p.approvedByUserId"><i class="mdi mdi-check"></i></button>
-                            <button class="btn btn-sm btn-primary" (click)="registerPayment(p)">
 
+                        <td class="text-end">
+
+                            <button class="btn btn-sm btn-success me-2" title="Aprobar nómina" (click)="approve(p)"
+                                [disabled]="p.approvedByUserId">
+                                <i class="mdi mdi-check"></i>
+                            </button>
+
+                            <button class="btn btn-sm btn-primary" title="Registrar pago" (click)="registerPayment(p)">
                                 <i class="mdi mdi-cash"></i> Pagar
                             </button>
+
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="d-flex justify-content-end mt-3">
-                <h5 class="fw-bold">
-                    Total Planilla: ₡ {{ totalPayroll | number:'1.2-2' }}
+            <!-- Total -->
+            <div class="d-flex justify-content-end mt-3 border-top pt-3">
+                <h5 class="fw-bold text-primary">
+                    Total General: ₡ {{ totalPayroll | number:'1.2-2' }}
                 </h5>
             </div>
 
         </div>
     </div>
+
+</div>
+
+<div *ngIf="showMessageModal" class="modal-overlay">
+
+    <div class="modal-box">
+
+        <div class="modal-header-custom" [ngClass]="{
+                'bg-success text-white': modalType === 'success',
+                'bg-danger text-white': modalType === 'error'
+            }">
+
+            <span>
+                {{ modalType === 'success' ? 'Operación exitosa' : 'Aviso' }}
+            </span>
+
+            <button (click)="closeModal()">✖</button>
+        </div>
+
+        <div class="modal-body-custom">
+            {{ messageText }}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Método de pago</label>
+
+                <select class="form-select" [(ngModel)]="paymentMethod">
+
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="SINPE">SINPE</option>
+
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer-custom">
+            <button class="btn btn-primary" (click)="closeModal()">
+                Aceptar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<div *ngIf="showConfirmPaymentModal" class="modal-overlay">
+
+    <div class="modal-box">
+
+        <div class="modal-header-custom bg-primary text-white">
+            <span>Confirmar pago</span>
+            <button (click)="showConfirmPaymentModal = false">✖</button>
+        </div>
+
+        <div class="modal-body-custom">
+            ¿Desea pagar ₡ {{ selectedPayroll?.total | number:'1.2-2' }}?
+        </div>
+
+        <div class="modal-footer-custom">
+            <button class="btn btn-secondary me-2" (click)="showConfirmPaymentModal = false">
+                Cancelar
+            </button>
+
+            <button class="btn btn-success" (click)="confirmPayment()">
+                Confirmar
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<div *ngIf="showToast" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 999999;
+        min-width: 250px;
+        padding: 14px 20px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        animation: fadeIn 0.3s ease;
+     " [style.background]="
+        toastType === 'success' ? '#22c55e' :
+        toastType === 'error' ? '#ef4444' :
+        '#f59e0b'
+     ">
+
+    {{ toastMessage }}
+
 </div>

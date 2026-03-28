@@ -10,9 +10,7 @@
 
     <!-- FILTER -->
     <div class="mb-4">
-        <input type="text" class="form-control"
-               placeholder="Buscar por usuario o tipo..."
-               (input)="onSearch($event)">
+        <input type="text" class="form-control" placeholder="Buscar por usuario o tipo..." (input)="onSearch($event)">
     </div>
 
     <!-- LIST -->
@@ -37,8 +35,7 @@
                         <td>{{ a.type }}</td>
                         <td>{{ a.reason || '-' }}</td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-light text-danger"
-                                    (click)="openDeleteModal(a)">
+                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(a)">
                                 <i class="mdi mdi-delete"></i>
                             </button>
                         </td>
@@ -57,8 +54,7 @@
         <div class="modal-content">
             <div class="modal-header border-0 pb-0">
                 <h5 class="modal-title fw-bold">Nuevo Ajuste</h5>
-                <button type="button" class="btn-close"
-                        (click)="showFormModal = false"></button>
+                <button type="button" class="btn-close" (click)="showFormModal = false"></button>
             </div>
 
             <div class="modal-body">
@@ -66,13 +62,11 @@
 
                     <div class="mb-3">
                         <label class="form-label">Usuario</label>
-                        <select class="form-select"
-                                formControlName="userId">
+                        <select class="form-select" formControlName="userId">
 
                             <option value="">Seleccione usuario</option>
 
-                            <option *ngFor="let u of users"
-                                    [value]="u.userId">
+                            <option *ngFor="let u of users" [value]="u.userId">
                                 {{ u.fullName }}
                             </option>
 
@@ -81,15 +75,17 @@
 
                     <div class="mb-3">
                         <label class="form-label">Monto</label>
-                        <input type="number"
-                               class="form-control"
-                               formControlName="amount">
+                        <input type="number" class="form-control" formControlName="amount">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mes</label>
+                        <input type="month" class="form-control" formControlName="month">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Tipo</label>
-                        <select class="form-select"
-                                formControlName="type">
+                        <select class="form-select" formControlName="type">
                             <option value="Extra">Extra</option>
                             <option value="Rebajo">Rebajo</option>
                         </select>
@@ -97,21 +93,18 @@
 
                     <div class="mb-3">
                         <label class="form-label">Razón</label>
-                        <textarea class="form-control"
-                                  formControlName="reason"></textarea>
+                        <textarea class="form-control" formControlName="reason"></textarea>
                     </div>
 
                 </form>
             </div>
 
             <div class="modal-footer border-0 pt-0">
-                <button class="btn btn-light"
-                        (click)="showFormModal = false">
+                <button class="btn btn-light" (click)="showFormModal = false">
                     Cancelar
                 </button>
 
-                <button class="btn btn-primary"
-                        (click)="saveAdjustment()">
+                <button class="btn btn-primary" (click)="saveAdjustment()">
                     Guardar
                 </button>
             </div>
@@ -136,13 +129,11 @@
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-4">
-                    <button class="btn btn-light"
-                            (click)="showDeleteModal = false">
+                    <button class="btn btn-light" (click)="showDeleteModal = false">
                         Cancelar
                     </button>
 
-                    <button class="btn btn-danger px-4"
-                            (click)="confirmDelete()">
+                    <button class="btn btn-danger px-4" (click)="confirmDelete()">
                         Eliminar
                     </button>
                 </div>
