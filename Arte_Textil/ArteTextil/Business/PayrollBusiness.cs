@@ -3,7 +3,9 @@ using ArteTextil.Data.Entities;
 using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
+using ArteTextil.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ArteTextil.Business;
 
@@ -11,11 +13,13 @@ public class PayrollBusiness
 {
     private readonly ArteTextilDbContext _context;
     private readonly IRepositoryPayrollMonthly _repository;
+    private readonly IEmailService _emailService;
 
-    public PayrollBusiness(ArteTextilDbContext context)
+    public PayrollBusiness(ArteTextilDbContext context, IEmailService emailService)
     {
         _context = context;
         _repository = new RepositoryPayrollMonthly(context);
+        _emailService = emailService;
     }
 
 
@@ -23,6 +27,7 @@ public class PayrollBusiness
     public async Task<ApiResponse<bool>> GeneratePayroll(int year, int month)
     {
         var response = new ApiResponse<bool>();
+        var messages = new List<string>();
 
         try
         {
@@ -32,64 +37,116 @@ public class PayrollBusiness
 
             foreach (var user in users)
             {
-                // Verificar si YA existe payroll para este usuario en este mes
-                var payrollExists = await _context.PayrollMonthly
-                    .AnyAsync(p =>
-                        p.UserId == user.UserId &&
-                        p.Year == year &&
-                        p.Month == month &&
-                        p.DeletedAt == null);
-
-                if (payrollExists)
-                    continue; // saltar usuario (evita duplicado)
 
                 var salary = await _context.Salaries
-                    .Where(s => s.UserId == user.UserId && s.IsActive)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(s =>
+                        s.UserId == user.UserId &&
+                        s.IsActive);
 
                 if (salary == null)
                     continue;
 
+                var existingPayroll = await _context.PayrollMonthly
+    .FirstOrDefaultAsync(p =>
+        p.UserId == user.UserId &&
+        p.Year == year &&
+        p.Month == month &&
+        p.DeletedAt == null);
+
+                PayrollMonthly payroll;
+
+                if (existingPayroll != null)
+                {
+                    var isPaid = await _context.Payments
+                        .AnyAsync(p =>
+                            p.PayrollId == existingPayroll.PayrollId &&
+                            p.DeletedAt == null);
+
+                    if (isPaid)
+                    {
+                        messages.Add($"Planilla ya pagada para {user.FullName}");
+                        continue;
+                    }
+
+                    payroll = existingPayroll;
+                }
+                else
+                {
+                    payroll = new PayrollMonthly
+                    {
+                        UserId = user.UserId,
+                        Year = year,
+                        Month = month,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _context.PayrollMonthly.AddAsync(payroll);
+                }
+
+                await _context.SaveChangesAsync();
+
+                if (messages.Any())
+                {
+                    response.Success = false;
+                    response.Message = string.Join(" | ", messages);
+                }
+                else
+                {
+                    response.Data = true;
+                    response.Message = "Payroll generado correctamente";
+                }
+
+
+                // SOLO ajustes NO aplicados
                 var adjustments = await _context.PayrollAdjustments
-                    .Where(a =>
-                        a.UserId == user.UserId &&
-                        a.DeletedAt == null)
-                    .ToListAsync();
+    .Where(a =>
+        a.UserId == user.UserId &&
+        a.Year == year &&
+        a.Month == month &&
+        a.DeletedAt == null &&
+        !a.Applied)
+    .ToListAsync();
 
                 decimal extras = adjustments
-                    .Where(a => a.Type == "Extra")
+                    .Where(a => a.Type.Trim().ToLower() == "extra")
                     .Sum(a => a.Amount);
 
                 decimal deductions = adjustments
-                    .Where(a => a.Type == "Rebajo")
+                    .Where(a => a.Type.Trim().ToLower() == "rebajo")
                     .Sum(a => a.Amount);
 
-                decimal total =
-                    salary.BaseSalary +
-                    extras -
-                    deductions;
-        
+                decimal total = salary.BaseSalary + extras - deductions;
 
-                var payroll = new PayrollMonthly
+                payroll.BaseSalary = salary.BaseSalary;
+                payroll.Extras = extras;
+                payroll.Deductions = deductions;
+                payroll.Total = total;
+                payroll.IsActive = true;
+                payroll.UpdatedAt = DateTime.UtcNow;
+
+                // MARCAR ajustes como usados
+                foreach (var adj in adjustments)
                 {
-                    UserId = user.UserId,
-                    Year = year,
-                    Month = month,
-                    BaseSalary = salary.BaseSalary,
-                    Extras = extras,
-                    Deductions = deductions,
-                    Total = total,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow
-                };
+                    adj.Applied = true;
+                    adj.UpdatedAt = DateTime.UtcNow;
+                }
 
-                await _context.PayrollMonthly.AddAsync(payroll);
             }
 
+            // Guardar cambios y finalizar transacción
             await _context.SaveChangesAsync();
 
-            response.Data = true;
-            response.Message = "Payroll generado correctamente";
+            // Respuesta final
+            if (messages.Any())
+            {
+                response.Success = false;
+                response.Message = string.Join(" | ", messages);
+            }
+            else
+            {
+                response.Data = true;
+                response.Message = "Payroll generado correctamente";
+            }
         }
         catch (Exception ex)
         {
@@ -99,6 +156,7 @@ public class PayrollBusiness
 
         return response;
     }
+
 
     // Ver planillas generadas
     public async Task<ApiResponse<List<PayrollMonthlyDto>>> GetAll()

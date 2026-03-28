@@ -4,6 +4,8 @@ public class PayrollAdjustmentDto : DtoBase
 {
     public int adjustmentId { get; set; }
     public int userId { get; set; }
+    public int year { get; set; }
+    public int month { get; set; }
     public string? userName { get; set; }
     public decimal amount { get; set; }
     public string type { get; set; } = null!;

@@ -20,7 +20,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
     adjustments: PayrollAdjustmentModel[] = [];
     adjustmentsOrigin: PayrollAdjustmentModel[] = [];
-    users: any[] = []; 
+    users: any[] = [];
 
     adjustmentForm: FormGroup;
 
@@ -43,7 +43,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
             userId: ['', Validators.required],
             amount: ['', Validators.required],
             type: ['Extra', Validators.required],
-            reason: ['']
+            reason: [''],
+            month: ['', Validators.required]
         });
     }
 
@@ -63,13 +64,13 @@ export class PayrollAdjustmentsComponent implements OnInit {
     // cargar los usuarios (dropdown)
     loadUsers() {
 
-    this.apiUser.getAll()
-        .then((users) => {
-            this.users = users;
-            this.cdr.markForCheck();
-        })
-        .catch(() => { });
-}
+        this.apiUser.getAll()
+            .then((users) => {
+                this.users = users;
+                this.cdr.markForCheck();
+            })
+            .catch(() => { });
+    }
 
     // cargar los ajustes
     loadAdjustments() {
@@ -119,7 +120,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
     openCreateModal() {
         this.adjustmentForm.reset({
             adjustmentId: 0,
-            type: 'Extra'
+            type: 'Extra',
+            month: ''
         });
         this.showFormModal = true;
     }
@@ -132,9 +134,24 @@ export class PayrollAdjustmentsComponent implements OnInit {
             return;
         }
 
+        const monthValue = this.adjustmentForm.value.month;
+
+        if (!monthValue) {
+            alert("Seleccione un mes");
+            return;
+        }
+
+        const [year, month] = monthValue.split('-');
+
+        const payload = {
+            ...this.adjustmentForm.value,
+            year: Number(year),
+            month: Number(month)
+        };
+
         this.sharedService.setLoading(true);
 
-        this.apiAdjustment.create(this.adjustmentForm.value).subscribe({
+        this.apiAdjustment.create(payload).subscribe({
             next: () => {
                 this.showFormModal = false;
                 this.adjustmentForm.reset({ type: 'Extra' });
