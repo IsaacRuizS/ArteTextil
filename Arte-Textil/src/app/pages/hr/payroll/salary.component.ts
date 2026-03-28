@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ApiSalaryService } from '../../../services/api-salary.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { SalaryModel } from '../../../shared/models/salary.model';
 import { UserModel } from '../../../shared/models/user.model';
 
@@ -26,6 +27,7 @@ export class SalaryComponent implements OnInit {
         private api: ApiSalaryService,
         private apiUser: ApiUserService,
         private shared: SharedService,
+        private notificationService: NotificationService,
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef
     ) {
@@ -37,14 +39,19 @@ export class SalaryComponent implements OnInit {
 
     ngOnInit(): void {
         this.load();
-        this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => { });
+        this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => {
+            this.notificationService.error('Error al cargar los usuarios');
+        });
     }
 
     load() {
         this.shared.setLoading(true);
         this.api.getAll().subscribe({
             next: data => { this.salaries = data; this.shared.setLoading(false); this.cdr.markForCheck(); },
-            error: () => this.shared.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar los salarios');
+                this.shared.setLoading(false);
+            }
         });
     }
 
@@ -75,8 +82,6 @@ export class SalaryComponent implements OnInit {
             isActive: true
         };
 
-        console.log("SALARY PAYLOAD:", payload);
-
         this.shared.setLoading(true);
 
         if (this.editingId) {
@@ -97,9 +102,8 @@ export class SalaryComponent implements OnInit {
                     this.shared.setLoading(false);
                 },
 
-                error: (err) => {
-                    console.error("ERROR UPDATE SALARY:", err);
-                    console.log("BACKEND RESPONSE:", err.error);
+                error: () => {
+                    this.notificationService.error('Error al actualizar el salario');
                     this.shared.setLoading(false);
                 }
 
@@ -115,8 +119,8 @@ export class SalaryComponent implements OnInit {
                     this.shared.setLoading(false);
                 },
 
-                error: (err) => {
-                    console.error("ERROR CREATE SALARY:", err);
+                error: () => {
+                    this.notificationService.error('Error al crear el salario');
                     this.shared.setLoading(false);
                 }
 

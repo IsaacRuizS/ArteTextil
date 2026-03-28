@@ -4,6 +4,7 @@ import { Chart } from 'chart.js/auto';
 import { CustomerModel } from '../../../shared/models/customer.model';
 import { ApiCustomerService } from '../../../services/api-customer.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { ApiQuoteService } from '../../../services/api-quote.service';
 import { QuoteModel } from '../../../shared/models/quote.model';
 import { CustomersSmartListComponent } from '../../../components/customers-smart-list/customers-smart-list.component';
@@ -62,6 +63,7 @@ export class CustomerAnalyticsComponent implements OnInit {
         private apiQuoteService: ApiQuoteService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
+        private notificationService: NotificationService
     ) { }
 
     ngOnInit(): void {
@@ -77,7 +79,10 @@ export class CustomerAnalyticsComponent implements OnInit {
                 this.customers = [...this.customersOrigins];
                 this.loadQuotes();
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('No se pudieron cargar los clientes. Intente de nuevo.');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -97,7 +102,10 @@ export class CustomerAnalyticsComponent implements OnInit {
                 this.sharedService.setLoading(false);
                 this.cdr.detectChanges();
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('No se pudieron cargar las cotizaciones. Intente de nuevo.');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 

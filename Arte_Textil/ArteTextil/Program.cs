@@ -71,6 +71,7 @@ builder.Services.AddScoped<SalaryBusiness>();
 builder.Services.AddScoped<QuoteBusiness>();
 builder.Services.AddScoped<CustomerBusiness>();
 builder.Services.AddScoped<PromotionBusiness>();
+builder.Services.AddScoped<BulkImportBusiness>();
 builder.Services.AddScoped<AlertBusiness>();
 builder.Services.AddScoped<CartBusiness>();
 builder.Services.AddScoped<CartItemBusiness>();

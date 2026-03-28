@@ -8,6 +8,7 @@ import { UserModel } from '../../../shared/models/user.model';
 import { ApiAttendanceService } from '../../../services/api-attendance.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-attendance',
@@ -38,6 +39,7 @@ export class AttendanceComponent implements OnInit {
         private apiAttendance: ApiAttendanceService,
         private apiUser: ApiUserService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -80,7 +82,10 @@ export class AttendanceComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
 
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar las asistencias');
+                this.sharedService.setLoading(false);
+            }
 
         });
     }
@@ -95,7 +100,10 @@ export class AttendanceComponent implements OnInit {
 
             next: () => this.loadAttendances(),
 
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al registrar la entrada');
+                this.sharedService.setLoading(false);
+            }
 
         });
     }
@@ -110,7 +118,10 @@ export class AttendanceComponent implements OnInit {
 
             next: () => this.loadAttendances(),
 
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al registrar la salida');
+                this.sharedService.setLoading(false);
+            }
 
         });
     }
@@ -140,10 +151,8 @@ export class AttendanceComponent implements OnInit {
                 this.cdr.markForCheck();
 
             })
-            .catch(err => {
-
-                console.error("ERROR USERS", err);
-
+            .catch(() => {
+                this.notificationService.error('Error al cargar los usuarios');
             });
     }
 
@@ -178,10 +187,8 @@ export class AttendanceComponent implements OnInit {
                     this.sharedService.setLoading(false);
                 },
 
-                error: (err) => {
-
-                    console.error("ERROR UPDATE ATTENDANCE", err);
-
+                error: () => {
+                    this.notificationService.error('Error al actualizar la asistencia');
                     this.sharedService.setLoading(false);
                 }
             });
@@ -199,10 +206,8 @@ export class AttendanceComponent implements OnInit {
                     this.sharedService.setLoading(false);
                 },
 
-                error: (err) => {
-
-                    console.error("ERROR CREATE ATTENDANCE", err);
-
+                error: () => {
+                    this.notificationService.error('Error al crear la asistencia');
                     this.sharedService.setLoading(false);
                 }
             });

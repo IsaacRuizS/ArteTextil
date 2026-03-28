@@ -5,6 +5,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { SupplierModel } from '../../../shared/models/supplier.model';
 import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-suppliers',
@@ -35,6 +36,7 @@ export class SuppliersComponent implements OnInit {
     constructor(
         private apiSupplierService: ApiSupplierService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -68,6 +70,7 @@ export class SuppliersComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: () => {
+                this.notificationService.error('Error al cargar los proveedores. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });
@@ -167,6 +170,7 @@ export class SuppliersComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: () => {
+                this.notificationService.error('Error al crear el proveedor. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });
@@ -183,6 +187,7 @@ export class SuppliersComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: () => {
+                this.notificationService.error('Error al actualizar el proveedor. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });
@@ -202,6 +207,7 @@ export class SuppliersComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: () => {
+                this.notificationService.error('Error al cambiar el estado del proveedor. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });

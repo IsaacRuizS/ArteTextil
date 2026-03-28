@@ -11,6 +11,7 @@ import { ApiDemandService } from '../../services/api-demand.service';
 import { ApiProductService } from '../../services/api-product.service';
 import { ApiCategoryService } from '../../services/api-category.service';
 import { SharedService } from '../../services/shared.service';
+import { NotificationService } from '../../services/notification.service';
 import { QuoteModel } from '../../shared/models/quote.model';
 import { DemandModel } from '../../shared/models/demand.model';
 import { QuotesSmartListComponent } from '../../components/quotes-smart-list/quotes-smart-list.component';
@@ -63,7 +64,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         private demandApi: ApiDemandService,
         private productApi: ApiProductService,
         private categoryApi: ApiCategoryService,
-        private shared: SharedService
+        private shared: SharedService,
+        private notificationService: NotificationService
     ) {}
 
     ngOnInit(): void {
@@ -86,7 +88,10 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.shared.setLoading(false);
                 this.tryRender();
             },
-            error: () => this.shared.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar los datos de analíticas. Intente de nuevo.');
+                this.shared.setLoading(false);
+            }
         });
     }
 

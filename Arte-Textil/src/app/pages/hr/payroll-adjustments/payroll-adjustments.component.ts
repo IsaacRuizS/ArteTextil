@@ -6,6 +6,7 @@ import { PayrollAdjustmentModel } from '../../../shared/models/payroll-adjustmen
 import { ApiPayrollAdjustmentService } from '../../../services/api-payroll-adjustment.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-payroll-adjustments',
@@ -35,6 +36,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
         private apiAdjustment: ApiPayrollAdjustmentService,
         private apiUser: ApiUserService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -68,7 +70,9 @@ export class PayrollAdjustmentsComponent implements OnInit {
             this.users = users;
             this.cdr.markForCheck();
         })
-        .catch(() => { });
+        .catch(() => {
+            this.notificationService.error('Error al cargar los usuarios');
+        });
 }
 
     // cargar los ajustes
@@ -87,7 +91,10 @@ export class PayrollAdjustmentsComponent implements OnInit {
                 this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cargar los ajustes de nómina');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -141,7 +148,10 @@ export class PayrollAdjustmentsComponent implements OnInit {
                 this.loadAdjustments();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al guardar el ajuste de nómina');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -164,7 +174,10 @@ export class PayrollAdjustmentsComponent implements OnInit {
                 this.loadAdjustments();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al eliminar el ajuste de nómina');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 }
