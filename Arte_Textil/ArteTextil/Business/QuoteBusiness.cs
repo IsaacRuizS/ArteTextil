@@ -57,6 +57,27 @@ public class QuoteBusiness
                 .ToListAsync();
 
             response.Data = _mapper.Map<List<QuoteDto>>(quotes);
+
+            // Enrich product names in quote items
+            var allProductIds = quotes
+                .SelectMany(q => q.QuoteItems ?? Enumerable.Empty<QuoteItem>())
+                .Select(i => i.ProductId)
+                .Distinct()
+                .ToList();
+
+            var products = await _context.Products
+                .Where(p => allProductIds.Contains(p.ProductId))
+                .ToDictionaryAsync(p => p.ProductId, p => p.Name);
+
+            foreach (var quoteDto in response.Data)
+            {
+                foreach (var item in quoteDto.items ?? Enumerable.Empty<QuoteItemDto>())
+                {
+                    if (products.TryGetValue(item.productId, out var name))
+                        item.productName = name;
+                }
+            }
+
             response.Message = "Cotizaciones obtenidas correctamente";
         }
         catch (Exception ex)
@@ -87,6 +108,23 @@ public class QuoteBusiness
             }
 
             response.Data = _mapper.Map<QuoteDto>(quote);
+
+            // Enrich product names in quote items
+            var itemProductIds = quote.QuoteItems?
+                .Select(i => i.ProductId)
+                .Distinct()
+                .ToList() ?? new List<int>();
+
+            var itemProducts = await _context.Products
+                .Where(p => itemProductIds.Contains(p.ProductId))
+                .ToDictionaryAsync(p => p.ProductId, p => p.Name);
+
+            foreach (var item in response.Data.items ?? Enumerable.Empty<QuoteItemDto>())
+            {
+                if (itemProducts.TryGetValue(item.productId, out var name))
+                    item.productName = name;
+            }
+
             response.Message = "Cotización obtenida correctamente";
         }
         catch (Exception ex)

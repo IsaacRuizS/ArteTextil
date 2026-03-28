@@ -21,6 +21,16 @@ export class QuotesSmartListComponent {
     @Output() edit = new EventEmitter<QuoteModel>();
     @Output() toggleActive = new EventEmitter<QuoteModel>();
 
+    expandedQuoteId: number | null = null;
+
+    toggleExpand(quoteId: number) {
+        this.expandedQuoteId = this.expandedQuoteId === quoteId ? null : quoteId;
+    }
+
+    getItemSubtotal(item: any): number {
+        return ((item.price ?? 0) - (item.discountAmount ?? 0)) * (item.quantity ?? 0);
+    }
+
     onEdit(q: QuoteModel) {
         this.edit.emit(q);
     }

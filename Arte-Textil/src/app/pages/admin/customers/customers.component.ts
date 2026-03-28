@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { BulkImportComponent } from '../../../components/bulk-import/bulk-import.component';
 
 import { CustomerModel } from '../../../shared/models/customer.model';
 import { ApiCustomerService } from '../../../services/api-customer.service';
@@ -13,7 +14,7 @@ import { CustomersSmartListComponent } from '../../../components/customers-smart
     selector: 'app-customers',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule, CustomersSmartListComponent],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule, CustomersSmartListComponent, BulkImportComponent],
     providers: [FormBuilder],
     templateUrl: './customers.component.html',
     styleUrls: ['./customers.component.scss']

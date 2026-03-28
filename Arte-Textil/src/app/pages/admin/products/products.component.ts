@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
+import { BulkImportComponent } from '../../../components/bulk-import/bulk-import.component';
 
 import { ProductModel } from '../../../shared/models/product.model';
 import { CategoryModel } from '../../../shared/models/category.model';
@@ -20,7 +21,7 @@ import Swal from 'sweetalert2';
 @Component({
     selector: 'app-products',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule, FormsModule, BulkImportComponent],
     providers: [FormBuilder],
     templateUrl: './products.component.html',
     styleUrls: ['./products.component.scss']
@@ -364,6 +365,8 @@ export class ProductsComponent implements OnInit {
             isActive: true
         });
 
+        this.productForm.get('stock')?.enable();
+
         this.showFormModal = true;
     }
 
@@ -385,12 +388,15 @@ export class ProductsComponent implements OnInit {
 
         this.uploadedImages = product.productImages ? [...product.productImages] : [];
 
+        this.productForm.get('stock')?.disable();
+
         this.showFormModal = true;
     }
 
     closeFormModal() {
         this.uploadedImages = [];
         this.showFormModal = false;
+        this.productForm.get('stock')?.enable();
         this.productForm.markAsPristine();
         this.productForm.markAsUntouched();
     }
@@ -403,7 +409,7 @@ export class ProductsComponent implements OnInit {
         }
 
         const payload = new ProductModel({
-            ...this.productForm.value,
+            ...this.productForm.getRawValue(),
             productImages: this.uploadedImages
         });
 

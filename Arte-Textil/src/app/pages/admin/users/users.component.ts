@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { BulkImportComponent } from '../../../components/bulk-import/bulk-import.component';
 import { UserModel } from '../../../shared/models/user.model';
 import { RolModel } from '../../../shared/models/rol.model';
 import { ApiUserService } from '../../../services/api-user.service';
@@ -10,7 +11,7 @@ import { SharedService } from '../../../services/shared.service';
 @Component({
     selector: 'app-users',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, BulkImportComponent],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })

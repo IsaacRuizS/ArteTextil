@@ -1,0 +1,15 @@
+<div class="d-flex align-items-center gap-2">
+  <label class="btn btn-outline-success btn-sm mb-0">
+    <i class="bi bi-file-earmark-excel me-1"></i>
+    {{ loading ? 'Importando...' : 'Importar Excel' }}
+    <input type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" [disabled]="loading" hidden>
+  </label>
+
+  <div *ngIf="result" class="small">
+    <span class="text-success" *ngIf="result.imported > 0">&#10003; {{ result.imported }} importados</span>
+    <span class="text-danger ms-2" *ngIf="result.errors > 0">&#10007; {{ result.errors }} errores</span>
+    <ul *ngIf="result.errorMessages.length" class="text-danger mb-0 ps-3 mt-1">
+      <li *ngFor="let msg of result.errorMessages">{{ msg }}</li>
+    </ul>
+  </div>
+</div>

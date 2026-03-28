@@ -256,9 +256,14 @@ export class OrderFormModalComponent {
 
         this.model.performByUserId = this.order?.loggedUserId ?? 1;
 
-        this.orderService.update(this.model).subscribe(() => {
-            this.saved.emit();
-            this.close();
+        this.orderService.update(this.model).subscribe({
+            next: () => {
+                this.saved.emit();
+                this.close();
+            },
+            error: (err) => {
+                this.notificationService.error(err?.error?.message || 'Error al actualizar el pedido.');
+            }
         });
     }
 

@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { QuoteModel } from '../../../../shared/models/quote.model';
 import { QuoteItemModel } from '../../../../shared/models/quote-item.model';
 import { CustomerModel } from '../../../../shared/models/customer.model';
+import { ProductModel } from '../../../../shared/models/product.model';
 
 import { ApiQuoteService } from '../../../../services/api-quote.service';
 import { ApiCustomerService } from '../../../../services/api-customer.service';
@@ -30,7 +31,7 @@ export class QuotesModalComponent implements OnInit {
     quoteForm: QuoteModel = new QuoteModel({ items: [] });
 
     customers: CustomerModel[] = [];
-    products: any[] = [];
+    products: ProductModel[] = [];
 
     constructor(
         private apiQuoteService: ApiQuoteService,
@@ -143,12 +144,16 @@ export class QuotesModalComponent implements OnInit {
 
         for (const item of this.quoteForm.items!) {
 
-            total += item.price * item.quantity;
+            total += (item.price - (item.discountAmount ?? 0)) * item.quantity;
 
         }
 
         this.quoteForm.total = total;
 
+    }
+
+    getItemFinalPrice(item: QuoteItemModel): number {
+        return (item.price ?? 0) - (item.discountAmount ?? 0);
     }
 
     addItem() {
@@ -173,17 +178,16 @@ export class QuotesModalComponent implements OnInit {
     }
 
     updatePrice(item: QuoteItemModel) {
-
         const product = this.products.find(p => p.productId == item.productId);
-
         if (product) {
-
             item.price = product.price;
-
+            const promo = product.bestPromotion;
+            item.discountAmount = promo ? Math.round(product.price * (promo.discountPercent ?? 0) / 100) : 0;
+        } else {
+            item.price = 0;
+            item.discountAmount = 0;
         }
-
         this.calculateTotal();
-
     }
 
 }

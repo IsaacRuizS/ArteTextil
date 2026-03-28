@@ -2,9 +2,12 @@
 
     <div class="d-flex justify-content-between mb-4">
         <h2 class="fw-bold">Gestión de Usuarios</h2>
-        <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-account-plus me-1"></i> Nuevo Usuario
-        </button>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <app-bulk-import entity="users" (imported)="loadUsers()"></app-bulk-import>
+            <button class="btn btn-primary" (click)="openCreateModal()">
+                <i class="mdi mdi-account-plus me-1"></i> Nuevo Usuario
+            </button>
+        </div>
     </div>
 
     <!-- FILTER -->

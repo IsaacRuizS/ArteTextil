@@ -107,7 +107,7 @@
 
                         <!-- PRODUCTO -->
 
-                        <div class="col-5">
+                        <div class="col-4">
 
                             <select
                                 class="form-select"
@@ -158,14 +158,29 @@
                         </div>
 
 
-                        <!-- SUBTOTAL -->
+                        <!-- DESCUENTO -->
 
                         <div class="col-2">
+
+                            @if ((item.discountAmount ?? 0) > 0) {
+                            <span class="badge bg-success-subtle text-success-emphasis d-block text-start py-2">
+                                -{{ item.discountAmount | customCurrency:'₡' }}
+                            </span>
+                            } @else {
+                            <span class="text-muted small d-block text-center">—</span>
+                            }
+
+                        </div>
+
+
+                        <!-- SUBTOTAL -->
+
+                        <div class="col-1">
 
                             <input
                                 type="text"
                                 class="form-control"
-                                [value]="(item.price * item.quantity) | customCurrency:'₡'"
+                                [value]="(getItemFinalPrice(item) * item.quantity) | customCurrency:'₡'"
                                 readonly>
 
                         </div>
