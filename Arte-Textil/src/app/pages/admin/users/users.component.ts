@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { UserModel } from '../../../shared/models/user.model';
 import { RolModel } from '../../../shared/models/rol.model';
 import { ApiUserService } from '../../../services/api-user.service';
@@ -10,7 +11,7 @@ import { SharedService } from '../../../services/shared.service';
 @Component({
     selector: 'app-users',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, NgxPaginationModule],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })
@@ -19,14 +20,18 @@ export class UsersComponent implements OnInit {
     users: UserModel[] = [];
     roles: RolModel[] = [];
     usersOrigins: UserModel[] = [];
+    filteredUsers: UserModel[] = [];
     userForm: FormGroup;
+
+    page = 1;
+    statusFilter: number = 1;
+    searchTerm = '';
 
     // UI State
     showFormModal = false;
     showDeleteModal = false;
     isEditing = false;
     userToDelete: UserModel | null = null;
-    searchTerm = '';
 
     constructor(
         private apiUserService: ApiUserService,
@@ -71,6 +76,7 @@ export class UsersComponent implements OnInit {
                 this.users = users;
                 this.usersOrigins = users;
 
+                this.applyFilters();
                 this.loadRoles();
             },
             (err: any) => {
@@ -88,34 +94,33 @@ export class UsersComponent implements OnInit {
 
     onSearch(event: any) {
         this.searchTerm = event.target.value;
-        this.onFilterInfo();
+        this.applyFilters();
     }
 
-    onFilterInfo() {
+    applyFilters() {
 
-        this.users = this.usersOrigins;
+        this.filteredUsers = [...this.usersOrigins];
 
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+        const filter = +this.statusFilter;
 
-        const term = this.searchTerm.toLowerCase();
+        if (filter === 1) {
+            this.filteredUsers = this.filteredUsers.filter(u => u.isActive);
+        } else if (filter === 2) {
+            this.filteredUsers = this.filteredUsers.filter(u => !u.isActive);
+        }
 
-        this.users = this.users.filter(s =>
-            s.fullName?.toLowerCase().includes(term) ||
-            s.email?.toLowerCase().includes(term) ||
-            s.phone?.toLowerCase().includes(term) ||
-            (
-                s.lastLoginAt &&
-                new Date(s.lastLoginAt)
-                    .toLocaleString()
-                    .toLowerCase()
-                    .includes(term)
-            ) ||
-            (
-                this.getRoleName(s.roleId)
-                    ?.toLowerCase()
-                    .includes(term)
-            )
-        );
+        if (this.searchTerm?.trim()) {
+            const term = this.searchTerm.toLowerCase();
+            this.filteredUsers = this.filteredUsers.filter(u =>
+                u.fullName?.toLowerCase().includes(term) ||
+                u.email?.toLowerCase().includes(term) ||
+                u.phone?.toLowerCase().includes(term) ||
+                this.getRoleName(u.roleId)?.toLowerCase().includes(term)
+            );
+        }
+
+        this.page = 1;
+        this.cdr.detectChanges();
     }
 
     // ACTIONS

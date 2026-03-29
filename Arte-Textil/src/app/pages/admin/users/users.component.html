@@ -1,64 +1,78 @@
-<div class="users-wrapper">
+<div class="users-wrapper p-4">
 
-    <div class="d-flex justify-content-between mb-4">
-        <h2 class="fw-bold">Gestión de Usuarios</h2>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Gestión de Usuarios</h2>
+            <p class="text-muted mb-0">Registro, edición y activación de usuarios.</p>
+        </div>
         <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-account-plus me-1"></i> Nuevo Usuario
+            <i class="mdi mdi-account-plus me-1"></i>Nuevo Usuario
         </button>
     </div>
 
-    <!-- FILTER -->
-    <div class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
-            (input)="onSearch($event)">
+    <!-- FILTERS -->
+    <div class="row mb-4 g-2">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Buscar por nombre, email o rol..."
+                (input)="onSearch($event)">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+                <option [value]="0">Todos</option>
+                <option [value]="1">Activos</option>
+                <option [value]="2">Inactivos</option>
+            </select>
+        </div>
     </div>
 
-    <!-- LISTADO -->
-    <div class="table-responsive card shadow-sm p-3">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Teléfono</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let user of users;">
-                    <td>
-                        <div class="fw-bold">{{ user.fullName }}</div>
-                    </td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        <span class="badge bg-info text-dark">{{ getRoleName(user.roleId) }}</span>
-                    </td>
-                    <td>{{ user.phone || 'N/A' }}</td>
-                    <td>
-                        <span class="badge" [class.bg-success]="user.isActive" [class.bg-secondary]="!user.isActive">
-                            {{ user.isActive ? 'Activo' : 'Inactivo' }}
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary me-2" (click)="openEditModal(user)">
-                            <i class="mdi mdi-pencil"></i>
-                        </button>
+    <!-- TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let user of filteredUsers | paginate: { itemsPerPage: 10, currentPage: page }">
+                        <td class="ps-4 fw-semibold">{{ user.fullName }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge bg-info text-dark">{{ getRoleName(user.roleId) }}</span>
+                        </td>
+                        <td>{{ user.phone || 'N/A' }}</td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                [class.bg-success-subtle]="user.isActive"
+                                [class.text-success]="user.isActive"
+                                [class.bg-secondary-subtle]="!user.isActive"
+                                [class.text-secondary]="!user.isActive">
+                                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-light me-1" (click)="openEditModal(user)">
+                                <i class="mdi mdi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(user)">
+                                <i class="mdi" [ngClass]="user.isActive ? 'mdi-eye-off' : 'mdi-eye-outline'"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-                        @if(user.isActive){
-                        <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(user)">
-                            <i class="mdi mdi-account-off"></i>
-                        </button>
-                        } @else {
-                        <button class="btn btn-sm btn-outline-secondary" disabled>
-                            <i class="mdi mdi-lock"></i>
-                        </button>
-                        }
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
+        </div>
     </div>
 
 </div>
@@ -175,25 +189,17 @@
                     <i class="mdi mdi-alert-circle-outline"></i>
                 </div>
 
-                <h5 class="mb-2 fw-bold">¿Desactivar usuario?</h5>
-
+                <h5 class="fw-bold">¿Modificar estado?</h5>
                 <p class="text-muted small">
-                    El usuario <strong>{{ userToDelete?.fullName }}</strong> no podrá iniciar sesión.
+                    ¿Deseas cambiar el estado activo/inactivo de <strong>{{ userToDelete?.fullName }}</strong>?
                 </p>
 
-                <div class="d-flex justify-content-center gap-2 mt-4">
-                    <button
-                        type="button"
-                        class="btn btn-light"
-                        (click)="showDeleteModal = false">
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <button type="button" class="btn btn-light" (click)="showDeleteModal = false">
                         Cancelar
                     </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-danger px-4"
-                        (click)="confirmDelete()">
-                        Sí, desactivar
+                    <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+                        Modificar
                     </button>
                 </div>
             </div>
