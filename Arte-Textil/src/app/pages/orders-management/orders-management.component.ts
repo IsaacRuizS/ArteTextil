@@ -127,9 +127,11 @@ export class OrdersManagementComponent implements OnInit {
         this.filteredOrders = [...this.ordersOrigin];
 
         // FILTRO ACTIVO / INACTIVO
-        if (this.statusFilter === 1) {
+        const filter = +this.statusFilter;
+
+        if (filter === 1) {
             this.filteredOrders = this.filteredOrders.filter(o => o.isActive);
-        } else if (this.statusFilter === 2) {
+        } else if (filter === 2) {
             this.filteredOrders = this.filteredOrders.filter(o => !o.isActive);
         }
 

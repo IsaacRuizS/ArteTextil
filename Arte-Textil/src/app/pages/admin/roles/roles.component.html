@@ -2,20 +2,28 @@
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Gestión de Roles</h2>
+        <div>
+            <h2 class="fw-bold mb-0">Gestión de Roles</h2>
+            <p class="text-muted mb-0">Creación, edición y activación de roles.</p>
+        </div>
         <button class="btn btn-primary" (click)="openCreateModal()">
             <i class="mdi mdi-plus-circle me-1"></i>Nuevo Rol
         </button>
     </div>
 
-    <!-- FILTER -->
-    <div class="mb-4">
-        <input
-            type="text"
-            class="form-control"
-            placeholder="Buscar por nombre de rol..."
-            (input)="onSearch($event)"
-        >
+    <!-- FILTERS -->
+    <div class="row mb-4 g-2">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Buscar por nombre de rol..." (input)="onSearch($event)">
+        </div>
+
+        <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+                <option [value]="0">Todos</option>
+                <option [value]="1">Activos</option>
+                <option [value]="2">Inactivos</option>
+            </select>
+        </div>
     </div>
 
     <!-- LIST -->
@@ -24,8 +32,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <!-- <th>Id</th> -->
-                        <th>Rol</th>
+                        <th class="ps-4">Rol</th>
                         <th>Descripción</th>
                         <th>Estado</th>
                         <th class="text-end pe-4">Acciones</th>
@@ -33,10 +40,8 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let role of roles">
-                        <!-- <td class="ps-4">{{ role.roleId }}</td> -->
-
-                        <td class="fw-semibold">{{ role.name }}</td>
+                    <tr *ngFor="let role of filteredRoles | paginate: { itemsPerPage: 10, currentPage: page }">
+                        <td class="ps-4 fw-semibold">{{ role.name }}</td>
 
                         <td class="text-muted">{{ role.description }}</td>
 
@@ -53,18 +58,20 @@
                         </td>
 
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(role)">
+                            <button class="btn btn-sm btn-light me-1" (click)="openEditModal(role)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>
-                            @if(role.isActive) {
-                            <button class="btn btn-sm btn-light text-danger" (click)="openDeleteModal(role)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(role)">
+                                <i class="mdi" [ngClass]="role.isActive ? 'mdi-eye-off' : 'mdi-eye-outline'"></i>
                             </button>
-                            }
                         </td>
                     </tr>
                 </tbody>
             </table>
+
+            <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+                class="d-flex justify-content-end mt-3">
+            </pagination-controls>
         </div>
     </div>
 

@@ -93,12 +93,11 @@ export class ApiRolService extends ApiBaseService {
             });
     }
 
-    // PATCH: api/rol/{id}/status
+    // DELETE: api/rol/{id} (toggle IsActive)
     updateStatus(id: number, isActive: boolean): Promise<boolean> {
         return this.http
-            .patch(
-                `${this.baseUrl}/api/rol/${id}/status`,
-                isActive,
+            .delete(
+                `${this.baseUrl}/api/rol/${id}`,
                 this.getHttpOptions()
             )
             .toPromise()

@@ -19,9 +19,9 @@
 
         <div class="col-md-3">
             <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
-                <option value="0">Todos</option>
-                <option value="1">Activos</option>
-                <option value="2">Inactivos</option>
+                <option [value]="0">Todos</option>
+                <option [value]="1">Activos</option>
+                <option [value]="2">Inactivos</option>
             </select>
         </div>
     </div>
