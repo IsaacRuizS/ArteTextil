@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { timeout, TimeoutError } from 'rxjs';
 
 import { ApiBaseService } from './api-base.service';
 import { UserModel } from '../shared/models/user.model';
@@ -18,6 +19,7 @@ export class ApiUserService extends ApiBaseService {
         // Assuming the API endpoint is api/user/login or similar, adjusting based on standard pattern
         // If it relies on a specificauth controller, I might need to change this, but based on instructions to use users info:
         return this.http.post(`${this.baseUrl}/api/user/login`, credentials, this.getHttpOptions())
+            .pipe(timeout(10000))
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
@@ -25,11 +27,18 @@ export class ApiUserService extends ApiBaseService {
                 }
                 return res.data; // Should return { user: UserModel, token: string }
             })
-            .catch((err: HttpErrorResponse | Error) => {
-                const errMsg = err instanceof HttpErrorResponse
-                    ? this.getErrorMsg(err)
-                    : err.message;
-                return Promise.reject(new Error(`Error de autenticación: ${errMsg}`));
+            .catch((err: HttpErrorResponse | Error | TimeoutError) => {
+                let errMsg: string;
+                if (err instanceof TimeoutError) {
+                    errMsg = 'No se pudo conectar con el servidor. Por favor verificá tu conexión a internet e intentá de nuevo.';
+                } else if (err instanceof HttpErrorResponse && err.status === 401) {
+                    errMsg = 'Email o contraseña incorrectos.';
+                } else {
+                    errMsg = err instanceof HttpErrorResponse
+                        ? this.getErrorMsg(err)
+                        : err.message;
+                }
+                return Promise.reject(new Error(errMsg));
             });
     }
 

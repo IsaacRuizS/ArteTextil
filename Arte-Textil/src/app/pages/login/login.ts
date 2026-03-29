@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -20,7 +20,8 @@ export class Login {
     constructor(
         private formBuilder: FormBuilder,
         private router: Router,
-        private authService: AuthService
+        private authService: AuthService,
+        private cdr: ChangeDetectorRef
     ) {
         // redirect to home if already logged in
         if (this.authService.isAuthenticated()) {
@@ -58,8 +59,10 @@ export class Login {
                 // AuthService handles redirect to dashboard
             })
             .catch((error: any) => {
+                console.log('Login error:', error);
                 this.error = error.message;
                 this.loading = false;
+                this.cdr.detectChanges();
             });
     }
 }
