@@ -42,7 +42,8 @@ export class DashboardComponent implements OnInit {
         this.kpis.finishedOrders = allOrders.filter(o => o.status === 'Entregado').length;
         this.kpis.stockAvailable = products.reduce((sum, p) => sum + (p.stock ?? 0), 0);
         this.kpis.totalSales = quotes.filter(q => q.isActive).reduce((sum, q) => sum + (q.total ?? 0), 0);
-        this.alerts = alerts.slice(0, 4);
+        this.alerts = alerts;
+        this.alertIndex = 0;
 
         const total = allOrders.length || 1;
         this.productionStages = [
@@ -88,6 +89,11 @@ export class DashboardComponent implements OnInit {
   ];
 
   alerts: AlertModel[] = [];
+  alertIndex = 0;
+
+  get currentAlert(): AlertModel | null {
+    return this.alerts[this.alertIndex] ?? null;
+  }
 
   lastUpdateLabel = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
 }
