@@ -32,7 +32,7 @@ namespace ArteTextil.Business
 
             try
             {
-                var roles = await _repositoryRol.GetAllAsync(s => s.DeletedAt == null);
+                var roles = await _repositoryRol.GetAllAsync();
 
                 response.Data = _mapper.Map<List<RolDto>>(roles);
                 response.Message = "Roles obtenidos correctamente";
@@ -202,20 +202,21 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(rol);
 
-                rol.IsActive = false;
-                rol.DeletedAt = DateTime.UtcNow;
+                rol.IsActive = !rol.IsActive;
+                rol.UpdatedAt = DateTime.UtcNow;
 
                 _repositoryRol.Update(rol);
                 await _repositoryRol.SaveAsync();
 
-                await _logHelper.LogDelete(
+                await _logHelper.LogUpdate(
                     tableName: "Roles",
                     recordId: rol.RoleId,
-                    previousValue: previousSnapshot
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(rol)
                 );
 
                 response.Data = true;
-                response.Message = "Rol eliminado correctamente";
+                response.Message = rol.IsActive ? "Rol activado correctamente" : "Rol desactivado correctamente";
             }
             catch (Exception ex)
             {
