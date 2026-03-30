@@ -7,8 +7,16 @@
         <form [formGroup]="form" class="d-flex gap-2">
             <input type="month" class="form-control" formControlName="month" (change)="onMonthChange()">
 
-            <button type="button" class="btn btn-primary" (click)="generate()" [disabled]="generating">
-                Generar
+            <button class="btn btn-primary d-flex align-items-center gap-2" (click)="generate()"
+                [disabled]="generating">
+
+                <span class="spinner-border spinner-border-sm" *ngIf="generating">
+                </span>
+
+                <span>
+                    {{ generating ? 'Procesando...' : 'Generar' }}
+                </span>
+
             </button>
         </form>
     </div>
@@ -38,18 +46,18 @@
 
                         <td>{{ p.year }}-{{ p.month | number:'2.0' }}</td>
 
-                        <td>₡ {{ p.baseSalary | number:'1.2-2' }}</td>
+                        <td> {{ p.baseSalary | customCurrency:'₡' }}</td>
 
                         <td class="text-success fw-bold">
-                            + ₡ {{ p.extras | number:'1.2-2' }}
+                            + {{ p.extras | customCurrency:'₡' }}
                         </td>
 
                         <td class="text-danger fw-bold">
-                            - ₡ {{ p.deductions | number:'1.2-2' }}
+                            - {{ p.deductions | customCurrency:'₡' }}
                         </td>
 
                         <td class="fw-bold fs-6">
-                            ₡ {{ p.total | number:'1.2-2' }}
+                            {{p.total | customCurrency:'₡'}}
                         </td>
 
                         <td>
@@ -61,13 +69,11 @@
 
                         <td class="text-end">
 
-                            <button class="btn btn-sm btn-success me-2" title="Aprobar nómina" (click)="approve(p)"
+                            <button class="btn btn-success btn-sm" (click)="openPaymentModal(p)"
                                 [disabled]="p.approvedByUserId">
-                                <i class="mdi mdi-check"></i>
-                            </button>
 
-                            <button class="btn btn-sm btn-primary" title="Registrar pago" (click)="registerPayment(p)">
-                                <i class="mdi mdi-cash"></i> Pagar
+                                <i class="mdi mdi-cash-check"></i> Procesar
+
                             </button>
 
                         </td>
@@ -78,7 +84,7 @@
             <!-- Total -->
             <div class="d-flex justify-content-end mt-3 border-top pt-3">
                 <h5 class="fw-bold text-primary">
-                    Total General: ₡ {{ totalPayroll | number:'1.2-2' }}
+                    Total General: {{ totalPayroll | customCurrency:'₡' }}
                 </h5>
             </div>
 
@@ -139,7 +145,7 @@
         </div>
 
         <div class="modal-body-custom">
-            ¿Desea pagar ₡ {{ selectedPayroll?.total | number:'1.2-2' }}?
+            ¿Desea pagar {{ selectedPayroll?.total | customCurrency:'₡' }}?
         </div>
 
         <div class="modal-footer-custom">
@@ -154,6 +160,44 @@
 
     </div>
 
+</div>
+
+<div *ngIf="showPaymentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Procesar pago</h5>
+                <button class="btn-close" (click)="showPaymentModal=false"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <label class="form-label">Método de pago</label>
+
+                <select class="form-select" [(ngModel)]="paymentMethod">
+
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Cheque">Cheque</option>
+
+                </select>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-light" (click)="showPaymentModal=false">
+                    Cancelar
+                </button>
+
+                <button class="btn btn-success" (click)="confirmPayment()">
+                    Confirmar pago
+                </button>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <div *ngIf="showToast" style="

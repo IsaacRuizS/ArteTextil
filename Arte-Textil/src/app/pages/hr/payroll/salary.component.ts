@@ -6,11 +6,14 @@ import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
 import { SalaryModel } from '../../../shared/models/salary.model';
 import { UserModel } from '../../../shared/models/user.model';
+import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
+import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-salaries',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, CustomCurrencyPipe, FormsModule, NgxPaginationModule],
     templateUrl: './salary.component.html',
     changeDetection: ChangeDetectionStrategy.Default,
     providers: [FormBuilder]
@@ -21,6 +24,9 @@ export class SalaryComponent implements OnInit {
     form!: FormGroup;
     showModal = false;
     editingId: number | null = null;
+    searchTerm: string = '';
+    salariesOrigin: SalaryModel[] = [];
+    page = 1;
 
     constructor(
         private api: ApiSalaryService,
@@ -40,10 +46,27 @@ export class SalaryComponent implements OnInit {
         this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => { });
     }
 
+    get filteredSalaries() {
+
+        const term = this.searchTerm.toLowerCase().trim();
+
+        if (!term) return this.salariesOrigin;
+
+        return this.salariesOrigin.filter(s =>
+            s.userName?.toLowerCase().includes(term)
+        );
+    }
+
+
     load() {
         this.shared.setLoading(true);
         this.api.getAll().subscribe({
-            next: data => { this.salaries = data; this.shared.setLoading(false); this.cdr.markForCheck(); },
+            next: data => {
+                this.salariesOrigin = data;
+                this.salaries = data;
+                this.shared.setLoading(false);
+                this.cdr.markForCheck();
+            },
             error: () => this.shared.setLoading(false)
         });
     }

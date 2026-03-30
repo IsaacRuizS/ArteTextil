@@ -42,4 +42,15 @@ public class PayrollController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost("process/{id}")]
+    public async Task<IActionResult> Process(int id, [FromBody] ProcessPayrollDto dto)
+    {
+        var adminId = int.Parse(User.FindFirst("id")!.Value);
+
+        var result = await _business.ProcessPayroll(id, adminId, dto.Method);
+
+        return Ok(result);
+    }
+
 }

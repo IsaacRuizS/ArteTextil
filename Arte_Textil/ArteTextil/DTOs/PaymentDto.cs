@@ -2,8 +2,6 @@
 
 public class PaymentDto
 {
-    public int paymentId { get; set; }
-
     public int payrollId { get; set; }
 
     public string? userName { get; set; }

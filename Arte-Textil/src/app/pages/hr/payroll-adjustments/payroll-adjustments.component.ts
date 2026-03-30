@@ -6,12 +6,13 @@ import { PayrollAdjustmentModel } from '../../../shared/models/payroll-adjustmen
 import { ApiPayrollAdjustmentService } from '../../../services/api-payroll-adjustment.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-payroll-adjustments',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
     providers: [FormBuilder],
     templateUrl: './payroll-adjustments.component.html',
     styleUrls: ['./payroll-adjustments.component.scss']
@@ -21,6 +22,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
     adjustments: PayrollAdjustmentModel[] = [];
     adjustmentsOrigin: PayrollAdjustmentModel[] = [];
     users: any[] = [];
+    page = 1;
 
     adjustmentForm: FormGroup;
 

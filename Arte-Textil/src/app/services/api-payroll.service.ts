@@ -7,8 +7,8 @@ import { PayrollMonthlyModel } from '../shared/models/payroll-monthly.model';
 @Injectable({ providedIn: 'root' })
 export class ApiPayrollService extends ApiBaseService {
     constructor(public override http: HttpClient) { super(http); }
-    
-    // GENERAR NÓMINA
+
+    // Generar nominas
     generate(year: number, month: number): Observable<any> {
 
         return this.http.post<any>(
@@ -16,13 +16,13 @@ export class ApiPayrollService extends ApiBaseService {
             { year, month },
             this.getHttpOptions()
         ).pipe(
-            map((res: any) => res), // 🔥 SOLO DEVOLVER
+            map((res: any) => res),
             catchError(err => throwError(() => err))
         );
     }
 
 
-    // OBTENER NÓMINAS
+    // Obtener nominas
     getAll(): Observable<PayrollMonthlyModel[]> {
 
         return this.http.get<any>(
@@ -36,7 +36,7 @@ export class ApiPayrollService extends ApiBaseService {
         );
     }
 
-    // APROBAR
+    // Aprobar
     approve(id: number): Observable<any> {
 
         return this.http.put<any>(
@@ -44,8 +44,17 @@ export class ApiPayrollService extends ApiBaseService {
             {},
             this.getHttpOptions()
         ).pipe(
-            map((res: any) => res), // 🔥 SOLO DEVOLVER
+            map((res: any) => res),
             catchError(err => throwError(() => err))
+        );
+    }
+
+    // Procesar
+    process(id: number, method: string) {
+        return this.http.post<any>(
+            `${this.baseUrl}/api/payroll/process/${id}`,
+            { method },
+            this.getHttpOptions()
         );
     }
 }

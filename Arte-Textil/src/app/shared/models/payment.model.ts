@@ -3,7 +3,6 @@ export class PaymentModel {
         Object.assign(this, init);
     }
 
-    paymentId!: number;
     payrollId!: number;
     userName?: string;
     amount!: number;

@@ -7,11 +7,12 @@ import { ApiPaymentService } from '../../../services/api-payment.service';
 import { SharedService } from '../../../services/shared.service';
 
 import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.model';
+import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 
 @Component({
     selector: 'app-payroll-monthly',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, CustomCurrencyPipe],
     templateUrl: './payroll-monthly.component.html',
     styleUrls: ['./payroll-monthly.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
@@ -21,7 +22,6 @@ export class PayrollMonthlyComponent implements OnInit {
 
     payrolls: PayrollMonthlyModel[] = [];
     payrollsOrigin: PayrollMonthlyModel[] = [];
-    paymentMethod: string = 'Transferencia';
     showToast = false;
     toastMessage = '';
     toastType: 'success' | 'error' | 'warning' = 'success';
@@ -35,7 +35,8 @@ export class PayrollMonthlyComponent implements OnInit {
 
     showConfirmPaymentModal = false;
     selectedPayroll: PayrollMonthlyModel | null = null;
-
+    paymentMethod = 'Transferencia';
+    showPaymentModal = false;
     generating = false;
 
     totalPayroll = 0;
@@ -109,7 +110,6 @@ export class PayrollMonthlyComponent implements OnInit {
         });
     }
 
-    // Generar planilla
     generate() {
 
         const monthValue = this.form.get('month')?.value;
@@ -122,12 +122,14 @@ export class PayrollMonthlyComponent implements OnInit {
         const [year, month] = monthValue.split('-');
 
         this.generating = true;
+        this.shared.setLoading(true);
 
         this.api.generate(year, month).subscribe({
 
             next: (res: any) => {
 
                 this.generating = false;
+                this.shared.setLoading(false);
 
                 if (res.success) {
                     this.showToastMessage(res.message, 'success');
@@ -136,6 +138,11 @@ export class PayrollMonthlyComponent implements OnInit {
                 }
 
                 this.load(monthValue);
+            },
+
+            error: () => {
+                this.generating = false;
+                this.shared.setLoading(false);
             }
         });
     }
@@ -161,23 +168,25 @@ export class PayrollMonthlyComponent implements OnInit {
         this.showConfirmPaymentModal = true;
     }
 
+    openPaymentModal(p: PayrollMonthlyModel) {
+        this.selectedPayroll = p;
+        this.paymentMethod = 'Transferencia';
+        this.showPaymentModal = true;
+    }
+
     // Confirmar el pago
     confirmPayment() {
 
         if (!this.selectedPayroll) return;
 
-        const payload = {
-            payrollId: this.selectedPayroll.payrollId,
-            paymentDate: new Date(),
-            amount: this.selectedPayroll.total,
-            method: this.paymentMethod
-        };
-
-        this.payments.create(payload).subscribe({
+        this.api.process(
+            this.selectedPayroll.payrollId,
+            this.paymentMethod
+        ).subscribe({
 
             next: (res: any) => {
 
-                this.showConfirmPaymentModal = false;
+                this.showPaymentModal = false;
 
                 if (res.success) {
                     this.showToastMessage(res.message, 'success');

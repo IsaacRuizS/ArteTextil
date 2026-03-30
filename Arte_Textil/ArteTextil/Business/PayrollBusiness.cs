@@ -232,4 +232,72 @@ public class PayrollBusiness
 
         return response;
     }
+
+    public async Task<ApiResponse<bool>> ProcessPayroll(int payrollId, int adminId, string method)
+    {
+        var response = new ApiResponse<bool>();
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var payroll = await _context.PayrollMonthly
+                .FirstOrDefaultAsync(p =>
+                    p.PayrollId == payrollId &&
+                    p.DeletedAt == null);
+
+            if (payroll == null)
+            {
+                response.Success = false;
+                response.Message = "Planilla no encontrada";
+                return response;
+            }
+
+            // Verificar si ya está pagada
+            var alreadyPaid = await _context.Payments
+                .AnyAsync(p =>
+                    p.PayrollId == payrollId &&
+                    p.DeletedAt == null);
+
+            if (alreadyPaid)
+            {
+                response.Success = false;
+                response.Message = "Esta planilla ya fue pagada";
+                return response;
+            }
+
+            // Aprobar
+            payroll.ApprovedByUserId = adminId;
+            payroll.UpdatedAt = DateTime.UtcNow;
+
+            // Crear pago
+            var payment = new Payment
+            {
+                PayrollId = payrollId,
+                Amount = payroll.Total,
+                Method = method,
+                PaymentDate = DateTime.UtcNow,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.Payments.AddAsync(payment);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            response.Data = true;
+            response.Message = "Planilla aprobada y pagada correctamente";
+        }
+        catch (Exception ex)
+        {
+            if (transaction.GetDbTransaction().Connection != null)
+                await transaction.RollbackAsync();
+
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
 }

@@ -27,7 +27,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let a of adjustments">
+                    <tr *ngFor="let a of adjustments | paginate: { itemsPerPage: 10, currentPage: page }">
                         <td class="ps-4 fw-semibold">
                             {{ a.userName || a.userId }}
                         </td>
@@ -112,6 +112,11 @@
     </div>
 </div>
 }
+
+<!-- Paginacion -->
+<pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+    class="d-flex justify-content-end mt-3">
+</pagination-controls>
 
 <!-- DELETE MODAL -->
 @if (showDeleteModal) {
