@@ -8,12 +8,13 @@ import { UserModel } from '../../../shared/models/user.model';
 import { ApiAttendanceService } from '../../../services/api-attendance.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-attendance',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
     templateUrl: './attendance.component.html',
     styleUrls: ['./attendance.component.scss']
 })
@@ -33,6 +34,8 @@ export class AttendanceComponent implements OnInit {
     adminAttendanceForm: FormGroup;
 
     editingAttendanceId: number | null = null;
+
+    page = 1;
 
     constructor(
         private apiAttendance: ApiAttendanceService,

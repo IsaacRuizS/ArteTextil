@@ -40,7 +40,7 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let p of payrolls">
+                    <tr *ngFor="let p of payrolls | paginate: { itemsPerPage: 10, currentPage: page }">
 
                         <td class="fw-semibold">{{ p.userName }}</td>
 
@@ -93,73 +93,46 @@
 
 </div>
 
-<div *ngIf="showMessageModal" class="modal-overlay">
+<!-- PAGINACIÓN -->
+<pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+    class="d-flex justify-content-end mt-3">
+</pagination-controls>
 
-    <div class="modal-box">
+<div *ngIf="showMessageModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
 
-        <div class="modal-header-custom" [ngClass]="{
-                'bg-success text-white': modalType === 'success',
-                'bg-danger text-white': modalType === 'error'
-            }">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-center p-3">
 
-            <span>
-                {{ modalType === 'success' ? 'Operación exitosa' : 'Aviso' }}
-            </span>
+            <div class="modal-body">
 
-            <button (click)="closeModal()">✖</button>
-        </div>
+                <div class="mb-3 display-5" [ngClass]="{
+                        'text-success': modalType === 'success',
+                        'text-danger': modalType === 'error'
+                     }">
 
-        <div class="modal-body-custom">
-            {{ messageText }}
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Método de pago</label>
+                    <i class="mdi" [ngClass]="{
+                          'mdi-check-circle-outline': modalType === 'success',
+                          'mdi-alert-circle-outline': modalType === 'error'
+                       }"></i>
 
-                <select class="form-select" [(ngModel)]="paymentMethod">
+                </div>
 
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Cheque">Cheque</option>
-                    <option value="SINPE">SINPE</option>
+                <h5 class="fw-bold mb-2">
+                    {{ modalType === 'success' ? 'Operación exitosa' : 'Aviso' }}
+                </h5>
 
-                </select>
+                <p class="text-muted small">
+                    {{ messageText }}
+                </p>
+
+                <button class="btn btn-primary mt-3 px-4" (click)="closeModal()">
+                    Aceptar
+                </button>
+
             </div>
-        </div>
 
-        <div class="modal-footer-custom">
-            <button class="btn btn-primary" (click)="closeModal()">
-                Aceptar
-            </button>
         </div>
-
     </div>
-
-</div>
-
-<div *ngIf="showConfirmPaymentModal" class="modal-overlay">
-
-    <div class="modal-box">
-
-        <div class="modal-header-custom bg-primary text-white">
-            <span>Confirmar pago</span>
-            <button (click)="showConfirmPaymentModal = false">✖</button>
-        </div>
-
-        <div class="modal-body-custom">
-            ¿Desea pagar {{ selectedPayroll?.total | customCurrency:'₡' }}?
-        </div>
-
-        <div class="modal-footer-custom">
-            <button class="btn btn-secondary me-2" (click)="showConfirmPaymentModal = false">
-                Cancelar
-            </button>
-
-            <button class="btn btn-success" (click)="confirmPayment()">
-                Confirmar
-            </button>
-        </div>
-
-    </div>
-
 </div>
 
 <div *ngIf="showPaymentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
@@ -167,32 +140,39 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Procesar pago</h5>
+            <!-- HEADER -->
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Procesar pago</h5>
                 <button class="btn-close" (click)="showPaymentModal=false"></button>
             </div>
 
+            <!-- BODY -->
             <div class="modal-body">
 
-                <label class="form-label">Método de pago</label>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">
+                        Método de pago
+                    </label>
 
-                <select class="form-select" [(ngModel)]="paymentMethod">
+                    <select class="form-select" [(ngModel)]="paymentMethod">
 
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Cheque">Cheque</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Cheque">Cheque</option>
 
-                </select>
+                    </select>
+                </div>
 
             </div>
 
-            <div class="modal-footer">
+            <!-- FOOTER -->
+            <div class="modal-footer border-0 pt-0">
                 <button class="btn btn-light" (click)="showPaymentModal=false">
                     Cancelar
                 </button>
 
-                <button class="btn btn-success" (click)="confirmPayment()">
-                    Confirmar pago
+                <button class="btn btn-primary px-4" (click)="openConfirmPaymentModal()">
+                    Continuar
                 </button>
             </div>
 
@@ -200,24 +180,72 @@
     </div>
 </div>
 
-<div *ngIf="showToast" style="
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 999999;
-        min-width: 250px;
-        padding: 14px 20px;
-        border-radius: 10px;
-        color: white;
-        font-weight: 500;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        animation: fadeIn 0.3s ease;
-     " [style.background]="
-        toastType === 'success' ? '#22c55e' :
-        toastType === 'error' ? '#ef4444' :
-        '#f59e0b'
-     ">
+<div *ngIf="showConfirmPaymentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
 
-    {{ toastMessage }}
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-center p-3">
 
+            <div class="modal-body">
+
+                <div class="mb-3 text-warning display-5">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+
+                <h5 class="fw-bold mb-2">Confirmar pago</h5>
+
+                <p class="text-muted small">
+                    ¿Desea pagar
+                    <b>{{ selectedPayroll?.total | customCurrency:'₡' }}</b>?
+                </p>
+
+                <div class="d-flex justify-content-center gap-2 mt-4">
+
+                    <button class="btn btn-light" (click)="showConfirmPaymentModal = false">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-success px-4" (click)="confirmPayment()">
+                        Confirmar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+
+    <div class="toast show shadow-sm border-0">
+
+        <div class="toast-header" [ngClass]="{
+                'bg-success text-white': toastType === 'success',
+                'bg-warning text-dark': toastType === 'warning',
+                'bg-danger text-white': toastType === 'error'
+             }">
+
+            <i class="mdi me-2" [ngClass]="{
+                  'mdi-check-circle-outline': toastType === 'success',
+                  'mdi-alert-outline': toastType === 'warning',
+                  'mdi-alert-circle-outline': toastType === 'error'
+               }"></i>
+
+            <strong class="me-auto">
+                {{
+                toastType === 'success' ? 'Operación exitosa' :
+                toastType === 'warning' ? 'Advertencia' :
+                'Error'
+                }}
+            </strong>
+
+            <button class="btn-close btn-close-white" (click)="showToast = false"></button>
+        </div>
+
+        <div class="toast-body text-dark">
+            {{ toastMessage }}
+        </div>
+
+    </div>
 </div>

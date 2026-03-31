@@ -8,11 +8,12 @@ import { SharedService } from '../../../services/shared.service';
 
 import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.model';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-payroll-monthly',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormsModule, CustomCurrencyPipe],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, CustomCurrencyPipe, NgxPaginationModule],
     templateUrl: './payroll-monthly.component.html',
     styleUrls: ['./payroll-monthly.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
@@ -25,6 +26,8 @@ export class PayrollMonthlyComponent implements OnInit {
     showToast = false;
     toastMessage = '';
     toastType: 'success' | 'error' | 'warning' = 'success';
+
+    page = 1;
 
     form: FormGroup;
 
@@ -106,7 +109,14 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.cdr.markForCheck();
             },
 
-            error: () => this.shared.setLoading(false)
+            error: (err) => {
+
+                const msg = err?.error?.message || 'Ocurrió un error inesperado';
+
+                this.showToastMessage(msg, 'error');
+
+                this.shared.setLoading(false);
+            }
         });
     }
 
@@ -140,8 +150,12 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.load(monthValue);
             },
 
-            error: () => {
+            error: (err) => {
+
                 this.generating = false;
+                const msg = err?.error?.message || 'Error generando planilla';
+                const type = err?.error?.success === false ? 'warning' : 'error';
+                this.showToastMessage(msg, type);
                 this.shared.setLoading(false);
             }
         });
@@ -174,6 +188,11 @@ export class PayrollMonthlyComponent implements OnInit {
         this.showPaymentModal = true;
     }
 
+    openConfirmPaymentModal() {
+        this.showPaymentModal = false;
+        this.showConfirmPaymentModal = true;
+    }
+
     // Confirmar el pago
     confirmPayment() {
 
@@ -186,6 +205,7 @@ export class PayrollMonthlyComponent implements OnInit {
 
             next: (res: any) => {
 
+                this.showConfirmPaymentModal = false;
                 this.showPaymentModal = false;
 
                 if (res.success) {
@@ -196,23 +216,31 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 const month = this.form.get('month')?.value;
                 if (month) this.load(month);
+            },
+
+            error: (err) => {
+
+                this.showConfirmPaymentModal = false;
+                this.showPaymentModal = false;
+
+                const msg = err?.error?.message || 'Error al procesar pago';
+
+                this.showToastMessage(msg, 'error');
             }
         });
     }
 
     // toast para advertencias
-    showToastMessage(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+    showToastMessage(message: string, type: 'success' | 'warning' | 'error') {
 
         this.toastMessage = message;
         this.toastType = type;
         this.showToast = true;
 
-        this.cdr.detectChanges();
-
+        // Auto cerrar
         setTimeout(() => {
             this.showToast = false;
-            this.cdr.detectChanges();
-        }, 3000); // desaparece en 3s
+        }, 3500);
     }
 
 }

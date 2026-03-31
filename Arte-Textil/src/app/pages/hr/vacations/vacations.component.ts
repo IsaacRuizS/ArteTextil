@@ -6,12 +6,13 @@ import { ApiVacationService } from '../../../services/api-vacation.service';
 import { SharedService } from '../../../services/shared.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { UserModel } from '../../../shared/models/user.model';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
     selector: 'app-vacations',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
     providers: [FormBuilder],
     templateUrl: './vacations.component.html',
     styleUrls: ['./vacations.component.scss']
@@ -24,6 +25,7 @@ export class VacationsComponent implements OnInit {
 
     showFormModal = true;
     searchTerm = '';
+    page = 1;
 
     // cambiar manualmente para probar
     isAdmin = false;

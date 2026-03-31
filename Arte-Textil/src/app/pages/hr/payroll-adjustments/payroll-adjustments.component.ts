@@ -7,12 +7,13 @@ import { ApiPayrollAdjustmentService } from '../../../services/api-payroll-adjus
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 
 @Component({
     selector: 'app-payroll-adjustments',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, CustomCurrencyPipe],
     providers: [FormBuilder],
     templateUrl: './payroll-adjustments.component.html',
     styleUrls: ['./payroll-adjustments.component.scss']

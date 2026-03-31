@@ -37,7 +37,7 @@
 
         <tbody>
 
-          <tr *ngFor="let p of filteredPayments | paginate: { itemsPerPage: 10, currentPage: page }">
+          <tr *ngFor="let p of filteredPayments | paginate: { itemsPerPage: 50, currentPage: page }">
             <td>{{ p.userName }}</td>
             <td>{{ p.amount | customCurrency:'₡' }}</td>
             <td>{{ p.paymentDate | date:'short' }}</td>

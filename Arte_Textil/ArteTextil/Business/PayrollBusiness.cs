@@ -64,7 +64,7 @@ public class PayrollBusiness
 
                     if (isPaid)
                     {
-                        messages.Add($"Planilla ya pagada para {user.FullName}");
+                        messages.Add($"La planilla de {user.FullName} ya fue pagada y no fue modificada.");
                         continue;
                     }
 
@@ -93,7 +93,7 @@ public class PayrollBusiness
                 else
                 {
                     response.Data = true;
-                    response.Message = "Payroll generado correctamente";
+                    response.Message = "Las planillas fueron generadas correctamente.";
                 }
 
 
@@ -145,7 +145,7 @@ public class PayrollBusiness
             else
             {
                 response.Data = true;
-                response.Message = "Payroll generado correctamente";
+                response.Message = "Planilla generado correctamente";
             }
         }
         catch (Exception ex)
@@ -188,7 +188,7 @@ public class PayrollBusiness
                 ).ToListAsync();
 
             response.Data = data;
-            response.Message = "Payroll obtenido";
+            response.Message = "Planilla obtenida";
         }
         catch (Exception ex)
         {
@@ -211,7 +211,7 @@ public class PayrollBusiness
             if (payroll == null)
             {
                 response.Success = false;
-                response.Message = "Payroll no encontrado";
+                response.Message = "Planilla no encontrada";
                 return response;
             }
 
@@ -222,7 +222,7 @@ public class PayrollBusiness
             await _repository.SaveAsync();
 
             response.Data = true;
-            response.Message = "Payroll aprobado";
+            response.Message = "Planilla aprobada";
         }
         catch (Exception ex)
         {
@@ -262,7 +262,7 @@ public class PayrollBusiness
             if (alreadyPaid)
             {
                 response.Success = false;
-                response.Message = "Esta planilla ya fue pagada";
+                response.Message = "La planilla ya había sido pagada previamente.";
                 return response;
             }
 
@@ -287,7 +287,7 @@ public class PayrollBusiness
             await transaction.CommitAsync();
 
             response.Data = true;
-            response.Message = "Planilla aprobada y pagada correctamente";
+            response.Message = "La planilla fue procesada y pagada correctamente.";
         }
         catch (Exception ex)
         {
