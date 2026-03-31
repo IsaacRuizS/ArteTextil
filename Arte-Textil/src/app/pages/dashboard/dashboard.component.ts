@@ -80,14 +80,6 @@ export class DashboardComponent implements OnInit {
 
   productionStages: { name: string; active: number; total: number }[] = [];
 
-  // Productividad (mock — requiere endpoint backend)
-  productivityByEmployee = [
-    { name: 'Ana López',  units: 42, efficiency: 88 },
-    { name: 'Carlos Mora', units: 35, efficiency: 81 },
-    { name: 'María Rojas', units: 29, efficiency: 76 },
-    { name: 'José Vega', units: 25, efficiency: 72 },
-  ];
-
   alerts: AlertModel[] = [];
   alertIndex = 0;
 
