@@ -78,6 +78,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/product/market-all
+        [AllowAnonymous]
         [HttpGet("market-all")]
         public async Task<IActionResult> GetAllForMarket()
         {

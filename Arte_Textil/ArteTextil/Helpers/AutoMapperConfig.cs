@@ -82,7 +82,8 @@ namespace ArteTextil.Helpers
 
             cfg.CreateMap<Promotion, PromotionDto>()
                .ForMember(d => d.promotionId, o => o.MapFrom(s => s.PromotionId))
-               .ForMember(d => d.product, o => o.MapFrom(s => s.Product));
+               .ForMember(d => d.product, o => o.Ignore())
+               .ForMember(d => d.productName, o => o.MapFrom(s => s.Product != null ? s.Product.Name : null));
 
             cfg.CreateMap<PromotionDto, Promotion>()
                 .ForMember(d => d.PromotionId, o => o.MapFrom(s => s.promotionId))
