@@ -5,6 +5,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import Swal from 'sweetalert2';
 
 import { PromotionFormModal } from './components/promotion-form-modal';
+import { BulkImportComponent } from '../../components/bulk-import/bulk-import.component';
 import { ApiPromotionService } from '../../services/api-promotion.service';
 import { ApiProductService } from '../../services/api-product.service';
 import { PromotionModel } from '../../shared/models/promotion.model';
@@ -18,7 +19,8 @@ import { SharedService } from '../../services/shared.service';
         CommonModule,
         FormsModule,
         NgxPaginationModule,
-        PromotionFormModal
+        PromotionFormModal,
+        BulkImportComponent
     ],
     templateUrl: './promotion.component.html',
     styleUrls: ['./promotion.component.scss'],

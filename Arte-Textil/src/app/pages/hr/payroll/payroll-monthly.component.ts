@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormsModule } from '@angul
 import { ApiPayrollService } from '../../../services/api-payroll.service';
 import { ApiPaymentService } from '../../../services/api-payment.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.model';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
@@ -49,7 +50,8 @@ export class PayrollMonthlyComponent implements OnInit {
         private payments: ApiPaymentService,
         private shared: SharedService,
         private fb: FormBuilder,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private notificationService: NotificationService
     ) {
         this.form = this.fb.group({
             month: ['']

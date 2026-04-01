@@ -13,6 +13,4 @@ public class PromotionDto : DtoBase
 
     // Relación
     public string? productName { get; set; }
-
-    public ProductDto? product { get; set; }
 }

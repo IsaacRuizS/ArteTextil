@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { BulkImportComponent } from '../../../components/bulk-import/bulk-import.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { UserModel } from '../../../shared/models/user.model';
 import { RolModel } from '../../../shared/models/rol.model';
@@ -11,7 +12,7 @@ import { SharedService } from '../../../services/shared.service';
 @Component({
     selector: 'app-users',
     standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, NgxPaginationModule],
+    imports: [FormsModule, CommonModule, ReactiveFormsModule, BulkImportComponent, NgxPaginationModule],
     templateUrl: './users.component.html',
     styleUrls: ['./users.component.scss']
 })

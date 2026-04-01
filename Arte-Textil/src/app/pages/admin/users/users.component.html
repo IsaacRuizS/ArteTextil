@@ -1,14 +1,13 @@
 <div class="users-wrapper p-4">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Gestión de Usuarios</h2>
-            <p class="text-muted mb-0">Registro, edición y activación de usuarios.</p>
+    <div class="d-flex justify-content-between mb-4">
+        <h2 class="fw-bold">Gestión de Usuarios</h2>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <app-bulk-import entity="users" (imported)="loadUsers()"></app-bulk-import>
+            <button class="btn btn-primary" (click)="openCreateModal()">
+                <i class="mdi mdi-account-plus me-1"></i> Nuevo Usuario
+            </button>
         </div>
-        <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-account-plus me-1"></i>Nuevo Usuario
-        </button>
     </div>
 
     <!-- FILTERS -->

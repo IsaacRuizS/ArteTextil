@@ -3,6 +3,7 @@ import { ApiOrderService } from '../../services/api-order.service';
 import { OrderStatusHistoryModel } from '../../shared/models/order-status-history.model';
 import { CommonModule } from '@angular/common';
 import { SharedService } from '../../services/shared.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
     selector: 'app-order-status-history-modal',
@@ -22,6 +23,7 @@ export class OrderStatusHistoryModalComponent implements OnInit {
 
     constructor(private apiOrderService: ApiOrderService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
     ) { }
 
@@ -48,6 +50,7 @@ export class OrderStatusHistoryModalComponent implements OnInit {
                 this.cdr.markForCheck();
             },
             error: () => {
+                this.notificationService.error('Error al cargar el historial de estados del pedido. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });

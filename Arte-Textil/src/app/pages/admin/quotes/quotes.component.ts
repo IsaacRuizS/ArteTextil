@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { QuoteModel } from '../../../shared/models/quote.model';
 import { ApiQuoteService } from '../../../services/api-quote.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { QuotesModalComponent } from './quotes-modal/quotes-modal.component';
 import { QuotesSmartListComponent } from '../../../components/quotes-smart-list/quotes-smart-list.component';
 
@@ -37,6 +38,7 @@ export class QuotesComponent implements OnInit {
     constructor(
         private apiQuoteService: ApiQuoteService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef
     ) { }
 
@@ -62,6 +64,7 @@ export class QuotesComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al cargar las cotizaciones. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -169,6 +172,10 @@ export class QuotesComponent implements OnInit {
 
                 this.loadQuotes();
 
+            },
+
+            error: () => {
+                this.notificationService.error('Error al cambiar el estado de la cotización. Intente de nuevo.');
             }
 
         });

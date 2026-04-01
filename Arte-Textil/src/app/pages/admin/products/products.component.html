@@ -7,7 +7,8 @@
             <div class="text-muted small">Administra tu inventario, precios y estado del catálogo.</div>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <app-bulk-import entity="products" (imported)="loadProducts()"></app-bulk-import>
             <button class="btn btn-outline-success" (click)="onGenerateExcel()" title="Exportar lista actual">
                 <i class="mdi mdi-file-excel me-1"></i>Exportar Excel
             </button>
@@ -270,6 +271,7 @@
                             <label class="form-label small fw-bold text-muted">Stock</label>
                             <input type="number" class="form-control" formControlName="stock"
                                 [class.is-invalid]="productForm.get('stock')?.invalid && productForm.get('stock')?.touched">
+                            <small class="text-muted" *ngIf="isEditing">El stock solo puede modificarse desde el módulo de Inventario.</small>
                         </div>
 
                         <div class="col-md-4 mb-3">

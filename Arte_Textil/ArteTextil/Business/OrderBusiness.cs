@@ -173,6 +173,20 @@ namespace ArteTextil.Business
                         return response;
                     }
 
+                    // Validar stock disponible (Stock - QuantityReserved) antes de reservar
+                    foreach (var qi in quote.QuoteItems)
+                    {
+                        var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
+                        var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
+                        if (product == null || available < qi.Quantity)
+                        {
+                            response.Success = false;
+                            response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
+                            await transaction.RollbackAsync();
+                            return response;
+                        }
+                    }
+
                     // Crear Order
                     order = new Order
                     {
@@ -187,7 +201,7 @@ namespace ArteTextil.Business
                     await _repositoryOrder.AddAsync(order);
                     await _repositoryOrder.SaveAsync();
 
-                    // Copiar Items
+                    // Copiar Items y reservar QuantityReserved
                     foreach (var qi in quote.QuoteItems)
                     {
                         var orderItem = new OrderItem
@@ -202,13 +216,9 @@ namespace ArteTextil.Business
 
                         await _repositoryOrderItem.AddAsync(orderItem);
 
-                        // OPCIONAL: Descontar stock aquí
-                        var product = await _repositoryProduct.GetByIdAsync(qi.ProductId);
-                        if (product != null)
-                        {
-                            product.Stock -= qi.Quantity;
-                            _repositoryProduct.Update(product);
-                        }
+                        await _context.Products
+                            .Where(p => p.ProductId == qi.ProductId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
                     }
 
                     await _repositoryOrderItem.SaveAsync();
@@ -246,6 +256,19 @@ namespace ArteTextil.Business
                     {
                         foreach (var item in dto.items)
                         {
+                            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == item.productId && p.DeletedAt == null);
+                            var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
+                            if (product == null || available < item.quantity)
+                            {
+                                response.Success = false;
+                                response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + item.productId}'. Disponible: {available}, requerido: {item.quantity}.";
+                                await transaction.RollbackAsync();
+                                return response;
+                            }
+                        }
+
+                        foreach (var item in dto.items)
+                        {
                             var orderItem = new OrderItem
                             {
                                 OrderId = order.OrderId,
@@ -257,6 +280,10 @@ namespace ArteTextil.Business
                             };
 
                             await _repositoryOrderItem.AddAsync(orderItem);
+
+                            await _context.Products
+                                .Where(p => p.ProductId == item.productId)
+                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + item.quantity));
                         }
 
                         await _repositoryOrderItem.SaveAsync();
@@ -339,6 +366,51 @@ namespace ArteTextil.Business
                 });
 
                 var statusChanged = order.Status != dto.status;
+
+                if (statusChanged)
+                {
+                    var quoteForStock = await _repositoryQuote.Query()
+                        .Include(q => q.QuoteItems)
+                        .FirstOrDefaultAsync(q => q.QuoteId == order.QuoteId && q.DeletedAt == null);
+
+                    var activeItems = quoteForStock?.QuoteItems?
+                        .Where(i => i.DeletedAt == null && i.IsActive).ToList();
+
+                    if (activeItems != null && activeItems.Any())
+                    {
+                        // Saliendo de Cancelado → validar disponible y re-reservar
+                        if (order.Status == "Cancelado" && dto.status != "Cancelado")
+                        {
+                            foreach (var qi in activeItems)
+                            {
+                                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
+                                var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
+                                if (product == null || available < qi.Quantity)
+                                {
+                                    response.Success = false;
+                                    response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
+                                    return response;
+                                }
+                            }
+                            foreach (var qi in activeItems)
+                            {
+                                await _context.Products
+                                    .Where(p => p.ProductId == qi.ProductId)
+                                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
+                            }
+                        }
+                        // Entrando a Cancelado → liberar reserva
+                        else if (dto.status == "Cancelado" && order.Status != "Cancelado")
+                        {
+                            foreach (var qi in activeItems)
+                            {
+                                await _context.Products
+                                    .Where(p => p.ProductId == qi.ProductId)
+                                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved - qi.Quantity));
+                            }
+                        }
+                    }
+                }
 
                 order.Status = dto.status;
                 order.DeliveryDate = dto.deliveryDate;
@@ -477,6 +549,48 @@ namespace ArteTextil.Business
                 }
 
                 var previousSnapshot = JsonSerializer.Serialize(order);
+
+                var quoteForStock2 = await _repositoryQuote.Query()
+                    .Include(q => q.QuoteItems)
+                    .FirstOrDefaultAsync(q => q.QuoteId == order.QuoteId && q.DeletedAt == null);
+
+                var activeItems2 = quoteForStock2?.QuoteItems?
+                    .Where(i => i.DeletedAt == null && i.IsActive).ToList();
+
+                if (activeItems2 != null && activeItems2.Any())
+                {
+                    // Saliendo de Cancelado → validar disponible y re-reservar
+                    if (order.Status == "Cancelado" && newStatus != "Cancelado")
+                    {
+                        foreach (var qi in activeItems2)
+                        {
+                            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
+                            var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
+                            if (product == null || available < qi.Quantity)
+                            {
+                                response.Success = false;
+                                response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
+                                return response;
+                            }
+                        }
+                        foreach (var qi in activeItems2)
+                        {
+                            await _context.Products
+                                .Where(p => p.ProductId == qi.ProductId)
+                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
+                        }
+                    }
+                    // Entrando a Cancelado → liberar reserva
+                    else if (newStatus == "Cancelado" && order.Status != "Cancelado")
+                    {
+                        foreach (var qi in activeItems2)
+                        {
+                            await _context.Products
+                                .Where(p => p.ProductId == qi.ProductId)
+                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved - qi.Quantity));
+                        }
+                    }
+                }
 
                 order.Status = newStatus;
                 order.UpdatedAt = DateTime.UtcNow;

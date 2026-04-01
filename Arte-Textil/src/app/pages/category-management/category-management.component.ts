@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } 
 import { CategoryModel } from '../../shared/models/category.model';
 import { ApiCategoryService } from '../../services/api-category.service';
 import { SharedService } from '../../services/shared.service';
+import { NotificationService } from '../../services/notification.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
@@ -33,6 +34,7 @@ export class CategoryManagementComponent implements OnInit {
     constructor(
         private apiCategoryService: ApiCategoryService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -65,6 +67,7 @@ export class CategoryManagementComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: () => {
+                this.notificationService.error('Error al cargar las categorías. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });
@@ -183,7 +186,10 @@ export class CategoryManagementComponent implements OnInit {
                 this.loadCategories();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al crear la categoría. Intente de nuevo.');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -196,7 +202,10 @@ export class CategoryManagementComponent implements OnInit {
                 this.loadCategories();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al actualizar la categoría. Intente de nuevo.');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 
@@ -212,7 +221,10 @@ export class CategoryManagementComponent implements OnInit {
                 this.loadCategories();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+            error: () => {
+                this.notificationService.error('Error al cambiar el estado de la categoría. Intente de nuevo.');
+                this.sharedService.setLoading(false);
+            }
         });
     }
 }

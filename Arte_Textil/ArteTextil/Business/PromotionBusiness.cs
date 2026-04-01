@@ -135,7 +135,7 @@ namespace ArteTextil.Business
 
                 await _repositoryPromotion.AddAsync(promotion);
 
-                await _logHelper.LogCreate("Promotions", promotion.PromotionId, JsonSerializer.Serialize(promotion));
+                await _logHelper.LogCreate("Promotions", promotion.PromotionId, JsonSerializer.Serialize(promotion, new JsonSerializerOptions { ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles }));
 
                 var promotionDto = _mapper.Map<PromotionDto>(promotion);
                 promotionDto.productName = product.Name;

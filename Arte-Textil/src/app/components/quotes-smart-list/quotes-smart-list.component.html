@@ -19,9 +19,14 @@
 
             <tbody>
 
-                <tr *ngFor="let q of quotes | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
+                <ng-container *ngFor="let q of quotes | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
+
+                <tr (click)="toggleExpand(q.quoteId!)" style="cursor: pointer;">
 
                     <td class="ps-4 fw-semibold">
+                        <span class="me-1 text-muted" style="font-size: 0.75rem;">
+                            {{ expandedQuoteId === q.quoteId ? '▼' : '▶' }}
+                        </span>
                         {{ q.quoteNumber }}
                     </td>
 
@@ -63,7 +68,7 @@
                     </td>
 
                     <!-- ACTIONS -->
-                    <td *ngIf="showActions" class="text-end pe-4">
+                    <td *ngIf="showActions" class="text-end pe-4" (click)="$event.stopPropagation()">
 
                         <button class="btn btn-sm btn-light text-primary me-2" (click)="onEdit(q)">
                             <i class="mdi mdi-pencil"></i>
@@ -82,6 +87,35 @@
                     </td>
 
                 </tr>
+
+                <tr *ngIf="expandedQuoteId === q.quoteId">
+                    <td [attr.colspan]="showActions ? 8 : 7" class="p-0">
+                        <div class="p-3 bg-light border-top">
+                            <table class="table table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio unit.</th>
+                                        <th>Descuento</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let item of q.items">
+                                        <td>{{ item.productName || 'Producto #' + item.productId }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ item.price | currency:'CRC':'symbol':'1.0-0' }}</td>
+                                        <td>{{ item.discountAmount | currency:'CRC':'symbol':'1.0-0' }}</td>
+                                        <td>{{ getItemSubtotal(item) | currency:'CRC':'symbol':'1.0-0' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+                </ng-container>
 
             </tbody>
 

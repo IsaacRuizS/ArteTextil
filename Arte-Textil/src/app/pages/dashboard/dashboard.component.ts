@@ -11,6 +11,7 @@ import { AlertModel } from '../../shared/models/alert.model';
 import { OrderModel } from '../../shared/models/order.model';
 import { QuoteModel } from '../../shared/models/quote.model';
 import { SharedService } from '../../services/shared.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,7 +27,8 @@ export class DashboardComponent implements OnInit {
     private orderApi: ApiOrderService,
     private productApi: ApiProductService,
     private quoteApi: ApiQuoteService,
-    private shared: SharedService
+    private shared: SharedService,
+    private notificationService: NotificationService
   ) {}
 
   private _allOrders: OrderModel[] = [];
@@ -51,7 +53,10 @@ export class DashboardComponent implements OnInit {
         this.recalculate(allOrders, quotes);
         this.shared.setLoading(false);
       },
-      error: () => this.shared.setLoading(false)
+      error: () => {
+        this.notificationService.error('Error al cargar los datos del dashboard. Intente de nuevo.');
+        this.shared.setLoading(false);
+      }
     });
   }
 

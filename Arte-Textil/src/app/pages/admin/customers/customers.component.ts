@@ -2,17 +2,19 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { BulkImportComponent } from '../../../components/bulk-import/bulk-import.component';
 
 import { CustomerModel } from '../../../shared/models/customer.model';
 import { ApiCustomerService } from '../../../services/api-customer.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 import { CustomersSmartListComponent } from '../../../components/customers-smart-list/customers-smart-list.component';
 
 @Component({
     selector: 'app-customers',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule, CustomersSmartListComponent],
+    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule, FormsModule, CustomersSmartListComponent, BulkImportComponent],
     providers: [FormBuilder],
     templateUrl: './customers.component.html',
     styleUrls: ['./customers.component.scss']
@@ -39,6 +41,7 @@ export class CustomersComponent implements OnInit {
     constructor(
         private apiCustomerService: ApiCustomerService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -79,6 +82,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al cargar los clientes. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -194,6 +198,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al crear el cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -216,6 +221,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al actualizar el cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
@@ -240,6 +246,7 @@ export class CustomersComponent implements OnInit {
             },
 
             error: () => {
+                this.notificationService.error('Error al cambiar el estado del cliente. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
 
