@@ -1,12 +1,39 @@
 <div class="hr-wrapper p-4">
+
+  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold mb-0">Salarios</h2>
-    <button class="btn btn-primary" (click)="openCreate()"><i class="mdi mdi-plus-circle me-1"></i>Nuevo salario</button>
+
+    <button *ngIf="isAdmin" class="btn btn-primary" (click)="openCreate()">
+      <i class="mdi mdi-plus-circle me-1"></i>
+      Nuevo salario
+    </button>
   </div>
 
+  <!-- Buscador -->
+  <div *ngIf="isAdmin" class="card shadow-sm border-0 mb-3 p-3">
+    <div class="row">
+      <div class="col-md-6">
+
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="mdi mdi-magnify"></i>
+          </span>
+
+          <input *ngIf="isAdmin" type="text" class="form-control" placeholder="Buscar empleado..." [(ngModel)]="searchTerm"
+            (ngModelChange)="page = 1">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
   <div class="card shadow-sm border-0">
     <div class="table-responsive">
-      <table class="table mb-0">
+
+      <table class="table mb-0 align-middle">
+
         <thead class="bg-light">
           <tr>
             <th>Usuario</th>
@@ -14,44 +41,80 @@
             <th class="text-end">Acciones</th>
           </tr>
         </thead>
+
         <tbody>
-          <tr *ngFor="let s of salaries">
+
+          <tr *ngFor="let s of filteredSalaries | paginate: { itemsPerPage: 50, currentPage: page }">
             <td>{{ s.userName || s.userId }}</td>
-            <td>₡ {{ s.baseSalary }}</td>
+            <td>{{ s.baseSalary | customCurrency:'₡' }}</td>
+
             <td class="text-end">
-              <button class="btn btn-sm btn-light" (click)="edit(s)"><i class="mdi mdi-pencil"></i></button>
+              <button *ngIf="isAdmin" class="btn btn-sm btn-light" (click)="edit(s)">
+                <i class="mdi mdi-pencil"></i>
+              </button>
             </td>
           </tr>
+
         </tbody>
+
       </table>
+
     </div>
   </div>
 
+  <!-- Paginacion -->
+  <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+    class="d-flex justify-content-end mt-3">
+  </pagination-controls>
+
   <!-- Modal -->
-  <div *ngIf="showModal" class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+  <div *ngIf="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">Salario</h5><button class="btn-close" (click)="showModal=false"></button></div>
+
+        <!-- Header -->
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Salario</h5>
+          <button class="btn-close" (click)="showModal=false"></button>
+        </div>
+
+        <!-- Body -->
         <div class="modal-body">
           <form [formGroup]="form">
+
             <div class="mb-3">
               <label class="form-label">Usuario</label>
               <select class="form-select" formControlName="userId">
                 <option value="">Seleccione usuario</option>
-                <option *ngFor="let u of users" [value]="u.userId">{{ u.fullName }}</option>
+
+                <option *ngFor="let u of users" [value]="u.userId">
+                  {{ u.fullName }}
+                </option>
               </select>
             </div>
+
             <div class="mb-3">
               <label class="form-label">Salario base</label>
               <input type="number" class="form-control" formControlName="baseSalary">
             </div>
+
           </form>
         </div>
+
+        <!-- Footer -->
         <div class="modal-footer border-0 pt-0">
-          <button class="btn btn-light" (click)="showModal=false">Cancelar</button>
-          <button class="btn btn-primary" (click)="save()">Guardar</button>
+          <button class="btn btn-light" (click)="showModal=false">
+            Cancelar
+          </button>
+
+          <button class="btn btn-primary" (click)="save()">
+            Guardar
+          </button>
         </div>
+
       </div>
     </div>
   </div>
+
 </div>

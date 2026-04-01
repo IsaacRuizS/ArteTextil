@@ -11,6 +11,10 @@ public class PayrollAdjustment : EntityBase
 
     public decimal Amount { get; set; }
 
+    public int Year { get; set; }
+
+    public int Month { get; set; }
+
     public string Type { get; set; } = null!; // Extra o Rebajo
 
     public string? Reason { get; set; }

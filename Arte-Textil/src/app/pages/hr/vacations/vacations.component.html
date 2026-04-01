@@ -4,13 +4,26 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Solicitudes de Vacaciones</h2>
 
-        <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-plus-circle me-1"></i>Nueva solicitud
+
+        <div class="mb-3 text-muted small">
+            Días disponibles: <strong>{{ availableState.days }}</strong>
+        </div>
+
+
+        <button *ngIf="isAdmin || availableState.days > 0" class="btn btn-primary" (click)="openCreateModal()">
+
+            <i class="mdi mdi-plus-circle me-1"></i>
+            Nueva solicitud
         </button>
+
+        <div *ngIf="!isAdmin && availableState.days <= 0" class="text-danger small mt-2">
+
+            No tienes días disponibles para solicitar vacaciones
+        </div>
     </div>
 
     <!-- FILTER -->
-    <div class="mb-4">
+    <div *ngIf="isAdmin" class="mb-4">
         <input type="text" class="form-control" placeholder="Buscar por usuario, estado o fecha..."
             (input)="onSearch($event)">
     </div>
@@ -33,7 +46,7 @@
 
                 <tbody>
 
-                    <tr *ngFor="let v of vacations">
+                    <tr *ngFor="let v of vacations | paginate: { itemsPerPage: 50, currentPage: page }">
 
                         <td class="ps-4 fw-semibold">
                             {{ v.userName || v.userId }}
@@ -66,12 +79,12 @@
 
                         <td class="text-end pe-4" *ngIf="isAdmin">
 
-                            <button class="btn btn-sm btn-light text-success me-2" (click)="approve(v)">
-                                <i class="mdi mdi-check"></i>
+                            <button class="btn btn-sm btn-light text-primary me-2" (click)="approve(v)">
+                                <i class="mdi mdi-eye"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger" (click)="reject(v)">
-                                <i class="mdi mdi-close"></i>
+                            <button class="btn btn-sm btn-light text-secondary" (click)="reject(v)">
+                                <i class="mdi mdi-eye-off"></i>
                             </button>
 
                         </td>
@@ -84,113 +97,42 @@
         </div>
     </div>
 
+    <!-- Paginacion -->
+    <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+        class="d-flex justify-content-end mt-3">
+    </pagination-controls>
 
-    <!-- CREATE MODAL -->
-
-    @if (showFormModal) {
+    @if (showError) {
 
     <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
 
         <div class="modal-dialog modal-dialog-centered">
 
-            <div class="modal-content">
+            <div class="modal-content border-0 shadow">
 
                 <div class="modal-header border-0 pb-0">
 
-                    <h5 class="modal-title fw-bold">
-                        Nueva solicitud
+                    <h5 class="modal-title text-danger fw-bold">
+                        <i class="mdi mdi-alert-circle me-2"></i>
+                        Error
                     </h5>
 
-                    <button type="button" class="btn-close" (click)="showFormModal = false">
-                    </button>
+                    <button type="button" class="btn-close" (click)="showError = false"></button>
 
                 </div>
 
+                <div class="modal-body text-center">
 
-                <div class="modal-body">
-
-                    <form [formGroup]="vacationForm">
-
-
-                        <!-- ADMIN USER SELECT -->
-
-                        <div class="mb-3" *ngIf="isAdmin">
-
-                            <label class="form-label small fw-bold text-muted">
-                                Usuario
-                            </label>
-
-                            <select class="form-select" formControlName="userId"
-                                [class.is-invalid]="vacationForm.get('userId')?.invalid && vacationForm.get('userId')?.touched">
-
-                                <div class="invalid-feedback">
-                                    Debe seleccionar un usuario
-                                </div>
-
-                                <option *ngFor="let u of users" [value]="u.userId">
-
-                                    {{ u.fullName }}
-
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- START DATE -->
-
-                        <div class="mb-3">
-
-                            <label class="form-label small fw-bold text-muted">
-                                Fecha inicio
-                            </label>
-
-                            <input type="date" class="form-control" formControlName="startDate">
-
-                        </div>
-
-
-                        <!-- END DATE -->
-
-                        <div class="mb-3">
-
-                            <label class="form-label small fw-bold text-muted">
-                                Fecha fin
-                            </label>
-
-                            <input type="date" class="form-control" formControlName="endDate">
-
-                        </div>
-
-
-                        <!-- NOTES -->
-
-                        <div class="mb-3">
-
-                            <label class="form-label small fw-bold text-muted">
-                                Motivo / Notas
-                            </label>
-
-                            <textarea rows="3" class="form-control" formControlName="notes">
-                        </textarea>
-
-                        </div>
-
-
-                    </form>
+                    <p class="mb-0">
+                        {{ errorMessage }}
+                    </p>
 
                 </div>
 
+                <div class="modal-footer border-0 justify-content-center">
 
-                <div class="modal-footer border-0 pt-0">
-
-                    <button class="btn btn-light" (click)="showFormModal = false">
-                        Cancelar
-                    </button>
-
-                    <button class="btn btn-primary px-4" (click)="saveVacation()">
-                        Guardar
+                    <button class="btn btn-danger px-4" (click)="showError = false">
+                        Entendido
                     </button>
 
                 </div>
@@ -203,4 +145,91 @@
 
     }
 
-</div>
+    <!-- CREATE MODAL -->
+
+    <div *ngIf="showFormModal">
+
+        <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <div class="modal-header border-0 pb-0">
+
+                        <h5 class="modal-title fw-bold">
+                            Nueva solicitud
+                        </h5>
+
+                        <button type="button" class="btn-close" (click)="showFormModal = false">
+                        </button>
+
+                    </div>
+
+
+                    <form [formGroup]="vacationForm" (ngSubmit)="saveVacation()">
+
+                        <div class="modal-body">
+
+                            <!-- ADMIN USER SELECT -->
+                            <div class="mb-3" *ngIf="isAdmin">
+                                <label class="form-label small fw-bold text-muted">
+                                    Usuario
+                                </label>
+
+                                <select formControlName="userId" class="form-select">
+                                    <option value="">Seleccione usuario</option>
+
+                                    <option *ngFor="let u of users" [value]="u.userId">
+                                        {{ u.fullName }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- START DATE -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">
+                                    Fecha inicio
+                                </label>
+                                <input type="date" class="form-control" formControlName="startDate">
+                            </div>
+
+                            <!-- END DATE -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">
+                                    Fecha fin
+                                </label>
+                                <input type="date" class="form-control" formControlName="endDate">
+                            </div>
+
+                            <!-- NOTES -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">
+                                    Motivo / Notas
+                                </label>
+                                <textarea rows="3" class="form-control" formControlName="notes"></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0">
+
+                            <button type="button" class="btn btn-light" (click)="showFormModal = false">
+                                Cancelar
+                            </button>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                Guardar
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>

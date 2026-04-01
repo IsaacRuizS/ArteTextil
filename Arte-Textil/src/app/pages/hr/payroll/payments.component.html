@@ -1,30 +1,58 @@
 <div class="hr-wrapper p-4">
+
+  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold mb-0">Pagos</h2>
   </div>
 
+  <!-- Buscador -->
+  <div class="card shadow-sm border-0 mb-3 p-3">
+    <div class="row g-2">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="mdi mdi-magnify"></i>
+          </span>
+
+          <input type="text" class="form-control" placeholder="Buscar por empleado o método..." [(ngModel)]="searchTerm"
+            (ngModelChange)="page = 1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
   <div class="card shadow-sm border-0">
     <div class="table-responsive">
-      <table class="table mb-0">
+      <table class="table mb-0 align-middle">
+
         <thead class="bg-light">
           <tr>
             <th>Usuario</th>
-            <th>Pago</th>
             <th>Monto</th>
             <th>Fecha</th>
             <th>Método</th>
           </tr>
         </thead>
+
         <tbody>
-          <tr *ngFor="let p of payments">
+
+          <tr *ngFor="let p of filteredPayments | paginate: { itemsPerPage: 50, currentPage: page }">
             <td>{{ p.userName }}</td>
-            <td>{{ p.payrollId }}</td>
-            <td>₡ {{ p.amount }}</td>
+            <td>{{ p.amount | customCurrency:'₡' }}</td>
             <td>{{ p.paymentDate | date:'short' }}</td>
             <td>{{ p.method }}</td>
           </tr>
+
         </tbody>
+
       </table>
     </div>
   </div>
+
+  <!-- PAGINACIÓN -->
+  <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+    class="d-flex justify-content-end mt-3">
+  </pagination-controls>
+
 </div>

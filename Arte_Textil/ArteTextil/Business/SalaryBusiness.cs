@@ -56,15 +56,23 @@ public class SalaryBusiness
         return response;
     }
 
-    // Ver salarios
-    public async Task<ApiResponse<List<SalaryDto>>> GetAll()
+    // Ver salarios (CON SEGURIDAD)
+    public async Task<ApiResponse<List<SalaryDto>>> GetAll(int userId, string roleId)
     {
         var response = new ApiResponse<List<SalaryDto>>();
 
         try
         {
-            var data = _repository.Query()
-                .Where(s => s.IsActive)
+            var query = _repository.Query()
+                .Where(s => s.IsActive);
+
+            // Si NO es admin, solo ve su salario
+            if (roleId != "1")
+            {
+                query = query.Where(s => s.UserId == userId);
+            }
+
+            var data = query
                 .Join(
                     _repository.Context.Users,
                     s => s.UserId,
@@ -127,5 +135,4 @@ public class SalaryBusiness
 
         return response;
     }
-
 }

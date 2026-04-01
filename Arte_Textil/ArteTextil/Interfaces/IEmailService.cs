@@ -8,6 +8,7 @@ namespace ArteTextil.Interfaces
         Task SendRegistrationConfirmationAsync(string fullName, string email);
         Task SendPromotionsExpiringAsync(List<string>? emails, List<Promotion> promotions);
         Task SendDailyAlertsToAdminsAsync(List<string> emails, List<Promotion> promotions, List<Product> products, List<Order> orders);
+        Task SendPayrollPaymentAsync(User user, PayrollMonthly payroll, Payment payment);
     }
 
 }

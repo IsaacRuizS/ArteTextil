@@ -28,7 +28,7 @@
     </div>
 
     <!-- FILTER -->
-    <div class="mb-4">
+    <div *ngIf="isAdmin" class="mb-4">
         <input type="text" class="form-control" placeholder="Buscar por usuario o fecha..." (input)="onSearch($event)">
     </div>
 
@@ -49,7 +49,7 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let a of attendances">
+                    <tr *ngFor="let a of attendances | paginate: { itemsPerPage: 50, currentPage: page }">
 
                         <td class="ps-4 fw-semibold">
                             {{ a.userName || a.userId }}
@@ -92,6 +92,12 @@
 
             </table>
         </div>
+
+        <!-- Paginacion -->
+        <pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+            class="d-flex justify-content-end mt-3">
+        </pagination-controls>
+
 
         @if (showAdminModal) {
 

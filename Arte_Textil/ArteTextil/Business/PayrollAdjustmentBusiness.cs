@@ -5,6 +5,7 @@ using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArteTextil.Business;
 
@@ -45,7 +46,42 @@ public class PayrollAdjustmentBusiness
                 return response;
             }
 
-            var entity = _mapper.Map<PayrollAdjustment>(dto);
+            var hasSalary = await _repository.Context.Salaries
+    .AnyAsync(s =>
+        s.UserId == dto.userId &&
+        s.IsActive &&
+        s.DeletedAt == null);
+
+            if (!hasSalary)
+            {
+                response.Success = false;
+                response.Message = "El usuario no tiene salario asignado. No se pueden crear ajustes.";
+                return response;
+            }
+
+            // normalizar tipo
+            var type = dto.type.Trim().ToLower();
+
+            if (type != "extra" && type != "rebajo")
+            {
+                response.Success = false;
+                response.Message = "Tipo inválido (extra/rebajo)";
+                return response;
+            }
+
+            var entity = new PayrollAdjustment
+            {
+                UserId = dto.userId,
+                Amount = dto.amount,
+                Type = type, // normalizado
+                Reason = dto.reason,
+                Year = dto.year,
+                Month = dto.month,
+                Applied = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
             entity.IsActive = true;
             entity.CreatedAt = DateTime.UtcNow;
 
@@ -57,7 +93,25 @@ public class PayrollAdjustmentBusiness
                 JsonSerializer.Serialize(entity)
             );
 
-            response.Data = _mapper.Map<PayrollAdjustmentDto>(entity);
+            response.Data = new PayrollAdjustmentDto
+            {
+                adjustmentId = entity.AdjustmentId,
+                userId = entity.UserId,
+                amount = entity.Amount,
+                type = entity.Type,
+                reason = entity.Reason,
+                year = entity.Year,
+                month = entity.Month,
+                isActive = entity.IsActive
+            };
+
+            if (dto.year <= 0 || dto.month <= 0)
+            {
+                response.Success = false;
+                response.Message = "Debe indicar año y mes";
+                return response;
+            }
+
             response.Message = "Ajuste creado";
         }
         catch (Exception ex)
@@ -176,6 +230,8 @@ public class PayrollAdjustmentBusiness
                         reason = a.Reason,
                         isActive = a.IsActive,
                         createdAt = a.CreatedAt,
+                        year = a.Year,
+                        month = a.Month,
                         updatedAt = a.UpdatedAt,
                         deletedAt = a.DeletedAt
                     }

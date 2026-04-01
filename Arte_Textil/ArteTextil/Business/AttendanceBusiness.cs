@@ -27,6 +27,12 @@ public class AttendanceBusiness
         _logHelper = logHelper;
     }
 
+    private DateTime GetCostaRicaNow()
+    {
+        var tz = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz);
+    }
+
     // Check-in
     public async Task<ApiResponse<bool>> CheckIn(int userId)
     {
@@ -34,8 +40,24 @@ public class AttendanceBusiness
 
         try
         {
-            var today = DateTime.UtcNow.Date;
+            var now = GetCostaRicaNow();
+            var today = now.Date;
 
+            // no check-in abierto
+            var openAttendance = await _repository.FirstOrDefaultAsync(a =>
+                a.UserId == userId &&
+                a.CheckIn != null &&
+                a.CheckOut == null &&
+                a.DeletedAt == null);
+
+            if (openAttendance != null)
+            {
+                response.Success = false;
+                response.Message = "Ya tienes un check-in abierto (falta check-out)";
+                return response;
+            }
+
+            // no repetir en el mismo día
             var existing = await _repository.FirstOrDefaultAsync(a =>
                 a.UserId == userId &&
                 a.CheckIn != null &&
@@ -52,9 +74,9 @@ public class AttendanceBusiness
             var attendance = new Attendance
             {
                 UserId = userId,
-                CheckIn = DateTime.UtcNow,
+                CheckIn = now,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = now
             };
 
             await _repository.AddAsync(attendance);
@@ -84,7 +106,8 @@ public class AttendanceBusiness
 
         try
         {
-            var today = DateTime.UtcNow.Date;
+            var now = GetCostaRicaNow();
+            var today = now.Date;
 
             var attendance = await _repository.FirstOrDefaultAsync(a =>
                 a.UserId == userId &&
@@ -100,10 +123,18 @@ public class AttendanceBusiness
                 return response;
             }
 
+            
+            if (attendance.CheckOut != null)
+            {
+                response.Success = false;
+                response.Message = "Ya realizaste check-out hoy";
+                return response;
+            }
+
             var previous = JsonSerializer.Serialize(attendance);
 
-            attendance.CheckOut = DateTime.UtcNow;
-            attendance.UpdatedAt = DateTime.UtcNow;
+            attendance.CheckOut = now;
+            attendance.UpdatedAt = now;
 
             _repository.Update(attendance);
             await _repository.SaveAsync();
@@ -212,6 +243,17 @@ public class AttendanceBusiness
                 return response;
             }
 
+            // VALIDACIONES PRO
+            if (dto.checkIn != null && dto.checkOut != null)
+            {
+                if (dto.checkOut < dto.checkIn)
+                {
+                    response.Success = false;
+                    response.Message = "El check-out no puede ser menor que el check-in";
+                    return response;
+                }
+            }
+
             attendance.CheckIn = dto.checkIn;
             attendance.CheckOut = dto.checkOut;
             attendance.UpdatedAt = DateTime.UtcNow;
@@ -220,7 +262,7 @@ public class AttendanceBusiness
             await _repository.SaveAsync();
 
             response.Data = true;
-            response.Message = "Asistencia actualizada";
+            response.Message = "Asistencia actualizada correctamente";
         }
         catch (Exception ex)
         {
@@ -230,5 +272,42 @@ public class AttendanceBusiness
 
         return response;
     }
+
+    // Solo para colaboradores, no para admin
+    public async Task<ApiResponse<List<AttendanceDto>>> GetMyAttendances(int userId)
+    {
+        var response = new ApiResponse<List<AttendanceDto>>();
+
+        try
+        {
+            var data = await _context.Attendance
+                .Where(a => a.UserId == userId && a.DeletedAt == null)
+                .Select(a => new AttendanceDto
+                {
+                    attendanceId = a.AttendanceId,
+                    userId = a.UserId,
+                    userName = _context.Users
+                        .Where(u => u.UserId == a.UserId)
+                        .Select(u => u.FullName)
+                        .FirstOrDefault(),
+                    checkIn = a.CheckIn,
+                    checkOut = a.CheckOut,
+                    isActive = a.IsActive
+                })
+                .OrderByDescending(a => a.checkIn)
+                .ToListAsync();
+
+            response.Data = data;
+            response.Message = "Mis asistencias obtenidas correctamente";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
 }
 

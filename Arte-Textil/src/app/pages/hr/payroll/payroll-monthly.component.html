@@ -1,63 +1,251 @@
 <div class="hr-wrapper p-4">
+
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold mb-0">Planillas Mensuales</h2>
-        <form [formGroup]="form" class="d-flex gap-2">
 
+        <form [formGroup]="form" class="d-flex gap-2">
             <input type="month" class="form-control" formControlName="month" (change)="onMonthChange()">
 
-            <button type="button" class="btn btn-primary" (click)="generate()"
-                [disabled]="!form.get('month')?.value || generating">
+            <button class="btn btn-primary d-flex align-items-center gap-2" (click)="generate()"
+                [disabled]="generating">
 
-                Generar
+                <span class="spinner-border spinner-border-sm" *ngIf="generating">
+                </span>
+
+                <span>
+                    {{ generating ? 'Procesando...' : 'Generar' }}
+                </span>
 
             </button>
-
         </form>
     </div>
 
+    <!-- Tabla -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
+
             <table class="table mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>Usuario</th>
+                        <th>Empleado</th>
                         <th>Periodo</th>
+                        <th>Salario Base</th>
+                        <th>Extras</th>
+                        <th>Rebajos</th>
                         <th>Total</th>
                         <th>Estado</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    <tr *ngFor="let p of payrolls">
-                        <td>{{ p.userName || p.userId }}</td>
+                    <tr *ngFor="let p of payrolls | paginate: { itemsPerPage: 50, currentPage: page }">
+
+                        <td class="fw-semibold">{{ p.userName }}</td>
+
                         <td>{{ p.year }}-{{ p.month | number:'2.0' }}</td>
-                        <td>₡ {{ p.total }}</td>
+
+                        <td> {{ p.baseSalary | customCurrency:'₡' }}</td>
+
+                        <td class="text-success fw-bold">
+                            + {{ p.extras | customCurrency:'₡' }}
+                        </td>
+
+                        <td class="text-danger fw-bold">
+                            - {{ p.deductions | customCurrency:'₡' }}
+                        </td>
+
+                        <td class="fw-bold fs-6">
+                            {{p.total | customCurrency:'₡'}}
+                        </td>
+
                         <td>
-                            <span class="badge" [class.bg-warning]="!p.approvedByUserId"
+                            <span class="badge px-3 py-2" [class.bg-warning]="!p.approvedByUserId"
                                 [class.bg-success]="p.approvedByUserId">
-
                                 {{ p.approvedByUserId ? 'Aprobada' : 'Pendiente' }}
-
                             </span>
                         </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-success me-2" (click)="approve(p)"
-                                [disabled]="p.approvedByUserId"><i class="mdi mdi-check"></i></button>
-                            <button class="btn btn-sm btn-primary" (click)="registerPayment(p)">
 
-                                <i class="mdi mdi-cash"></i> Pagar
+                        <td class="text-end">
+
+                            <button class="btn btn-success btn-sm" (click)="openPaymentModal(p)"
+                                [disabled]="p.approvedByUserId">
+
+                                <i class="mdi mdi-cash-check"></i> Procesar
+
                             </button>
+
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <div class="d-flex justify-content-end mt-3">
-                <h5 class="fw-bold">
-                    Total Planilla: ₡ {{ totalPayroll | number:'1.2-2' }}
+            <!-- Total -->
+            <div class="d-flex justify-content-end mt-3 border-top pt-3">
+                <h5 class="fw-bold text-primary">
+                    Total General: {{ totalPayroll | customCurrency:'₡' }}
                 </h5>
             </div>
 
         </div>
+    </div>
+
+</div>
+
+<!-- PAGINACIÓN -->
+<pagination-controls (pageChange)="page = $event" previousLabel="‹" nextLabel="›"
+    class="d-flex justify-content-end mt-3">
+</pagination-controls>
+
+<div *ngIf="showMessageModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-center p-3">
+
+            <div class="modal-body">
+
+                <div class="mb-3 display-5" [ngClass]="{
+                        'text-success': modalType === 'success',
+                        'text-danger': modalType === 'error'
+                     }">
+
+                    <i class="mdi" [ngClass]="{
+                          'mdi-check-circle-outline': modalType === 'success',
+                          'mdi-alert-circle-outline': modalType === 'error'
+                       }"></i>
+
+                </div>
+
+                <h5 class="fw-bold mb-2">
+                    {{ modalType === 'success' ? 'Operación exitosa' : 'Aviso' }}
+                </h5>
+
+                <p class="text-muted small">
+                    {{ messageText }}
+                </p>
+
+                <button class="btn btn-primary mt-3 px-4" (click)="closeModal()">
+                    Aceptar
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showPaymentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Procesar pago</h5>
+                <button class="btn-close" (click)="showPaymentModal=false"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">
+                        Método de pago
+                    </label>
+
+                    <select class="form-select" [(ngModel)]="paymentMethod">
+
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Cheque">Cheque</option>
+
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-light" (click)="showPaymentModal=false">
+                    Cancelar
+                </button>
+
+                <button class="btn btn-primary px-4" (click)="openConfirmPaymentModal()">
+                    Continuar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showConfirmPaymentModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content text-center p-3">
+
+            <div class="modal-body">
+
+                <div class="mb-3 text-warning display-5">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+
+                <h5 class="fw-bold mb-2">Confirmar pago</h5>
+
+                <p class="text-muted small">
+                    ¿Desea pagar
+                    <b>{{ selectedPayroll?.total | customCurrency:'₡' }}</b>?
+                </p>
+
+                <div class="d-flex justify-content-center gap-2 mt-4">
+
+                    <button class="btn btn-light" (click)="showConfirmPaymentModal = false">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-success px-4" (click)="confirmPayment()">
+                        Confirmar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+
+    <div class="toast show shadow-sm border-0">
+
+        <div class="toast-header" [ngClass]="{
+                'bg-success text-white': toastType === 'success',
+                'bg-warning text-dark': toastType === 'warning',
+                'bg-danger text-white': toastType === 'error'
+             }">
+
+            <i class="mdi me-2" [ngClass]="{
+                  'mdi-check-circle-outline': toastType === 'success',
+                  'mdi-alert-outline': toastType === 'warning',
+                  'mdi-alert-circle-outline': toastType === 'error'
+               }"></i>
+
+            <strong class="me-auto">
+                {{
+                toastType === 'success' ? 'Operación exitosa' :
+                toastType === 'warning' ? 'Advertencia' :
+                'Error'
+                }}
+            </strong>
+
+            <button class="btn-close btn-close-white" (click)="showToast = false"></button>
+        </div>
+
+        <div class="toast-body text-dark">
+            {{ toastMessage }}
+        </div>
+
     </div>
 </div>

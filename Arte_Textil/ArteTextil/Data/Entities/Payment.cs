@@ -5,8 +5,6 @@ namespace ArteTextil.Data.Entities;
 public class Payment : EntityBase
 {
     [Key]
-    public int PaymentId { get; set; }
-
     public int PayrollId { get; set; }
 
     public DateTime PaymentDate { get; set; }

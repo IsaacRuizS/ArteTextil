@@ -22,9 +22,6 @@ public class PayrollController : ControllerBase
     {
         var result = await _business.GeneratePayroll(dto.Year, dto.Month);
 
-        if (!result.Success)
-            return BadRequest(result);
-
         return Ok(result);
     }
 
@@ -43,8 +40,17 @@ public class PayrollController : ControllerBase
 
         var result = await _business.Approve(id, adminId);
 
-        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPost("process/{id}")]
+    public async Task<IActionResult> Process(int id, [FromBody] ProcessPayrollDto dto)
+    {
+        var adminId = int.Parse(User.FindFirst("id")!.Value);
+
+        var result = await _business.ProcessPayroll(id, adminId, dto.Method);
 
         return Ok(result);
     }
+
 }

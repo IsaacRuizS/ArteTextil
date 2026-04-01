@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { UserModel } from '../../../shared/models/user.model';
 import { PayrollAdjustmentModel } from '../../../shared/models/payroll-adjustment.model';
 import { ApiPayrollAdjustmentService } from '../../../services/api-payroll-adjustment.service';
 import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 
 @Component({
     selector: 'app-payroll-adjustments',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule, CustomCurrencyPipe],
     providers: [FormBuilder],
     templateUrl: './payroll-adjustments.component.html',
     styleUrls: ['./payroll-adjustments.component.scss']
@@ -20,7 +22,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
     adjustments: PayrollAdjustmentModel[] = [];
     adjustmentsOrigin: PayrollAdjustmentModel[] = [];
-    users: any[] = []; 
+    users: any[] = [];
+    page = 1;
 
     adjustmentForm: FormGroup;
 
@@ -30,6 +33,10 @@ export class PayrollAdjustmentsComponent implements OnInit {
     searchTerm = '';
 
     isAdmin = false;
+
+    messageText: string = '';
+    modalType: 'success' | 'error' = 'error';
+    showMessageModal = false;
 
     constructor(
         private apiAdjustment: ApiPayrollAdjustmentService,
@@ -43,7 +50,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
             userId: ['', Validators.required],
             amount: ['', Validators.required],
             type: ['Extra', Validators.required],
-            reason: ['']
+            reason: [''],
+            month: ['', Validators.required]
         });
     }
 
@@ -63,13 +71,13 @@ export class PayrollAdjustmentsComponent implements OnInit {
     // cargar los usuarios (dropdown)
     loadUsers() {
 
-    this.apiUser.getAll()
-        .then((users) => {
-            this.users = users;
-            this.cdr.markForCheck();
-        })
-        .catch(() => { });
-}
+        this.apiUser.getAll()
+            .then((users) => {
+                this.users = users;
+                this.cdr.markForCheck();
+            })
+            .catch(() => { });
+    }
 
     // cargar los ajustes
     loadAdjustments() {
@@ -119,7 +127,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
     openCreateModal() {
         this.adjustmentForm.reset({
             adjustmentId: 0,
-            type: 'Extra'
+            type: 'Extra',
+            month: ''
         });
         this.showFormModal = true;
     }
@@ -132,17 +141,67 @@ export class PayrollAdjustmentsComponent implements OnInit {
             return;
         }
 
+        const monthValue = this.adjustmentForm.value.month;
+
+        if (!monthValue) {
+            this.showModal("Seleccione un mes", 'error');
+            return;
+        }
+
+        const [year, month] = monthValue.split('-');
+
+        const payload = {
+            ...this.adjustmentForm.value,
+            year: Number(year),
+            month: Number(month)
+        };
+
         this.sharedService.setLoading(true);
 
-        this.apiAdjustment.create(this.adjustmentForm.value).subscribe({
-            next: () => {
+        this.apiAdjustment.create(payload).subscribe({
+
+            next: (res: any) => {
+
+                if (!res.success) {
+                    this.showModal(res.message, 'error');
+                    return;
+                }
+
                 this.showFormModal = false;
                 this.adjustmentForm.reset({ type: 'Extra' });
+
+                this.showModal('Ajuste creado correctamente', 'success');
+
                 this.loadAdjustments();
                 this.sharedService.setLoading(false);
             },
-            error: () => this.sharedService.setLoading(false)
+
+            error: (err) => {
+
+                console.log("ERROR CAPTURADO:", err);
+
+                const msg = err?.error?.message || 'Error';
+
+                this.showMessageModal = true;
+                this.messageText = msg;
+                this.modalType = 'error';
+
+                console.log("MODAL STATE:", this.showMessageModal, this.messageText);
+            }
+
         });
+    }
+
+    // modal para error
+    showModal(message: string, type: 'success' | 'error' = 'error') {
+
+        this.messageText = message;
+        this.modalType = type;
+        this.showMessageModal = true;
+    }
+
+    closeModal() {
+        this.showMessageModal = false;
     }
 
     // eliminar
@@ -166,5 +225,11 @@ export class PayrollAdjustmentsComponent implements OnInit {
             },
             error: () => this.sharedService.setLoading(false)
         });
+        this.showModal(
+            this.adjustmentToDelete?.isActive
+                ? 'Ajuste ocultado correctamente'
+                : 'Ajuste activado correctamente',
+            'success'
+        );
     }
 }

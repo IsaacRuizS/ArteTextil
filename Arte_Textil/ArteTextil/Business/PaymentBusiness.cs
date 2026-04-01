@@ -52,8 +52,6 @@ public class PaymentBusiness
 
             await _context.SaveChangesAsync();
 
-            dto.paymentId = entity.PaymentId;
-
             response.Data = dto;
             response.Message = "Pago registrado correctamente";
         }
@@ -87,7 +85,6 @@ public class PaymentBusiness
                     u => u.UserId,
                     (x, u) => new PaymentDto
                     {
-                        paymentId = x.p.PaymentId,
                         payrollId = x.p.PayrollId,
                         userName = u.FullName,
                         amount = x.p.Amount,

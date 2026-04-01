@@ -15,6 +15,20 @@ public class VacationBusiness
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
 
+    private async Task<int> CalculateAvailableDays(int userId)
+    {
+        var user = await _repository.Context.Users
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (user == null) return 0;
+
+        var monthsWorked = (DateTime.UtcNow.Year - user.CreatedAt.Year) * 12
+                         + DateTime.UtcNow.Month - user.CreatedAt.Month;
+
+        if (monthsWorked < 0) monthsWorked = 0;
+
+        return monthsWorked; // 1 día por mes
+    }
 
     public VacationBusiness(
         ArteTextilDbContext context,
@@ -42,6 +56,30 @@ public class VacationBusiness
                 return response;
             }
 
+            // Calcular días solicitados
+            var daysRequested = (dto.endDate - dto.startDate).Days + 1;
+
+            // Calcular disponibles
+            var availableDays = await CalculateAvailableDays(dto.userId);
+
+            // Calcular días ya usados
+            var vacations = await _repository.Query()
+    .Where(v => v.UserId == dto.userId
+        && v.Status == "Aprobada"
+        && v.DeletedAt == null)
+    .ToListAsync();
+
+            var usedDays = vacations.Sum(v => (v.EndDate - v.StartDate).Days + 1);
+
+            var remainingDays = availableDays - usedDays;
+
+            if (daysRequested > remainingDays)
+            {
+                response.Success = false;
+                response.Message = $"No tiene días suficientes. Disponibles: {remainingDays}";
+                return response;
+            }
+
             var entity = new Vacation
             {
                 UserId = dto.userId,
@@ -56,6 +94,7 @@ public class VacationBusiness
             Console.WriteLine("ANTES DE GUARDAR VACATION");
 
             await _repository.AddAsync(entity);
+            await _repository.SaveAsync();
 
             Console.WriteLine("DESPUES DE GUARDAR VACATION");
             Console.WriteLine($"USERID: {entity.UserId}");
@@ -73,6 +112,22 @@ public class VacationBusiness
         }
 
         return response;
+    }
+
+    // Calcular días disponibles
+    public async Task<int> GetAvailableDays(int userId)
+    {
+        var available = await CalculateAvailableDays(userId);
+
+        var vacations = await _repository.Query()
+            .Where(v => v.UserId == userId
+                && v.Status == "Aprobada"
+                && v.DeletedAt == null)
+            .ToListAsync();
+
+        var used = vacations.Sum(v => (v.EndDate - v.StartDate).Days + 1);
+
+        return available - used;
     }
 
     // Ver propias solicitudes
