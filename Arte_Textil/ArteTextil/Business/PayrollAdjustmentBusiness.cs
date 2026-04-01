@@ -5,6 +5,7 @@ using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArteTextil.Business;
 
@@ -42,6 +43,19 @@ public class PayrollAdjustmentBusiness
             {
                 response.Success = false;
                 response.Message = "Tipo inválido (Extra/Rebajo)";
+                return response;
+            }
+
+            var hasSalary = await _repository.Context.Salaries
+    .AnyAsync(s =>
+        s.UserId == dto.userId &&
+        s.IsActive &&
+        s.DeletedAt == null);
+
+            if (!hasSalary)
+            {
+                response.Success = false;
+                response.Message = "El usuario no tiene salario asignado. No se pueden crear ajustes.";
                 return response;
             }
 

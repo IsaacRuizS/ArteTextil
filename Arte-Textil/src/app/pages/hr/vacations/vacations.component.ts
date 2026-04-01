@@ -11,7 +11,6 @@ import { NgxPaginationModule } from 'ngx-pagination';
 @Component({
     selector: 'app-vacations',
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.Default,
     imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
     providers: [FormBuilder],
     templateUrl: './vacations.component.html',
@@ -26,9 +25,16 @@ export class VacationsComponent implements OnInit {
     showFormModal = true;
     searchTerm = '';
     page = 1;
+    availableState = {
+        days: 0
+    };
+
+    showError = false;
+    errorMessage = '';
 
     // cambiar manualmente para probar
     isAdmin = false;
+    userId: number = 0;
 
     users: UserModel[] = [];
 
@@ -37,14 +43,18 @@ export class VacationsComponent implements OnInit {
         private apiUser: ApiUserService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
-        private fb: FormBuilder
+        private fb: FormBuilder,
     ) {
         this.vacationForm = this.fb.group({
-            userId: ['', Validators.required],
+            userId: [null],
             startDate: ['', Validators.required],
             endDate: ['', Validators.required],
             notes: ['']
         });
+    }
+
+    ngAfterViewInit(): void {
+        setTimeout(() => this.loadAvailableDays());
     }
 
     ngOnInit(): void {
@@ -54,18 +64,36 @@ export class VacationsComponent implements OnInit {
         if (token) {
             const payload: any = JSON.parse(atob(token.split('.')[1]));
 
-            console.log("TOKEN PAYLOAD:", payload);
-
             this.isAdmin = payload?.roleId === "1";
+            this.userId = Number(payload?.id);
         }
 
         this.showFormModal = false;
 
-        if (this.isAdmin) {
+        // SI NO ES ADMIN → setear userId automáticamente
+        if (!this.isAdmin) {
+            this.vacationForm.get('userId')?.setValue(this.userId);
+            this.vacationForm.get('userId')?.clearValidators();
+            this.vacationForm.get('userId')?.updateValueAndValidity();
+        } else {
             this.loadUsers();
         }
 
         this.loadVacations();
+
+    }
+
+
+    // cargar los dias disponibles
+    loadAvailableDays() {
+        if (!this.isAdmin) {
+            this.apiVacation.getAvailableDays().subscribe({
+                next: (days) => {
+                    this.availableState = { days };
+                },
+                error: (err) => console.error(err)
+            });
+        }
     }
 
     // carga segun el rol
@@ -81,7 +109,6 @@ export class VacationsComponent implements OnInit {
             next: (data) => {
                 this.vacations = data;
                 this.vacationsOrigin = data;
-                this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },
             error: () => this.sharedService.setLoading(false)
@@ -95,7 +122,6 @@ export class VacationsComponent implements OnInit {
 
                 this.users = users;
 
-                this.cdr.markForCheck();
             })
             .catch(err => {
                 console.error("ERROR USERS", err);
@@ -135,41 +161,73 @@ export class VacationsComponent implements OnInit {
 
     saveVacation() {
 
-    if (this.vacationForm.invalid) {
-        this.vacationForm.markAllAsTouched();
-        return;
+        if (this.vacationForm.invalid) {
+            this.vacationForm.markAllAsTouched();
+            return;
+        }
+
+        setTimeout(() => {
+            this.sharedService.setLoading(true);
+        });
+
+        if (this.isAdmin && !this.vacationForm.value.userId) {
+            this.showErrorModal("Debe seleccionar un usuario");
+            return;
+        }
+
+        const payload = {
+            userId: this.isAdmin
+                ? Number(this.vacationForm.value.userId)
+                : this.userId,
+            startDate: this.vacationForm.value.startDate,
+            endDate: this.vacationForm.value.endDate,
+            notes: this.vacationForm.value.notes
+        };
+
+        console.log("PAYLOAD:", payload);
+
+        this.apiVacation.create(payload).subscribe({
+            next: () => {
+
+                this.vacationForm.reset();
+
+                // volver a setear userId si es colaborador
+                if (!this.isAdmin) {
+                    this.vacationForm.get('userId')?.setValue(this.userId);
+                }
+
+                this.showFormModal = false;
+
+                this.loadVacations();
+
+                this.loadAvailableDays();
+
+                this.sharedService.setLoading(false);
+            },
+            error: (err) => {
+
+                console.error("ERROR CREAR", err);
+
+                this.showFormModal = false;
+                
+                const message =
+                    err?.error?.message ||
+                    err?.error?.Message ||
+                    err?.message ||
+                    "No tiene días disponibles";
+
+                this.showErrorModal(message);
+
+                this.sharedService.setLoading(false);
+            }
+        });
     }
 
-    this.sharedService.setLoading(true);
-
-    const payload = {
-        userId: Number(this.vacationForm.get('userId')?.value),
-        startDate: this.vacationForm.get('startDate')?.value,
-        endDate: this.vacationForm.get('endDate')?.value,
-        notes: this.vacationForm.get('notes')?.value
-    };
-
-    console.log("PAYLOAD FINAL:", payload);
-
-    this.apiVacation.create(payload).subscribe({
-        next: () => {
-
-            console.log("VACATION CREADA");
-
-            this.vacationForm.reset();
-            this.showFormModal = false;
-
-            this.loadVacations();
-
-            this.sharedService.setLoading(false);
-        },
-        error: (err) => {
-            console.error("ERROR CREAR", err);
-            console.log("RESPUESTA BACKEND:", err.error);
-            this.sharedService.setLoading(false);
-        }
-    });
-}
+    // modal de error
+    showErrorModal(message: string) {
+        this.errorMessage = message;
+        this.showError = true;
+    }
 
     // Admin
     approve(vacation: VacationModel) {

@@ -31,7 +31,7 @@ export const routes: Routes = [
             {
                 path: 'hr/payroll/salaries',
                 loadComponent: () => import('./pages/hr/payroll/salary.component').then(m => m.SalaryComponent),
-                data: { roles: [1] }
+                data: { roles: [1, 2, 4] }
             },
             {
                 path: 'hr/payroll/monthly',

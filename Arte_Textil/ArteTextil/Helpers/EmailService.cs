@@ -458,5 +458,88 @@ namespace ArteTextil.Helpers
                 await _smtp.SendMailAsync(mail);
             }
         }
+
+        public async Task SendPayrollPaymentAsync(User user, PayrollMonthly payroll, Payment payment)
+        {
+            if (string.IsNullOrWhiteSpace(user.Email))
+                return;
+
+            var body = $@"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+    </head>
+    <body style='font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:20px;'>
+
+        <table width='100%' cellpadding='0' cellspacing='0'>
+            <tr>
+                <td align='center'>
+
+                    <table width='600' style='background:#ffffff;border-radius:8px;overflow:hidden;'>
+
+                        <!-- HEADER -->
+                        <tr>
+                            <td style='background:#111827;color:#ffffff;padding:20px;'>
+                                <h2 style='margin:0;'>Comprobante de Pago</h2>
+                                <p style='margin:5px 0 0;font-size:14px;'>Arte Textil</p>
+                            </td>
+                        </tr>
+
+                        <!-- BODY -->
+                        <tr>
+                            <td style='padding:20px;'>
+
+                                <p>Hola, <b>{user.FullName}</b></p>
+
+                                <p>Se ha realizado el pago de tu planilla correspondiente al período:</p>
+
+                                <p><b>{payroll.Year}-{payroll.Month:D2}</b></p>
+
+                                <hr/>
+
+                                <p><b>Salario base:</b> ₡{payroll.BaseSalary:N2}</p>
+                                <p><b>Extras:</b> ₡{payroll.Extras:N2}</p>
+                                <p><b>Deducciones:</b> ₡{payroll.Deductions:N2}</p>
+
+                                <h3 style='margin-top:20px;'>Total pagado: ₡{payroll.Total:N2}</h3>
+
+                                <p><b>Método de pago:</b> {payment.Method}</p>
+                                <p><b>Fecha:</b> {payment.PaymentDate:dd/MM/yyyy HH:mm}</p>
+
+                            </td>
+                        </tr>
+
+                        <!-- FOOTER -->
+                        <tr>
+                            <td style='background:#f9fafb;padding:15px;text-align:center;font-size:12px;color:#6b7280;'>
+                                Este correo fue generado automáticamente.<br/>
+                                © {DateTime.UtcNow.Year} Arte Textil
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+
+    </body>
+    </html>
+    ";
+
+            var mail = new MailMessage
+            {
+                Subject = $"Pago de planilla - {payroll.Year}-{payroll.Month:D2}",
+                Body = body,
+                IsBodyHtml = true,
+                From = new MailAddress("no-reply@artetextil.com")
+            };
+
+            mail.To.Add(user.Email);
+
+            await _smtp.SendMailAsync(mail);
+        }
+
     }
 }

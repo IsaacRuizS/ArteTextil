@@ -9,6 +9,7 @@ import { UserModel } from '../../../shared/models/user.model';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
     selector: 'app-salaries',
@@ -27,13 +28,15 @@ export class SalaryComponent implements OnInit {
     searchTerm: string = '';
     salariesOrigin: SalaryModel[] = [];
     page = 1;
+    isAdmin: boolean = false;
 
     constructor(
         private api: ApiSalaryService,
         private apiUser: ApiUserService,
         private shared: SharedService,
         private fb: FormBuilder,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private authService: AuthService
     ) {
         this.form = this.fb.group({
             userId: ['', Validators.required],
@@ -42,6 +45,7 @@ export class SalaryComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.isAdmin = this.authService.currentUserValue?.roleId === 1;
         this.load();
         this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => { });
     }

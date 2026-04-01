@@ -100,6 +100,17 @@ public class VacationController : ControllerBase
         return Ok(result);
     }
 
+    // GET: api/vacation/available-days  (COLABORADOR)
+    [HttpGet("available-days")]
+    public async Task<IActionResult> GetAvailableDays()
+    {
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
+
+        var days = await _business.GetAvailableDays(userId.Value);
+        return Ok(days);
+    }
+
     private int? GetUserIdFromToken()
     {
         var claim = User.FindFirst("id");

@@ -4,14 +4,14 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold mb-0">Salarios</h2>
 
-    <button class="btn btn-primary" (click)="openCreate()">
+    <button *ngIf="isAdmin" class="btn btn-primary" (click)="openCreate()">
       <i class="mdi mdi-plus-circle me-1"></i>
       Nuevo salario
     </button>
   </div>
 
   <!-- Buscador -->
-  <div class="card shadow-sm border-0 mb-3 p-3">
+  <div *ngIf="isAdmin" class="card shadow-sm border-0 mb-3 p-3">
     <div class="row">
       <div class="col-md-6">
 
@@ -20,7 +20,7 @@
             <i class="mdi mdi-magnify"></i>
           </span>
 
-          <input type="text" class="form-control" placeholder="Buscar empleado..." [(ngModel)]="searchTerm"
+          <input *ngIf="isAdmin" type="text" class="form-control" placeholder="Buscar empleado..." [(ngModel)]="searchTerm"
             (ngModelChange)="page = 1">
         </div>
 
@@ -44,12 +44,12 @@
 
         <tbody>
 
-          <tr *ngFor="let s of filteredSalaries | paginate: { itemsPerPage: 10, currentPage: page }">
+          <tr *ngFor="let s of filteredSalaries | paginate: { itemsPerPage: 50, currentPage: page }">
             <td>{{ s.userName || s.userId }}</td>
             <td>{{ s.baseSalary | customCurrency:'₡' }}</td>
 
             <td class="text-end">
-              <button class="btn btn-sm btn-light" (click)="edit(s)">
+              <button *ngIf="isAdmin" class="btn btn-sm btn-light" (click)="edit(s)">
                 <i class="mdi mdi-pencil"></i>
               </button>
             </td>

@@ -65,4 +65,12 @@ export class ApiAttendanceService extends ApiBaseService {
 
     }
 
+    getMine(): Observable<AttendanceModel[]> {
+        return this.http.get<any>(`${this.baseUrl}/api/attendance/mine`, this.getHttpOptions())
+            .pipe(map((res: any) => {
+                if (!res?.success) throw new Error(res.message);
+                return res.data.map((x: any) => new AttendanceModel(x));
+            }));
+    }
+
 }

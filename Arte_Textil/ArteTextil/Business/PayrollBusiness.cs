@@ -44,7 +44,10 @@ public class PayrollBusiness
                         s.IsActive);
 
                 if (salary == null)
+                {
+                    messages.Add($"El usuario {user.FullName} no tiene salario asignado.");
                     continue;
+                }
 
                 var existingPayroll = await _context.PayrollMonthly
     .FirstOrDefaultAsync(p =>
@@ -286,13 +289,32 @@ public class PayrollBusiness
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            // EMAIL
+            try
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.UserId == payroll.UserId);
+
+                if (user != null)
+                {
+                    await _emailService.SendPayrollPaymentAsync(user, payroll, payment);
+                }
+            }
+            catch (Exception emailEx)
+            {
+                //
+                Console.WriteLine("Error enviando correo: " + emailEx.Message);
+            }
+
             response.Data = true;
             response.Message = "La planilla fue procesada y pagada correctamente.";
         }
         catch (Exception ex)
         {
             if (transaction.GetDbTransaction().Connection != null)
+            {
                 await transaction.RollbackAsync();
+            }
 
             response.Success = false;
             response.Message = ex.Message;

@@ -50,7 +50,7 @@ export class LeftSidebarComponent {
                 { label: 'Asistencia', link: '/hr/attendance', roles: [1, 2, 4] },
                 { label: 'Vacaciones', link: '/hr/vacations', roles: [1, 2, 4] },
                 { label: 'Ajustes de Planilla', link: '/hr/payroll', roles: [1] },
-                { label: 'Salarios', link: '/hr/payroll/salaries', roles: [1] },
+                { label: 'Salarios', link: '/hr/payroll/salaries', roles: [1 , 2, 4] },
                 { label: 'Planillas Mensuales', link: '/hr/payroll/monthly', roles: [1] },
                 { label: 'Pagos', link: '/hr/payroll/payments', roles: [1] }
             ]

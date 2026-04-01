@@ -59,7 +59,7 @@ export class AttendanceComponent implements OnInit {
 
         if (token) {
             const payload: any = JSON.parse(atob(token.split('.')[1]));
-            this.isAdmin = payload?.roleId === "1";
+            this.isAdmin = payload?.roleId == 1;
         }
 
         this.loadAttendances();
@@ -71,21 +71,31 @@ export class AttendanceComponent implements OnInit {
 
         this.sharedService.setLoading(true);
 
-        this.apiAttendance.getAll().subscribe({
+        if (this.isAdmin) {
 
-            next: (data) => {
+            this.apiAttendance.getAll().subscribe({
+                next: (data) => {
+                    this.attendances = data;
+                    this.attendancesOrigin = data;
+                    this.cdr.markForCheck();
+                    this.sharedService.setLoading(false);
+                },
+                error: () => this.sharedService.setLoading(false)
+            });
 
-                this.attendances = data;
-                this.attendancesOrigin = data;
+        } else {
 
-                this.cdr.markForCheck();
+            this.apiAttendance.getMine().subscribe({
+                next: (data) => {
+                    this.attendances = data;
+                    this.attendancesOrigin = data;
+                    this.cdr.markForCheck();
+                    this.sharedService.setLoading(false);
+                },
+                error: () => this.sharedService.setLoading(false)
+            });
 
-                this.sharedService.setLoading(false);
-            },
-
-            error: () => this.sharedService.setLoading(false)
-
-        });
+        }
     }
 
     // CHECK IN
@@ -154,7 +164,7 @@ export class AttendanceComponent implements OnInit {
 
     saveAdminAttendance() {
 
-        if (this.adminAttendanceForm.invalid) {
+        if (!this.isAdmin) {
             this.adminAttendanceForm.markAllAsTouched();
             return;
         }
@@ -248,6 +258,30 @@ export class AttendanceComponent implements OnInit {
 
         this.editingAttendanceId = attendance.attendanceId;
 
+        if (this.users.length === 0) {
+
+            this.apiUser.getAll()
+                .then((users: UserModel[]) => {
+
+                    this.users = users;
+
+                    this.setFormValues(attendance);
+
+                    this.showAdminModal = true;
+
+                    this.cdr.detectChanges();
+                });
+
+        } else {
+
+            this.setFormValues(attendance);
+
+            this.showAdminModal = true;
+        }
+    }
+
+    setFormValues(attendance: AttendanceModel) {
+
         this.adminAttendanceForm.patchValue({
             userId: attendance.userId,
             checkIn: this.formatDate(attendance.checkIn),
@@ -255,8 +289,6 @@ export class AttendanceComponent implements OnInit {
                 ? this.formatDate(attendance.checkOut)
                 : null
         });
-
-        this.showAdminModal = true;
     }
 
     formatDate(date: any) {

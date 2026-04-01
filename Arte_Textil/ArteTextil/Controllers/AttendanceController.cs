@@ -94,4 +94,20 @@ public class AttendanceController : ControllerBase
         return Ok(result);
     }
 
+    // Obtener mis asistencias (COLABORADOR)
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine()
+    {
+        var userId = GetUserIdFromToken();
+
+        if (userId == null)
+            return Unauthorized("Token sin id válido");
+
+        var result = await _business.GetMyAttendances(userId.Value);
+
+        if (!result.Success) return StatusCode(500, result);
+
+        return Ok(result);
+    }
+
 }

@@ -3,52 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\payrollbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\payrollbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\vacationbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\vacationbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\payrollcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\payrollcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\dtos\\processpayrolldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:dtos\\processpayrolldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\productbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\productbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\paymentbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\paymentbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\dtos\\paymentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:dtos\\paymentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\entities\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\entities\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\controllers\\vacationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:controllers\\vacationcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\payrolladjustmentbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:business\\payrolladjustmentbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\entities\\payrolladjustment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\entities\\payrolladjustment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\dtos\\payrolladjustmentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:dtos\\payrolladjustmentdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\data\\repositories\\repositorypayrollmonthly.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|solutionrelative:data\\repositories\\repositorypayrollmonthly.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{75A8E9BC-A9FD-63AA-EC68-A42F40E1E393}|ArteTextil.csproj|c:\\users\\henry\\onedrive\\documents\\github\\artetextil\\arte_textil\\artetextil\\business\\rolbusiness.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -66,22 +30,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 4,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "PaymentController.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\PaymentController.cs",
-              "RelativeDocumentMoniker": "Controllers\\PaymentController.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\PaymentController.cs",
-              "RelativeToolTip": "Controllers\\PaymentController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T22:35:00.736Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
@@ -91,151 +41,51 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ProcessPayrollDto.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\ProcessPayrollDto.cs",
-              "RelativeDocumentMoniker": "DTOs\\ProcessPayrollDto.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\ProcessPayrollDto.cs",
-              "RelativeToolTip": "DTOs\\ProcessPayrollDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAzAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-30T19:15:11.434Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "PaymentDto.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\PaymentDto.cs",
-              "RelativeDocumentMoniker": "DTOs\\PaymentDto.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\PaymentDto.cs",
-              "RelativeToolTip": "DTOs\\PaymentDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-30T17:16:15.446Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "PaymentBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PaymentBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\PaymentBusiness.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PaymentBusiness.cs",
-              "RelativeToolTip": "Business\\PaymentBusiness.cs",
-              "ViewState": "AgIAADUAAAAAAAAAAAAAAFcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-30T17:15:42.372Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PayrollController.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\PayrollController.cs",
-              "RelativeDocumentMoniker": "Controllers\\PayrollController.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\PayrollController.cs",
-              "RelativeToolTip": "Controllers\\PayrollController.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAowC4AAABWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T22:34:19.529Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "PayrollAdjustmentBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollAdjustmentBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\PayrollAdjustmentBusiness.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollAdjustmentBusiness.cs",
-              "RelativeToolTip": "Business\\PayrollAdjustmentBusiness.cs",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAkwNsAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:46:40.35Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "PayrollAdjustmentDto.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\PayrollAdjustmentDto.cs",
-              "RelativeDocumentMoniker": "DTOs\\PayrollAdjustmentDto.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\DTOs\\PayrollAdjustmentDto.cs",
-              "RelativeToolTip": "DTOs\\PayrollAdjustmentDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:45:26.298Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PayrollBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\PayrollBusiness.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollBusiness.cs",
-              "RelativeToolTip": "Business\\PayrollBusiness.cs",
-              "ViewState": "AgIAAP0AAAAAAAAAAAAswAgBAABTAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:01:50.016Z",
-              "EditorCaption": ""
-            },
-            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "VacationController.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\VacationController.cs",
+              "RelativeDocumentMoniker": "Controllers\\VacationController.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Controllers\\VacationController.cs",
+              "RelativeToolTip": "Controllers\\VacationController.cs",
+              "ViewState": "AgIAAFIAAAAAAAAAAAAcwGYAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-01T04:13:45.867Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VacationBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\VacationBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\VacationBusiness.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\VacationBusiness.cs",
+              "RelativeToolTip": "Business\\VacationBusiness.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAwwF4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-01T04:01:57.411Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PayrollAdjustmentBusiness.cs",
+              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollAdjustmentBusiness.cs",
+              "RelativeDocumentMoniker": "Business\\PayrollAdjustmentBusiness.cs",
+              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\PayrollAdjustmentBusiness.cs",
+              "RelativeToolTip": "Business\\PayrollAdjustmentBusiness.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAowAcAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-27T16:46:40.35Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "ProductBusiness.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
-              "RelativeDocumentMoniker": "Business\\ProductBusiness.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\ProductBusiness.cs",
-              "RelativeToolTip": "Business\\ProductBusiness.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAAgwCoAAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-26T00:53:11.761Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Payment.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Payment.cs",
-              "RelativeDocumentMoniker": "Data\\Entities\\Payment.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\Payment.cs",
-              "RelativeToolTip": "Data\\Entities\\Payment.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-30T17:16:41.231Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "PayrollAdjustment.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\PayrollAdjustment.cs",
-              "RelativeDocumentMoniker": "Data\\Entities\\PayrollAdjustment.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Entities\\PayrollAdjustment.cs",
-              "RelativeToolTip": "Data\\Entities\\PayrollAdjustment.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T16:31:59.474Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "RepositoryPayrollMonthly.cs",
-              "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Repositories\\RepositoryPayrollMonthly.cs",
-              "RelativeDocumentMoniker": "Data\\Repositories\\RepositoryPayrollMonthly.cs",
-              "ToolTip": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Repositories\\RepositoryPayrollMonthly.cs",
-              "RelativeToolTip": "Data\\Repositories\\RepositoryPayrollMonthly.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T15:54:51.447Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
               "Title": "RolBusiness.cs",
               "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Business\\RolBusiness.cs",
               "RelativeDocumentMoniker": "Business\\RolBusiness.cs",
@@ -247,7 +97,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 4,
               "Title": "RepositoryBase.cs",
               "DocumentMoniker": "C:\\Users\\henry\\OneDrive\\Documents\\GitHub\\ArteTextil\\Arte_Textil\\ArteTextil\\Data\\Repositories\\RepositoryBase.cs",
               "RelativeDocumentMoniker": "Data\\Repositories\\RepositoryBase.cs",

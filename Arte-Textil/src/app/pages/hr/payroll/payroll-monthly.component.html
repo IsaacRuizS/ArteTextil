@@ -40,7 +40,7 @@
                 </thead>
 
                 <tbody>
-                    <tr *ngFor="let p of payrolls | paginate: { itemsPerPage: 10, currentPage: page }">
+                    <tr *ngFor="let p of payrolls | paginate: { itemsPerPage: 50, currentPage: page }">
 
                         <td class="fw-semibold">{{ p.userName }}</td>
 

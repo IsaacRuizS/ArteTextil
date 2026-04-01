@@ -17,8 +17,6 @@ export class ApiVacationService extends ApiBaseService {
     // Colaborador: crear solicitud
     create(data: any): Observable<VacationModel> {
 
-        console.log("API BODY:", data);
-
         return this.http.post<any>(
             `${this.baseUrl}/api/vacation`,
             data,
@@ -49,6 +47,20 @@ export class ApiVacationService extends ApiBaseService {
                 return res.data.map((x: any) => new VacationModel(x));
             }),
             catchError(err => throwError(() => err))
+        );
+    }
+
+    getAvailableDays(): Observable<number> {
+        return this.http.get<number>(
+            `${this.baseUrl}/api/vacation/available-days`,
+            this.getHttpOptions()
+        ).pipe(
+            map((event: any) => {
+                if (event?.body !== undefined) {
+                    return event.body;
+                }
+                return event;
+            })
         );
     }
 

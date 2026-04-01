@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize] // no solo admin
 [ApiController]
 [Route("api/[controller]")]
 public class SalaryController : ControllerBase
@@ -17,6 +17,8 @@ public class SalaryController : ControllerBase
         _business = business;
     }
 
+    // SOLO ADMIN CREA
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] SalaryDto dto)
     {
@@ -28,7 +30,8 @@ public class SalaryController : ControllerBase
         return Ok(result);
     }
 
-    // PUT: api/salary/5
+    // SOLO ADMIN ACTUALIZA
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] SalaryDto dto)
     {
@@ -40,10 +43,14 @@ public class SalaryController : ControllerBase
         return Ok(result);
     }
 
+    // TODOS pueden ver (pero filtrado)
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var result = await _business.GetAll();
+        var userId = int.Parse(User.FindFirst("id")!.Value);
+        var roleId = User.FindFirst("roleId")!.Value;
+
+        var result = await _business.GetAll(userId, roleId);
 
         return Ok(result);
     }
