@@ -92,11 +92,11 @@ export class QuotesComponent implements OnInit {
 
         if (this.statusFilter > 0) {
 
-            if (this.statusFilter === 1) {
+            if (this.statusFilter == 1) {
                 this.quotes = this.quotes.filter(q => q.isActive);
             }
 
-            if (this.statusFilter === 2) {
+            if (this.statusFilter == 2) {
                 this.quotes = this.quotes.filter(q => !q.isActive);
             }
 
@@ -169,6 +169,7 @@ export class QuotesComponent implements OnInit {
             next: () => {
 
                 this.showDeleteModal = false;
+                this.quoteSelected!.isActive = !current
 
                 this.loadQuotes();
 

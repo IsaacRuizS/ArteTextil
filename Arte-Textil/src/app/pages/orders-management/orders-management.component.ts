@@ -142,7 +142,7 @@ export class OrdersManagementComponent implements OnInit {
 
             this.filteredOrders = this.filteredOrders.filter(o =>
                 o.status?.toLowerCase().includes(term) ||
-                o.orderId?.toString().includes(term)
+                o.quote?.quoteNumber?.toLowerCase().includes(term)
             );
         }
 

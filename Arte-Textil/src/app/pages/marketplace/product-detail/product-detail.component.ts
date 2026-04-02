@@ -53,7 +53,7 @@ export class ProductDetailComponent {
 
     increaseQty() {
 
-        if (this.product!.quantitySelected < this.product!.stock) {
+        if (this.product!.quantitySelected < this.product!.availableStock) {
             this.product!.quantitySelected++;
         }
     }

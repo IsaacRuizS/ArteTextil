@@ -45,10 +45,16 @@ export class ProductModel {
     updatedAt?: Date;
     deletedAt?: Date;
 
+    quantityReserved: number = 0;
+
     quantitySelected: number = 1;
     cartItemId?: number;
     categoryName = '';
     supplierName = '';
+
+    get availableStock(): number {
+        return this.stock - this.quantityReserved;
+    }
 
     get bestPromotion(): PromotionModel | null {
 

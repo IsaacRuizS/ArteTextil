@@ -164,9 +164,9 @@ export class OrderFormModalComponent {
         const product = this.products.find(p => p.productId == item.productId);
         if (!product) return;
 
-        if (item.quantity > product.stock) {
+        if (item.quantity > product.availableStock) {
             this.notificationService.warning('Stock insuficiente');
-            item.quantity = product.stock;
+            item.quantity = product.availableStock;
         }
     }
 
@@ -254,6 +254,8 @@ export class OrderFormModalComponent {
 
     saveEdit() {
 
+        this.sharedService.setLoading(true);
+
         this.model.performByUserId = this.order?.loggedUserId ?? 1;
 
         this.orderService.update(this.model).subscribe({
@@ -262,6 +264,7 @@ export class OrderFormModalComponent {
                 this.close();
             },
             error: (err) => {
+                this.sharedService.setLoading(false);
                 this.notificationService.error(err?.error?.message || 'Error al actualizar el pedido.');
             }
         });
@@ -308,7 +311,7 @@ export class OrderFormModalComponent {
             const product = this.products.find(p => p.productId == item.productId);
             if (!product) return false;
 
-            if (item.quantity > product.stock)
+            if (item.quantity > product.availableStock)
                 return false;
         }
 

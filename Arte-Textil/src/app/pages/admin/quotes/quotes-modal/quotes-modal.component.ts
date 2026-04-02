@@ -13,6 +13,7 @@ import { ApiProductService } from '../../../../services/api-product.service';
 import { CustomCurrencyPipe } from "../../../../shared/pipes/crc-currency.pipe";
 import { SharedService } from '../../../../services/shared.service';
 import { NotificationService } from '../../../../services/notification.service';
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'app-quotes-modal',
@@ -33,6 +34,8 @@ export class QuotesModalComponent implements OnInit {
     customers: CustomerModel[] = [];
     products: ProductModel[] = [];
 
+    originalQuantity: number = 0;
+
     constructor(
         private apiQuoteService: ApiQuoteService,
         private apiCustomerService: ApiCustomerService,
@@ -46,7 +49,6 @@ export class QuotesModalComponent implements OnInit {
         this.sharedService.setLoading(true);
 
         this.loadCustomers();
-        this.loadProducts();
 
         if (this.quote) {
 
@@ -55,30 +57,42 @@ export class QuotesModalComponent implements OnInit {
             );
 
             this.calculateTotal();
-
-        }
+        } 
 
     }
 
     loadCustomers() {
 
-        this.apiCustomerService.getAll().subscribe({
-            next: res => this.customers = res
-        });
+        this.apiCustomerService.getAll()
+            .subscribe({
+                next: (customers: CustomerModel[]) => {
+
+                    this.customers = customers;
+                    this.loadProducts();
+                },
+                error: () => {
+                    this.notificationService.error('Error al cargar los Clientes. Intente de nuevo.');
+                    this.closed.emit();
+                }
+            });
 
     }
 
     loadProducts() {
 
-        this.apiProductService.getAllForMarket().subscribe({
-            next: res => {
+        this.apiProductService.getAllForMarket()
+            .pipe(finalize(() => this.sharedService.setLoading(false)))
+            .subscribe({
+                next: (products: ProductModel[]) => {
 
-                this.products = res;
-
-                this.sharedService.setLoading(false);
-
-            }
-        });
+                    this.products = products;
+                    this.sharedService.setLoading(false);
+                },
+                error: () => {
+                    this.notificationService.error('Error al cargar los Productos. Intente de nuevo.');
+                    this.closed.emit();
+                }
+            });
 
     }
 
@@ -136,6 +150,24 @@ export class QuotesModalComponent implements OnInit {
 
         }
 
+    }
+
+    validateStock(index: number) {
+        
+        const item = this.quoteForm.items![index];
+        const itemOrigin = this.quote?.items![index];
+        const product = this.products.find(p => p.productId == item.productId);
+        if (!product) return; 
+
+        // stock real disponible considerando lo que ya tiene el item
+        const maxAllowed = product.availableStock + (itemOrigin?.quantity ?? 0);
+
+        if (item.quantity > maxAllowed) {
+            this.notificationService.warning('Stock insuficiente');
+
+            item.quantity = maxAllowed;
+            this.calculateTotal();
+        }
     }
 
     calculateTotal() {

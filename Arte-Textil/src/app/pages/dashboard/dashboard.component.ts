@@ -47,7 +47,7 @@ export class DashboardComponent implements OnInit {
       next: ({ allOrders, products, quotes, alerts }) => {
         this._allOrders = allOrders;
         this._allQuotes = quotes;
-        this.kpis.stockAvailable = products.reduce((sum, p) => sum + (p.stock ?? 0), 0);
+        this.kpis.stockAvailable = products.reduce((sum, p) => sum + (p.availableStock ?? 0), 0);
         this.alerts = alerts;
         this.alertIndex = 0;
         this.recalculate(allOrders, quotes);

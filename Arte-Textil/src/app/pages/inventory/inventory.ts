@@ -90,13 +90,13 @@ export class InventoryComponent implements OnInit {
 
     getAvailabilityStatus(p: ProductModel): string {
         if (!p.isActive) return 'Inactivo';
-        if (p.stock === 0) return 'Agotado';
-        if (p.stock < p.minStock) return 'Stock Bajo';
+        if (p.availableStock === 0) return 'Agotado';
+        if (p.availableStock < p.minStock) return 'Stock Bajo';
         return 'Disponible';
     }
 
     get lowStockProducts(): ProductModel[] {
-        return this.productsOrigins.filter(p => p.isActive && p.stock < p.minStock);
+        return this.productsOrigins.filter(p => p.isActive && p.availableStock < p.minStock);
     }
 
     get availableCount(): number {
@@ -192,12 +192,13 @@ export class InventoryComponent implements OnInit {
 
     // RF-03-005 – Generar reporte Excel (CSV compatible)
     onGenerateExcel() {
-        const headers = ['Código', 'Producto', 'Categoría', 'Stock Actual', 'Stock Mínimo', 'Precio (₡)', 'Estado', 'Disponibilidad'];
+        const headers = ['Código', 'Producto', 'Categoría', 'Stock Total', 'Stock Disponible', 'Stock Mínimo', 'Precio (₡)', 'Estado', 'Disponibilidad'];
         const rows = this.products.map(p => [
             p.productCode ?? '',
             p.name ?? '',
             this.getCategoryName(p.categoryId),
             p.stock,
+            p.availableStock,
             p.minStock,
             p.price,
             p.isActive ? 'Activo' : 'Inactivo',

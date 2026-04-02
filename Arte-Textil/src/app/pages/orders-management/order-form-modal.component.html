@@ -144,7 +144,7 @@
                                     <option [value]="0">Seleccione</option>
                                     @for (p of products; track p.productId) {
                                     <option [value]="p.productId">
-                                        {{ p.name }} (Stock: {{ p.stock }})
+                                        {{ p.name }} (Stock: {{ p.availableStock }})
                                     </option>
                                     }
                                 </select>

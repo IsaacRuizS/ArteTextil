@@ -70,8 +70,8 @@
 
             <!-- Estado de stock -->
             <p class="mt-2">
-                <span class="badge" [class.bg-success]="product.stock > 0" [class.bg-danger]="product.stock === 0">
-                    {{ product.stock > 0 ? 'Disponible' : 'Fuera de stock' }}
+                <span class="badge" [class.bg-success]="product.availableStock > 0" [class.bg-danger]="product.availableStock === 0">
+                    {{ product.availableStock > 0 ? 'Disponible' : 'Fuera de stock' }}
                 </span>
             </p>
 
@@ -84,10 +84,10 @@
                         [disabled]="product.quantitySelected === 1">-</button>
 
                     <input type="number" class="form-control qty-input" [(ngModel)]="product.quantitySelected"
-                        [max]="product.stock" min="1">
+                        [max]="product.availableStock" min="1">
 
                     <button class="btn btn-outline-secondary" (click)="increaseQty()"
-                        [disabled]="product.quantitySelected >= product.stock">+</button>
+                        [disabled]="product.quantitySelected >= product.availableStock">+</button>
                 </div>
             </div>
 

@@ -89,27 +89,6 @@ export class ApiOrderService extends ApiBaseService {
             );
     }
 
-    // PATCH: api/order/{id}/status
-    changeStatus(id: number, newStatus: string): Observable<boolean> {
-
-        return this.http.patch<any>(
-            `${this.baseUrl}/api/order/${id}/status`,
-            newStatus,
-            this.getHttpOptions()
-        )
-            .pipe(
-                map((res: any) => {
-
-                    if (!res?.success) {
-                        throw new Error(res?.message || 'Error al cambiar estado.');
-                    }
-
-                    return res.data === true;
-                }),
-                catchError(err => throwError(() => err))
-            );
-    }
-
     // PATCH: api/order/{id}/active
     updateIsActive(id: number, isActive: boolean): Observable<boolean> {
 

@@ -48,7 +48,7 @@ export class CartComponent implements OnInit {
     }
 
     increaseQty(item: ProductModel) {
-        if ((item.quantitySelected ?? 0) + 1 > item.stock) {
+        if ((item.quantitySelected ?? 0) + 1 > item.availableStock) {
             this.alertMsg = `No hay más stock disponible para ${item.name}.`;
             return;
         }

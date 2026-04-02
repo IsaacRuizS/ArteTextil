@@ -121,7 +121,7 @@
                                 @for (p of products; track p.productId) {
 
                                 <option [value]="p.productId">
-                                    {{ p.name }} (Stock: {{ p.stock }})
+                                    {{ p.name }} (Stock: {{ p.availableStock }})
                                 </option>
 
                                 }
@@ -140,6 +140,7 @@
                                 class="form-control"
                                 min="1"
                                 [(ngModel)]="item.quantity"
+                                (change)="validateStock(i)"
                                 (ngModelChange)="calculateTotal()">
 
                         </div>

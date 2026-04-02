@@ -20,7 +20,7 @@
             @for (p of lowStockProducts; track p.productId) {
             <div class="small">
                 <i class="mdi mdi-circle-small"></i>
-                <strong>{{ p.name }}</strong> — Stock: {{ p.stock }} / Mínimo: {{ p.minStock }}
+                <strong>{{ p.name }}</strong> — Stock: {{ p.availableStock }} / Mínimo: {{ p.minStock }}
             </div>
             }
         </div>
@@ -114,7 +114,7 @@
                         </td>
                         <td class="d-none d-md-table-cell text-muted small">{{ getCategoryName(p.categoryId) }}</td>
                         <td>
-                            <div class="fw-semibold">{{ p.stock }}</div>
+                            <div class="fw-semibold">{{ p.stock }} | Disponible: {{ p.availableStock }}</div>
                             <div class="text-muted small">Mín: {{ p.minStock }}</div>
                         </td>
                         <td class="d-none d-lg-table-cell text-muted">₡{{ p.price | number:'1.0-0' }}</td>
@@ -176,6 +176,7 @@
                         <div class="text-end">
                             <div class="small text-muted">Stock actual</div>
                             <div class="fw-bold fs-5">{{ movementProduct.stock }}</div>
+                            <div class="small text-muted">Disponible: {{ movementProduct.availableStock }}</div>
                         </div>
                     </div>
                 </div>

@@ -119,8 +119,8 @@
 
                     <!-- Badges fila inferior -->
                     <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
-                        <span class="badge" [class.bg-success]="p.stock > 0" [class.bg-danger]="p.stock === 0">
-                            {{ p.stock > 0 ? 'Disponible' : 'Sin stock' }}
+                        <span class="badge" [class.bg-success]="p.availableStock > 0" [class.bg-danger]="p.availableStock === 0">
+                            {{ p.availableStock > 0 ? 'Disponible' : 'Sin stock' }}
                         </span>
                         @if (p.bestPromotion) {
                         <span class="badge promo-badge">
