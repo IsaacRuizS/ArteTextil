@@ -24,6 +24,6 @@ public class QuoteItem : EntityBase
     public Product? Product { get; set; }
 
     // Navigation
-    [ForeignKey(nameof(QuoteId))]
-    public Quote? Quote { get; set; }
+    //[ForeignKey(nameof(QuoteId))]
+    //public Quote? Quote { get; set; }
 }

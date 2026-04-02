@@ -65,18 +65,6 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
-        // PATCH: api/order/{id}/status
-        [HttpPatch("{id}/status")]
-        public async Task<IActionResult> ChangeStatus(int id, [FromBody] string newStatus)
-        {
-            var result = await _orderBusiness.ChangeStatus(id, newStatus);
-
-            if (!result.Success)
-                return NotFound(result);
-
-            return Ok(result);
-        }
-
         // PATCH: api/order/{id}/active
         [HttpPatch("{id}/active")]
         public async Task<IActionResult> UpdateIsActive(int id, [FromBody] bool isActive)

@@ -267,6 +267,17 @@ public class QuoteBusiness
             
             foreach (var item in dto.items)
             {
+                // Validar stock disponible (Stock - QuantityReserved) antes de reservar
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == item.productId && p.DeletedAt == null);
+                var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
+                if (product == null || available < item.quantity)
+                {
+                    response.Success = false;
+                    response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + item.productId}'. Disponible: {available}, requerido: {item.quantity}.";
+                    await transaction.RollbackAsync();
+                    return response;
+                }
+
                 var quoteItem = new QuoteItem
                 {
                     QuoteId = quote.QuoteId,
@@ -279,6 +290,10 @@ public class QuoteBusiness
                 };
 
                 await _repositoryQuoteItem.AddAsync(quoteItem);
+
+                await _context.Products
+                            .Where(p => p.ProductId == item.productId)
+                            .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + item.quantity));
             }
 
             await _repositoryQuoteItem.SaveAsync();
@@ -359,6 +374,8 @@ public class QuoteBusiness
     {
         var response = new ApiResponse<QuoteDto>();
 
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
         try
         {
             var quote = await _repositoryQuote.Query()
@@ -372,12 +389,100 @@ public class QuoteBusiness
                 return response;
             }
 
-            // Snapshot previo usando DTO para evitar ciclos
+            // Snapshot previo
             var previousSnapshot = JsonSerializer.Serialize(
                 _mapper.Map<QuoteDto>(quote)
             );
 
-            // Actualizar campos principales
+            var previousStatus = quote.Status;
+            var newStatus = dto.status;
+
+            // CASO 1: CANCELAR → LIBERAR TODO
+            if (newStatus == "Cancelado" && previousStatus != "Cancelado")
+            {
+                var items = quote.QuoteItems!
+                    .Where(i => i.DeletedAt == null)
+                    .ToList();
+
+                var grouped = items
+                    .GroupBy(x => x.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(x => x.Quantity)
+                    })
+                    .ToList();
+
+                foreach (var g in grouped)
+                {
+                    await _context.Products
+                    .Where(p => p.ProductId == g.ProductId)
+                    .ExecuteUpdateAsync(s =>
+                        s.SetProperty(p => p.QuantityReserved,
+                            p => p.QuantityReserved - g.Quantity >= 0
+                                ? p.QuantityReserved - g.Quantity
+                                : 0)
+                    );
+                }
+            }
+
+            // CASO 2: REACTIVAR → VALIDAR Y RESERVAR
+            bool skipDelta = false;
+
+            if (previousStatus == "Cancelado" && newStatus != "Cancelado")
+            {
+                var items = dto.items ?? new List<QuoteItemDto>();
+
+                var grouped = items
+                    .GroupBy(x => x.productId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(x => x.quantity)
+                    })
+                    .ToList();
+
+                // VALIDAR TODO
+                foreach (var g in grouped)
+                {
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == g.ProductId);
+
+                    if (product == null)
+                    {
+                        response.Success = false;
+                        response.Message = $"Producto #{g.ProductId} no encontrado.";
+                        await transaction.RollbackAsync();
+                        return response;
+                    }
+
+                    var available = product.Stock - product.QuantityReserved;
+
+                    if (available < g.Quantity)
+                    {
+                        response.Success = false;
+                        response.Message = $"Stock insuficiente para '{product.Name}'. Disponible: {available}, requerido: {g.Quantity}.";
+                        await transaction.RollbackAsync();
+                        return response;
+                    }
+                }
+
+                // RESERVAR
+                foreach (var g in grouped)
+                {
+                    await _context.Products
+                        .Where(p => p.ProductId == g.ProductId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(p => p.QuantityReserved,
+                                p => p.QuantityReserved + g.Quantity)
+                        );
+                }
+
+                // IMPORTANTE
+                skipDelta = true;
+            }
+
+            // ACTUALIZAR STATUS
             quote.Status = dto.status;
             quote.Total = dto.total;
             quote.Notes = dto.notes;
@@ -396,6 +501,19 @@ public class QuoteBusiness
 
             foreach (var itemDto in dtoItems)
             {
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductId == itemDto.productId && p.DeletedAt == null);
+
+                if (product == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Producto #{itemDto.productId} no encontrado.";
+                    await transaction.RollbackAsync();
+                    return response;
+                }
+
+                int delta = itemDto.quantity;
+
                 if (itemDto.quoteItemId > 0)
                 {
                     var existingItem = existingItems
@@ -403,6 +521,23 @@ public class QuoteBusiness
 
                     if (existingItem != null)
                     {
+                        // CALCULAR DIFERENCIA
+                        delta = itemDto.quantity - existingItem.Quantity;
+
+                        // VALIDAR SOLO SI AUMENTA
+                        if (!skipDelta && delta > 0)
+                        {
+                            var available = product.Stock - product.QuantityReserved;
+
+                            if (available < delta)
+                            {
+                                response.Success = false;
+                                response.Message = $"Stock insuficiente para '{product.Name}'. Disponible: {available}, requerido adicional: {delta}.";
+                                await transaction.RollbackAsync();
+                                return response;
+                            }
+                        }
+
                         // UPDATE
                         existingItem.ProductId = itemDto.productId;
                         existingItem.Quantity = itemDto.quantity;
@@ -414,49 +549,102 @@ public class QuoteBusiness
                     }
                     else
                     {
-                        // CREATE si no existe
+
+                        if(!skipDelta)
+                        {
+                            // CREATE si no existe
+                            var available = product.Stock - product.QuantityReserved;
+
+                            if (available < itemDto.quantity)
+                            {
+                                response.Success = false;
+                                response.Message = $"Stock insuficiente para '{product.Name}'.";
+                                await transaction.RollbackAsync();
+                                return response;
+                            }
+
+                            var newItem = new QuoteItem
+                            {
+                                QuoteId = quote.QuoteId,
+                                ProductId = itemDto.productId,
+                                Quantity = itemDto.quantity,
+                                Price = itemDto.price,
+                                DiscountAmount = itemDto.discountAmount,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                            };
+
+                            await _repositoryQuoteItem.AddAsync(newItem);
+                        } 
+                    }
+                }
+                else
+                {
+                    if(!skipDelta)
+                    {
+                        // CREATE (nuevo)
+                        var available = product.Stock - product.QuantityReserved;
+
+                        if (available < itemDto.quantity)
+                        {
+                            response.Success = false;
+                            response.Message = $"Stock insuficiente para '{product.Name}'.";
+                            await transaction.RollbackAsync();
+                            return response;
+                        }
+
                         var newItem = new QuoteItem
                         {
                             QuoteId = quote.QuoteId,
                             ProductId = itemDto.productId,
                             Quantity = itemDto.quantity,
                             Price = itemDto.price,
-                            DiscountAmount = itemDto.discountAmount,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
                         };
 
                         await _repositoryQuoteItem.AddAsync(newItem);
-                    }
+                    } 
                 }
-                else
-                {
-                    // CREATE (item nuevo)
-                    var newItem = new QuoteItem
-                    {
-                        QuoteId = quote.QuoteId,
-                        ProductId = itemDto.productId,
-                        Quantity = itemDto.quantity,
-                        Price = itemDto.price,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
 
-                    await _repositoryQuoteItem.AddAsync(newItem);
+                // APLICAR DELTA (SUMA o RESTA)
+                if (delta != 0 && !skipDelta)
+                {
+                    await _context.Products
+                        .Where(p => p.ProductId == itemDto.productId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(p => p.QuantityReserved,
+                                p => delta > 0
+                                    ? p.QuantityReserved + delta
+                                    : p.QuantityReserved + delta < 0
+                                        ? 0
+                                        : p.QuantityReserved + delta));
                 }
             }
 
             //ELIMINAR ITEMS QUE YA NO VIENEN
-
             var dtoItemIds = dtoItems
-                .Where(i => i.quoteItemId > 0)
-                .Select(i => i.quoteItemId)
-                .ToList();
+            .Where(i => i.quoteItemId > 0)
+            .Select(i => i.quoteItemId)
+            .ToList();
 
             foreach (var existingItem in existingItems)
             {
                 if (!dtoItemIds.Contains(existingItem.QuoteItemId))
                 {
+                    if(!skipDelta)
+                    {
+                        // DEVOLVER INVENTARIO
+                        await _context.Products
+                            .Where(p => p.ProductId == existingItem.ProductId)
+                            .ExecuteUpdateAsync(s =>
+                                s.SetProperty(p => p.QuantityReserved,
+                                    p => p.QuantityReserved - existingItem.Quantity < 0
+                                        ? 0
+                                        : p.QuantityReserved - existingItem.Quantity));
+                    } 
+
+                    //ELIMINAR LÓGICAMENTE
                     existingItem.DeletedAt = DateTime.UtcNow;
                     existingItem.IsActive = false;
 
@@ -482,6 +670,8 @@ public class QuoteBusiness
 
             response.Data = _mapper.Map<QuoteDto>(updated);
             response.Message = "Cotización actualizada correctamente";
+            await transaction.CommitAsync();
+
         }
         catch (Exception ex)
         {
@@ -500,6 +690,8 @@ public class QuoteBusiness
         try
         {
             var quote = await _repositoryQuote
+                .Query()
+                .Include(q => q.QuoteItems)
                 .FirstOrDefaultAsync(q => q.QuoteId == id);
 
             if (quote == null)
@@ -511,7 +703,83 @@ public class QuoteBusiness
 
             var previousSnapshot = JsonSerializer.Serialize(quote);
 
+            var items = quote.QuoteItems
+                .Where(i => i.IsActive && i.DeletedAt == null)
+                .ToList();
+
+            // DESACTIVAR → LIBERAR STOCK
+            if (!isActive)
+            {
+                var grouped = items
+                    .GroupBy(x => x.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(x => x.Quantity)
+                    })
+                    .ToList();
+
+                foreach (var g in grouped)
+                {
+                    await _context.Products
+                    .Where(p => p.ProductId == g.ProductId)
+                    .ExecuteUpdateAsync(s =>
+                        s.SetProperty(p => p.QuantityReserved,
+                            p => p.QuantityReserved - g.Quantity >= 0
+                                ? p.QuantityReserved - g.Quantity
+                                : 0)
+                    );
+                }
+            }
+            else
+            {
+                // ACTIVAR → VALIDAR STOCK ANTES
+                var grouped = items
+                    .GroupBy(x => x.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(x => x.Quantity)
+                    })
+                    .ToList();
+
+                foreach (var g in grouped)
+                {
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == g.ProductId);
+
+                    if (product == null)
+                    {
+                        response.Success = false;
+                        response.Message = $"Producto #{g.ProductId} no encontrado.";
+                        return response;
+                    }
+
+                    var available = product.Stock - product.QuantityReserved;
+
+                    if (available < g.Quantity)
+                    {
+                        response.Success = false;
+                        response.Message = $"Stock insuficiente para '{product.Name}'. Disponible: {available}, requerido: {g.Quantity}.";
+                        return response;
+                    }
+                }
+
+                // SI TODO OK → RESERVAR
+                foreach (var g in grouped)
+                {
+                    await _context.Products
+                        .Where(p => p.ProductId == g.ProductId)
+                        .ExecuteUpdateAsync(s =>
+                            s.SetProperty(p => p.QuantityReserved,
+                                p => p.QuantityReserved + g.Quantity)
+                        );
+                }
+            }
+
+            // ACTUALIZAR ESTADO
             quote.IsActive = isActive;
+            quote.UpdatedAt = DateTime.UtcNow;
 
             _repositoryQuote.Update(quote);
             await _repositoryQuote.SaveAsync();

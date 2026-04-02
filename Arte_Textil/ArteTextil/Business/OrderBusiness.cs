@@ -173,20 +173,6 @@ namespace ArteTextil.Business
                         return response;
                     }
 
-                    // Validar stock disponible (Stock - QuantityReserved) antes de reservar
-                    foreach (var qi in quote.QuoteItems)
-                    {
-                        var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
-                        var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
-                        if (product == null || available < qi.Quantity)
-                        {
-                            response.Success = false;
-                            response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
-                            await transaction.RollbackAsync();
-                            return response;
-                        }
-                    }
-
                     // Crear Order
                     order = new Order
                     {
@@ -201,7 +187,7 @@ namespace ArteTextil.Business
                     await _repositoryOrder.AddAsync(order);
                     await _repositoryOrder.SaveAsync();
 
-                    // Copiar Items y reservar QuantityReserved
+                    // Copiar Items
                     foreach (var qi in quote.QuoteItems)
                     {
                         var orderItem = new OrderItem
@@ -214,11 +200,7 @@ namespace ArteTextil.Business
                             CreatedAt = DateTime.UtcNow
                         };
 
-                        await _repositoryOrderItem.AddAsync(orderItem);
-
-                        await _context.Products
-                            .Where(p => p.ProductId == qi.ProductId)
-                            .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
+                        await _repositoryOrderItem.AddAsync(orderItem); 
                     }
 
                     await _repositoryOrderItem.SaveAsync();
@@ -256,19 +238,6 @@ namespace ArteTextil.Business
                     {
                         foreach (var item in dto.items)
                         {
-                            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == item.productId && p.DeletedAt == null);
-                            var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
-                            if (product == null || available < item.quantity)
-                            {
-                                response.Success = false;
-                                response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + item.productId}'. Disponible: {available}, requerido: {item.quantity}.";
-                                await transaction.RollbackAsync();
-                                return response;
-                            }
-                        }
-
-                        foreach (var item in dto.items)
-                        {
                             var orderItem = new OrderItem
                             {
                                 OrderId = order.OrderId,
@@ -280,10 +249,6 @@ namespace ArteTextil.Business
                             };
 
                             await _repositoryOrderItem.AddAsync(orderItem);
-
-                            await _context.Products
-                                .Where(p => p.ProductId == item.productId)
-                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + item.quantity));
                         }
 
                         await _repositoryOrderItem.SaveAsync();
@@ -365,51 +330,121 @@ namespace ArteTextil.Business
                     order.Notes
                 });
 
-                var statusChanged = order.Status != dto.status;
+                var statusChanged = order.Status != dto.status; 
 
                 if (statusChanged)
                 {
+
+                    // CASO 1: CANCELAR → LIBERAR TODO
+                    if (order.Status != "Cancelado" && dto.status == "Cancelado")
+                    {
+                        var quote = await _repositoryQuote.Query()
+                            .Include(q => q.QuoteItems)
+                            .FirstOrDefaultAsync(q => q.QuoteId == order.QuoteId && q.DeletedAt == null);
+
+                        var items = quote?.QuoteItems?
+                            .Where(i => i.DeletedAt == null && i.IsActive)
+                            .ToList();
+
+                        if (items != null && items.Any())
+                        {
+                            var grouped = items
+                                .GroupBy(x => x.ProductId)
+                                .Select(g => new
+                                {
+                                    ProductId = g.Key,
+                                    Quantity = g.Sum(x => x.Quantity)
+                                })
+                                .ToList();
+
+                            foreach (var g in grouped)
+                            {
+                                await _context.Products
+                                    .Where(p => p.ProductId == g.ProductId)
+                                    .ExecuteUpdateAsync(s =>
+                                        s.SetProperty(p => p.QuantityReserved,
+                                            p => (p.QuantityReserved - g.Quantity) < 0
+                                                ? 0
+                                                : p.QuantityReserved - g.Quantity)
+                                    );
+                            }
+                        }
+                    }
+                    // CASO 2: REACTIVAR → VALIDAR Y RESERVAR
+                    if (order.Status == "Cancelado" && dto.status != "Cancelado")
+                    {
+                        var quote = await _repositoryQuote.Query()
+                            .Include(q => q.QuoteItems)
+                            .FirstOrDefaultAsync(q => q.QuoteId == order.QuoteId && q.DeletedAt == null);
+
+                        if(dto.status != "Entregado")
+                        {
+                            quote?.Status = "Pedido Realizado";
+
+                            if(quote != null)
+                            _repositoryQuote.Update(quote);
+                        }
+
+                        var items = quote?.QuoteItems?
+                            .Where(i => i.DeletedAt == null && i.IsActive)
+                            .ToList();
+
+                        if (items != null && items.Any())
+                        {
+                            var grouped = items
+                                .GroupBy(x => x.ProductId)
+                                .Select(g => new
+                                {
+                                    ProductId = g.Key,
+                                    Quantity = g.Sum(x => x.Quantity)
+                                })
+                                .ToList();
+
+                            // VALIDAR TODO
+                            foreach (var g in grouped)
+                            {
+                                var product = await _context.Products
+                                    .FirstOrDefaultAsync(p => p.ProductId == g.ProductId);
+
+                                if (product == null)
+                                {
+                                    response.Success = false;
+                                    response.Message = $"Producto #{g.ProductId} no encontrado.";
+                                    await transaction.RollbackAsync();
+                                    return response;
+                                }
+
+                                var available = product.Stock - product.QuantityReserved;
+
+                                if (available < g.Quantity)
+                                {
+                                    response.Success = false;
+                                    response.Message = $"Stock insuficiente para '{product.Name}'. Disponible: {available}, requerido: {g.Quantity}.";
+                                    await transaction.RollbackAsync();
+                                    return response;
+                                }
+                            }
+
+                            // RESERVAR
+                            foreach (var g in grouped)
+                            {
+                                await _context.Products
+                                    .Where(p => p.ProductId == g.ProductId)
+                                    .ExecuteUpdateAsync(s =>
+                                        s.SetProperty(p => p.QuantityReserved,
+                                            p => p.QuantityReserved + g.Quantity)
+                                    );
+                            }
+                        }
+                    }
+
+                    //continue with the update
                     var quoteForStock = await _repositoryQuote.Query()
                         .Include(q => q.QuoteItems)
                         .FirstOrDefaultAsync(q => q.QuoteId == order.QuoteId && q.DeletedAt == null);
 
                     var activeItems = quoteForStock?.QuoteItems?
-                        .Where(i => i.DeletedAt == null && i.IsActive).ToList();
-
-                    if (activeItems != null && activeItems.Any())
-                    {
-                        // Saliendo de Cancelado → validar disponible y re-reservar
-                        if (order.Status == "Cancelado" && dto.status != "Cancelado")
-                        {
-                            foreach (var qi in activeItems)
-                            {
-                                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
-                                var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
-                                if (product == null || available < qi.Quantity)
-                                {
-                                    response.Success = false;
-                                    response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
-                                    return response;
-                                }
-                            }
-                            foreach (var qi in activeItems)
-                            {
-                                await _context.Products
-                                    .Where(p => p.ProductId == qi.ProductId)
-                                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
-                            }
-                        }
-                        // Entrando a Cancelado → liberar reserva
-                        else if (dto.status == "Cancelado" && order.Status != "Cancelado")
-                        {
-                            foreach (var qi in activeItems)
-                            {
-                                await _context.Products
-                                    .Where(p => p.ProductId == qi.ProductId)
-                                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved - qi.Quantity));
-                            }
-                        }
-                    }
+                        .Where(i => i.DeletedAt == null && i.IsActive).ToList(); 
                 }
 
                 order.Status = dto.status;
@@ -556,41 +591,6 @@ namespace ArteTextil.Business
 
                 var activeItems2 = quoteForStock2?.QuoteItems?
                     .Where(i => i.DeletedAt == null && i.IsActive).ToList();
-
-                if (activeItems2 != null && activeItems2.Any())
-                {
-                    // Saliendo de Cancelado → validar disponible y re-reservar
-                    if (order.Status == "Cancelado" && newStatus != "Cancelado")
-                    {
-                        foreach (var qi in activeItems2)
-                        {
-                            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == qi.ProductId && p.DeletedAt == null);
-                            var available = (product?.Stock ?? 0) - (product?.QuantityReserved ?? 0);
-                            if (product == null || available < qi.Quantity)
-                            {
-                                response.Success = false;
-                                response.Message = $"Stock insuficiente para '{product?.Name ?? "Producto #" + qi.ProductId}'. Disponible: {available}, requerido: {qi.Quantity}.";
-                                return response;
-                            }
-                        }
-                        foreach (var qi in activeItems2)
-                        {
-                            await _context.Products
-                                .Where(p => p.ProductId == qi.ProductId)
-                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved + qi.Quantity));
-                        }
-                    }
-                    // Entrando a Cancelado → liberar reserva
-                    else if (newStatus == "Cancelado" && order.Status != "Cancelado")
-                    {
-                        foreach (var qi in activeItems2)
-                        {
-                            await _context.Products
-                                .Where(p => p.ProductId == qi.ProductId)
-                                .ExecuteUpdateAsync(s => s.SetProperty(p => p.QuantityReserved, p => p.QuantityReserved - qi.Quantity));
-                        }
-                    }
-                }
 
                 order.Status = newStatus;
                 order.UpdatedAt = DateTime.UtcNow;
