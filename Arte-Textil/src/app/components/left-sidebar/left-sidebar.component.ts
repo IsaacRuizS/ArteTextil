@@ -62,7 +62,8 @@ export class LeftSidebarComponent {
             roles: [1, 4],
             children: [
                 { label: 'Cotizaciones', link: '/analytics', roles: [1, 4] },
-                { label: 'Alertas', link: '/analytics/alerts', roles: [1, 4] }
+                { label: 'Alertas', link: '/analytics/alerts', roles: [1, 4] },
+                { label: 'Reportes', link: '/reports', roles: [1, 4] }
             ]
         }
     ];

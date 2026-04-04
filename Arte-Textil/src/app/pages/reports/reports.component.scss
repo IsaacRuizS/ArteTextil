@@ -1,26 +1,103 @@
 .reports-container {
-  padding: 20px;
+    padding: 20px;
 }
 
-.card {
-  border-radius: 12px;
+// Tarjetas de reporte
+.report-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
 }
 
-.export-box {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 12px;
-  padding: 10px 12px;
-  min-width: 300px;
+.report-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.mini-card {
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 12px;
-  background: #fff;
-  transition: 0.2s ease;
+.report-card-body {
+    padding: 18px 20px;
 }
 
-.mini-card:hover {
-  transform: translateY(-2px);
+.report-card-footer {
+    padding: 14px 20px 20px;
+}
+
+// Iconos de reporte
+.report-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.inventory-icon {
+    background: #e8f4fd;
+    color: #0d6efd;
+}
+
+.sales-icon {
+    background: #e8f8f0;
+    color: #198754;
+}
+
+.orders-icon {
+    background: #fff3e8;
+    color: #fd7e14;
+}
+
+// Modal backdrop
+.modal-backdrop-custom {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1050;
+}
+
+.modal-content {
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    padding: 18px 24px;
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    padding: 14px 24px;
+}
+
+// Tabla dentro del modal
+.table th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.table td {
+    font-size: 0.875rem;
 }

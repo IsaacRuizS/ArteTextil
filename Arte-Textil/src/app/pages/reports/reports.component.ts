@@ -1,109 +1,141 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CustomCurrencyPipe } from '../../shared/pipes/crc-currency.pipe';
+import {
+    ApiReportsService,
+    InventoryReport,
+    SalesReport,
+    CompletedOrdersReport
+} from '../../services/api-reports.service';
 
-type ReportType =
-  | 'Ventas por producto'
-  | 'Ventas por cliente'
-  | 'Ventas por período'
-  | 'Productividad por empleado'
-  | 'Productividad por etapa'
-  | 'Inventario: rotación'
-  | 'Inventario: consumo'
-  | 'Inventario: niveles de stock'
-  | 'Comparativo mensual: ventas'
-  | 'Comparativo mensual: producción';
+type ActiveReport = 'inventory' | 'sales' | 'completed-orders' | null;
 
 @Component({
-  selector: 'app-reports',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.scss']
+    selector: 'app-reports',
+    standalone: true,
+    imports: [CommonModule, FormsModule, CustomCurrencyPipe],
+    templateUrl: './reports.component.html',
+    styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent {
 
-  // Filtros (solo UI)
-  filters = {
-    from: '',
-    to: '',
-    period: 'Mensual',
-    product: '',
-    client: '',
-    employee: 'Todos',
-    stage: 'Todas',
-  };
+    showModal = signal(false);
+    activeReport = signal<ActiveReport>(null);
+    loading = signal(false);
+    error = signal<string | null>(null);
 
-  periodOptions = ['Diario', 'Semanal', 'Mensual', 'Anual'];
-  employees = ['Todos', 'Ana López', 'Carlos Mora', 'María Jiménez', 'Luis Sánchez'];
-  stages = ['Todas', 'Corte', 'Costura', 'Bordado', 'Empaque'];
+    inventoryData = signal<InventoryReport[]>([]);
+    salesData = signal<SalesReport[]>([]);
+    completedOrdersData = signal<CompletedOrdersReport[]>([]);
 
-  selectedReport: ReportType = 'Ventas por período';
+    inventoryFilters = { stockLevel: '' };
 
-  // Datos mock para tablas
-  salesByProduct = [
-    { product: 'Camisa blanca', units: 120, revenue: '₡ 780,000' },
-    { product: 'Pantalón gris', units: 85, revenue: '₡ 935,000' },
-    { product: 'Uniforme completo', units: 40, revenue: '₡ 1,120,000' }
-  ];
+    salesFilters = {
+        startDate: '',
+        endDate: '',
+        customerId: null as number | null,
+        productId: null as number | null
+    };
 
-  salesByClient = [
-    { client: 'APF Liceo Samuel Sáenz', orders: 12, revenue: '₡ 2,450,000' },
-    { client: 'Cliente Mostrador', orders: 48, revenue: '₡ 1,880,000' },
-    { client: 'Institución X', orders: 6, revenue: '₡ 920,000' }
-  ];
+    completedOrdersFilters = {
+        startDate: '',
+        endDate: '',
+        categoryId: null as number | null
+    };
 
-  productivityByEmployee = [
-    { employee: 'Ana López', output: 52, target: 60 },
-    { employee: 'Carlos Mora', output: 63, target: 70 },
-    { employee: 'María Jiménez', output: 39, target: 50 }
-  ];
+    stockLevelOptions = ['Agotado', 'Crítico', 'Bajo', 'Normal'];
 
-  productivityByStage = [
-    { stage: 'Corte', output: 48, target: 60 },
-    { stage: 'Costura', output: 62, target: 70 },
-    { stage: 'Bordado', output: 31, target: 40 },
-    { stage: 'Empaque', output: 55, target: 55 }
-  ];
+    constructor(private reportsService: ApiReportsService) { }
 
-  inventoryRotation = [
-    { item: 'Tela blanca', rotation: '3.2x/mes', days: 9 },
-    { item: 'Tela gris', rotation: '2.1x/mes', days: 14 },
-    { item: 'Botones metálicos', rotation: '4.0x/mes', days: 7 }
-  ];
+    generateInventory() {
+        this.activeReport.set('inventory');
+        this.showModal.set(true);
+        this.loading.set(true);
+        this.error.set(null);
+        this.inventoryData.set([]);
 
-  rawMaterialConsumption = [
-    { item: 'Tela blanca (m)', used: 220, unit: 'm', period: 'Mes' },
-    { item: 'Hilo (rollos)', used: 34, unit: 'rollos', period: 'Mes' },
-    { item: 'Botones (u)', used: 520, unit: 'u', period: 'Mes' }
-  ];
+        this.reportsService.getInventory({
+            stockLevel: this.inventoryFilters.stockLevel || undefined
+        }).subscribe({
+            next: data => {
+                this.inventoryData.set(data);
+                this.loading.set(false);
+            },
+            error: err => {
+                this.error.set(err?.message || 'Error al generar el reporte.');
+                this.loading.set(false);
+            }
+        });
+    }
 
-  stockLevels = [
-    { item: 'Tela blanca', current: 45, min: 60, max: 200 },
-    { item: 'Tela gris', current: 120, min: 80, max: 220 },
-    { item: 'Botones metálicos', current: 30, min: 50, max: 300 }
-  ];
+    generateSales() {
+        this.activeReport.set('sales');
+        this.showModal.set(true);
+        this.loading.set(true);
+        this.error.set(null);
+        this.salesData.set([]);
 
-  monthlyComparative = [
-    { month: 'Ago', sales: '₡ 1,350,000', production: 210, orders: 42 },
-    { month: 'Sep', sales: '₡ 1,620,000', production: 240, orders: 51 },
-    { month: 'Oct', sales: '₡ 1,480,000', production: 225, orders: 46 }
-  ];
+        this.reportsService.getSales({
+            startDate: this.salesFilters.startDate || undefined,
+            endDate: this.salesFilters.endDate || undefined,
+            customerId: this.salesFilters.customerId || null,
+            productId: this.salesFilters.productId || null
+        }).subscribe({
+            next: data => {
+                this.salesData.set(data);
+                this.loading.set(false);
+            },
+            error: err => {
+                this.error.set(err?.message || 'Error al generar el reporte.');
+                this.loading.set(false);
+            }
+        });
+    }
 
-  // Helpers visuales
-  exportFormats = ['PDF', 'Excel', 'CSV'];
-  selectedExport = 'PDF';
+    generateCompletedOrders() {
+        this.activeReport.set('completed-orders');
+        this.showModal.set(true);
+        this.loading.set(true);
+        this.error.set(null);
+        this.completedOrdersData.set([]);
 
-  isSalesReport() {
-    return this.selectedReport.startsWith('Ventas');
-  }
-  isProductivityReport() {
-    return this.selectedReport.startsWith('Productividad');
-  }
-  isInventoryReport() {
-    return this.selectedReport.startsWith('Inventario');
-  }
-  isComparativeReport() {
-    return this.selectedReport.startsWith('Comparativo mensual');
-  }
+        this.reportsService.getCompletedOrders({
+            startDate: this.completedOrdersFilters.startDate || undefined,
+            endDate: this.completedOrdersFilters.endDate || undefined,
+            categoryId: this.completedOrdersFilters.categoryId || null
+        }).subscribe({
+            next: data => {
+                this.completedOrdersData.set(data);
+                this.loading.set(false);
+            },
+            error: err => {
+                this.error.set(err?.message || 'Error al generar el reporte.');
+                this.loading.set(false);
+            }
+        });
+    }
+
+    closeModal() {
+        this.showModal.set(false);
+        this.error.set(null);
+    }
+
+    get modalTitle(): string {
+        switch (this.activeReport()) {
+            case 'inventory': return 'Reporte de Inventario';
+            case 'sales': return 'Reporte de Ventas';
+            case 'completed-orders': return 'Reporte de Pedidos Finalizados';
+            default: return '';
+        }
+    }
+
+    stockLevelBadgeClass(level: string): string {
+        switch (level) {
+            case 'Agotado': return 'bg-danger';
+            case 'Crítico': return 'bg-warning text-dark';
+            case 'Bajo': return 'bg-info text-dark';
+            default: return 'bg-success';
+        }
+    }
 }

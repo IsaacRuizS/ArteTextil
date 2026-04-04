@@ -89,6 +89,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireClaim("roleId", "1", "2"));
 
+    // Reportes: roles 1 (Admin) y 4 (Analítica)
+    options.AddPolicy("ReportsAccess", policy =>
+        policy.RequireClaim("roleId", "1", "4"));
+
     options.AddPolicy("CustomerOnly", policy =>
         policy.RequireClaim("roleId", "3"));
 });
