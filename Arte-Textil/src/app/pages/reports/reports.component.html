@@ -69,16 +69,6 @@
               <input type="date" class="form-control form-control-sm" [(ngModel)]="salesFilters.endDate">
             </div>
           </div>
-          <div class="row g-2">
-            <div class="col-6">
-              <label class="form-label fw-semibold small">ID Cliente <span class="text-muted fw-normal">(opcional)</span></label>
-              <input type="number" class="form-control form-control-sm" placeholder="Ej: 5" [(ngModel)]="salesFilters.customerId">
-            </div>
-            <div class="col-6">
-              <label class="form-label fw-semibold small">ID Producto <span class="text-muted fw-normal">(opcional)</span></label>
-              <input type="number" class="form-control form-control-sm" placeholder="Ej: 10" [(ngModel)]="salesFilters.productId">
-            </div>
-          </div>
         </div>
 
         <div class="report-card-footer">
@@ -115,10 +105,6 @@
               <label class="form-label fw-semibold small">Hasta <span class="text-muted fw-normal">(opcional)</span></label>
               <input type="date" class="form-control form-control-sm" [(ngModel)]="completedOrdersFilters.endDate">
             </div>
-          </div>
-          <div class="mb-2">
-            <label class="form-label fw-semibold small">ID Categoría <span class="text-muted fw-normal">(opcional)</span></label>
-            <input type="number" class="form-control form-control-sm" placeholder="Ej: 2" [(ngModel)]="completedOrdersFilters.categoryId">
           </div>
         </div>
 
@@ -185,7 +171,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (row of inventoryData(); track row.productId) {
+                    @for (row of paginatedInventory(); track row.productId) {
                       <tr>
                         <td class="text-muted">{{ row.code }}</td>
                         <td class="fw-semibold">{{ row.productName }}</td>
@@ -204,6 +190,7 @@
                   </tbody>
                 </table>
               </div>
+              <ng-container *ngTemplateOutlet="pagination; context: { total: totalInventoryPages() }"></ng-container>
             }
           }
 
@@ -228,7 +215,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (row of salesData(); track row.orderItemId) {
+                    @for (row of paginatedSales(); track row.orderItemId) {
                       <tr>
                         <td class="text-muted">#{{ row.orderId }}</td>
                         <td>{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
@@ -244,6 +231,7 @@
                   </tbody>
                 </table>
               </div>
+              <ng-container *ngTemplateOutlet="pagination; context: { total: totalSalesPages() }"></ng-container>
             }
           }
 
@@ -268,7 +256,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @for (row of completedOrdersData(); track row.orderId + '-' + row.productId) {
+                    @for (row of paginatedOrders(); track row.orderId + '-' + row.productId) {
                       <tr>
                         <td class="text-muted">#{{ row.orderId }}</td>
                         <td>{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
@@ -292,16 +280,36 @@
                   </tbody>
                 </table>
               </div>
+              <ng-container *ngTemplateOutlet="pagination; context: { total: totalOrdersPages() }"></ng-container>
             }
           }
+
+          <!-- Template de paginación reutilizable -->
+          <ng-template #pagination let-total="total">
+            @if (total > 1) {
+              <div class="d-flex align-items-center justify-content-between mt-3 px-1">
+                <small class="text-muted">{{ currentTotalRecords }} registros · página {{ page() }} de {{ total }}</small>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-outline-secondary btn-sm" (click)="prevPage()" [disabled]="page() === 1">‹</button>
+                  @for (p of pageNumbers(total); track p) {
+                    <button class="btn btn-sm"
+                      [class.btn-primary]="page() === p"
+                      [class.btn-outline-secondary]="page() !== p"
+                      (click)="page.set(p)">
+                      {{ p }}
+                    </button>
+                  }
+                  <button class="btn btn-outline-secondary btn-sm" (click)="nextPage()" [disabled]="page() >= total">›</button>
+                </div>
+              </div>
+            }
+          </ng-template>
 
         </div>
 
         <div class="modal-footer">
-          @if (!loading() && !error()) {
-            <small class="text-muted me-auto">
-              {{ activeReport() === 'inventory' ? inventoryData().length : activeReport() === 'sales' ? salesData().length : completedOrdersData().length }} resultado(s)
-            </small>
+          @if (!loading() && !error() && currentTotalRecords > 0) {
+            <button type="button" class="btn btn-success" (click)="exportToExcel()">Exportar Excel</button>
           }
           <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
         </div>
