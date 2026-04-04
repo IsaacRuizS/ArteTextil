@@ -27,13 +27,13 @@ public class SalesReportView
     public string CustomerName { get; set; } = string.Empty;
 
     [Column("ClasificacionCliente")]
-    public string CustomerClassification { get; set; } = string.Empty;
+    public string? CustomerClassification { get; set; }
 
     [Column("EmailCliente")]
-    public string CustomerEmail { get; set; } = string.Empty;
+    public string? CustomerEmail { get; set; }
 
     [Column("TelefonoCliente")]
-    public string CustomerPhone { get; set; } = string.Empty;
+    public string? CustomerPhone { get; set; }
 
     [Column("EstadoPedido")]
     public string OrderStatus { get; set; } = string.Empty;

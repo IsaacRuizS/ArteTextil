@@ -33,7 +33,7 @@ public class CompletedOrdersReportView
     public string CustomerName { get; set; } = string.Empty;
 
     [Column("ClasificacionCliente")]
-    public string CustomerClassification { get; set; } = string.Empty;
+    public string? CustomerClassification { get; set; }
 
     public int ProductId { get; set; }
 
