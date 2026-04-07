@@ -1,0 +1,18 @@
+# Secrets - nunca en la imagen
+.env
+
+# Git
+.git
+.gitignore
+
+# Binarios locales (se regeneran en el build)
+**/bin
+**/obj
+
+# Visual Studio / Rider
+.vs
+.idea
+*.user
+
+# Logs
+*.log

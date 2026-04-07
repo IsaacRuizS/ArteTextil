@@ -24,19 +24,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-Env.Load();
-
-var server   = Env.GetString("DB_SERVER");
-var database = Env.GetString("DB_NAME");
-var user     = Env.GetString("DB_USER");
-var password = Env.GetString("DB_PASSWORD");
-
+// Program.cs
 var connectionString =
-    $"Data Source={server};" +
-    $"Initial Catalog={database};" +
+    $"Data Source={Environment.GetEnvironmentVariable("DB_SERVER")};" +
+    $"Initial Catalog={Environment.GetEnvironmentVariable("DB_NAME")};" +
     $"Persist Security Info=True;" +
-    $"User ID={user};" +
-    $"Password={password};" +
+    $"User ID={Environment.GetEnvironmentVariable("DB_USER")};" +
+    $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
     $"Pooling=False;" +
     $"MultipleActiveResultSets=False;" +
     $"Encrypt=True;" +
