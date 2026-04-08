@@ -1,4 +1,6 @@
 using ArteTextil.Business;
+using Hangfire;
+using Hangfire.SqlServer;
 using ArteTextil.Data;
 using ArteTextil.Helpers;
 using ArteTextil.Interfaces;
@@ -7,8 +9,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Hangfire;
-using Hangfire.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +103,7 @@ builder.Services.AddHangfire(config =>
     config.UseSqlServerStorage(connectionString));
 
 builder.Services.AddHangfireServer();
+
 
 builder.Services.AddSwaggerGen(c =>
 {

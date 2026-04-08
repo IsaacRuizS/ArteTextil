@@ -10,11 +10,21 @@ import { NotificationService } from '../../../services/notification.service';
     selector: 'app-alerts',
     standalone: true,
     imports: [CommonModule],
-    templateUrl: './alerts.component.html'
+    templateUrl: './alerts.component.html',
+    styles: [`
+        .message-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .border-4 { border-width: 4px !important; }
+    `]
 })
 export class AlertsComponent implements OnInit {
 
     alerts: AlertModel[] = [];
+    selectedAlert: AlertModel | null = null;
 
     constructor(
         private api: ApiAlertService,
@@ -41,8 +51,15 @@ export class AlertsComponent implements OnInit {
         });
     }
 
-    markAsRead(alert: AlertModel) {
+    openDetail(alert: AlertModel) {
+        this.selectedAlert = alert;
+    }
 
+    closeDetail(event: MouseEvent) {
+        this.selectedAlert = null;
+    }
+
+    markAsRead(alert: AlertModel) {
         this.api.markAsRead(alert.alertId).subscribe({
             next: () => {
                 this.alerts = this.alerts.filter(x => x.alertId !== alert.alertId);
