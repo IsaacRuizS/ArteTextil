@@ -92,6 +92,8 @@ export class VacationsComponent implements OnInit {
             this.apiVacation.getAvailableDays().subscribe({
                 next: (days) => {
                     this.availableState = { days };
+
+                    this.cdr.detectChanges();
                 },
                 error: (err) => console.error(err)
             });
@@ -212,7 +214,7 @@ export class VacationsComponent implements OnInit {
             error: (err) => {
 
                 this.showFormModal = false;
-                
+
                 const message =
                     err?.error?.message ||
                     err?.error?.Message ||
