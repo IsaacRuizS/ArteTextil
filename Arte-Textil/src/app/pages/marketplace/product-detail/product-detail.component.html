@@ -93,7 +93,7 @@
 
 
             <!-- BOTÓN AGREGAR AL CARRITO -->
-            <button class="btn btn-primary btn-lg mt-4" [class.btn-success]="added" (click)="addToCart()">
+            <button [disabled]="product.quantitySelected > product.availableStock || product.quantitySelected <= 0" class="btn btn-primary btn-lg mt-4" [class.btn-success]="added" (click)="addToCart()">
 
                 <i class="mdi" [class.mdi-cart-plus]="!added" [class.mdi-check]="added"></i>
                 {{ added ? 'Agregado' : 'Agregar al carrito' }}

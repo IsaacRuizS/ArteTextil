@@ -59,7 +59,6 @@ export class Login {
                 // AuthService handles redirect to dashboard
             })
             .catch((error: any) => {
-                console.log('Login error:', error);
                 this.error = error.message;
                 this.loading = false;
                 this.cdr.detectChanges();

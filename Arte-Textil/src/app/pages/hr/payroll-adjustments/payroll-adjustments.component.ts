@@ -145,8 +145,6 @@ export class PayrollAdjustmentsComponent implements OnInit {
     // modal para error
     showModal(message: string, type: 'success' | 'error' = 'error') {
 
-        console.log("SHOW MODAL EJECUTADO");
-
         this.messageText = message;
         this.modalType = type;
 
@@ -159,8 +157,6 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
     // crear ajuste
     saveAdjustment() {
-        console.log("HTML MODAL TEST", this.showMessageModal);
-        console.log("COMPONENTE AJUSTES ACTIVO");
 
         if (this.adjustmentForm.invalid) {
             this.adjustmentForm.markAllAsTouched();
@@ -207,7 +203,6 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
                 this.showModal(msg, 'error');
 
-                console.log("ESTADO FINAL:", this.showMessageModal);
             }
         });
     }

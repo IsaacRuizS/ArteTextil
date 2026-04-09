@@ -37,8 +37,6 @@ export class AuthGuard implements CanActivate {
             return true;
         }
 
-        console.log(route)
-
         let child = route.firstChild;
         while (child?.firstChild) {
             child = child.firstChild;

@@ -54,7 +54,7 @@ export class MarketplaceComponent {
 
     ngOnInit() {
         // Cargar productos
-        this._loadProducts(); 
+        this._loadProducts();
     }
 
     onClearFilters() {

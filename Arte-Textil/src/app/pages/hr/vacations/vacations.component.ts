@@ -189,8 +189,6 @@ export class VacationsComponent implements OnInit {
             notes: this.vacationForm.value.notes
         };
 
-        console.log("PAYLOAD:", payload);
-
         this.apiVacation.create(payload).subscribe({
             next: () => {
 
