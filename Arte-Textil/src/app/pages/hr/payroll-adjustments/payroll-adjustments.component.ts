@@ -9,6 +9,7 @@ import { SharedService } from '../../../services/shared.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { NotificationService } from '../../../services/notification.service';
+import { NgZone } from '@angular/core';
 
 @Component({
     selector: 'app-payroll-adjustments',
@@ -45,7 +46,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
         private sharedService: SharedService,
         private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private ngZone: NgZone,
     ) {
         this.adjustmentForm = this.fb.group({
             adjustmentId: [0],
@@ -140,8 +142,25 @@ export class PayrollAdjustmentsComponent implements OnInit {
         this.showFormModal = true;
     }
 
+    // modal para error
+    showModal(message: string, type: 'success' | 'error' = 'error') {
+
+        console.log("SHOW MODAL EJECUTADO");
+
+        this.messageText = message;
+        this.modalType = type;
+
+        this.showMessageModal = true;
+    }
+
+    closeModal() {
+        this.showMessageModal = false;
+    }
+
     // crear ajuste
     saveAdjustment() {
+        console.log("HTML MODAL TEST", this.showMessageModal);
+        console.log("COMPONENTE AJUSTES ACTIVO");
 
         if (this.adjustmentForm.invalid) {
             this.adjustmentForm.markAllAsTouched();
@@ -167,12 +186,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         this.apiAdjustment.create(payload).subscribe({
 
-            next: (res: any) => {
-
-                if (!res.success) {
-                    this.showModal(res.message, 'error');
-                    return;
-                }
+            next: () => {
 
                 this.showFormModal = false;
                 this.adjustmentForm.reset({ type: 'Extra' });
@@ -185,28 +199,17 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
             error: (err) => {
 
-                this.sharedService.setLoading(false);
-
                 const msg = err?.error?.message || 'Error';
 
-                this.showMessageModal = true;
-                this.messageText = msg;
-                this.modalType = 'error';
+                this.sharedService.setLoading(false);
+
+                this.showFormModal = false;
+
+                this.showModal(msg, 'error');
+
+                console.log("ESTADO FINAL:", this.showMessageModal);
             }
-
         });
-    }
-
-    // modal para error
-    showModal(message: string, type: 'success' | 'error' = 'error') {
-
-        this.messageText = message;
-        this.modalType = type;
-        this.showMessageModal = true;
-    }
-
-    closeModal() {
-        this.showMessageModal = false;
     }
 
     // eliminar

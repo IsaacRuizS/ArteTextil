@@ -42,6 +42,9 @@ export class PayrollMonthlyComponent implements OnInit {
     paymentMethod = 'Transferencia';
     showPaymentModal = false;
     generating = false;
+    errorList: string[] = [];
+    searchTerm: string = '';
+    statusFilter: string = 'all'; // all | approved | pending
 
     totalPayroll = 0;
 
@@ -115,7 +118,7 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 const msg = err?.error?.message || 'Ocurrió un error inesperado';
 
-                this.showToastMessage(msg, 'error');
+                this.handleMessages(msg, 'error');
 
                 this.shared.setLoading(false);
             }
@@ -144,9 +147,9 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.shared.setLoading(false);
 
                 if (res.success) {
-                    this.showToastMessage(res.message, 'success');
+                    this.handleMessages(res.message, 'success');
                 } else {
-                    this.showToastMessage(res.message, 'warning');
+                    this.handleMessages(res.message, 'warning');
                 }
 
                 this.load(monthValue);
@@ -157,7 +160,7 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.generating = false;
                 const msg = err?.error?.message || 'Error generando planilla';
                 const type = err?.error?.success === false ? 'warning' : 'error';
-                this.showToastMessage(msg, type);
+                this.handleMessages(msg, type);
                 this.shared.setLoading(false);
             }
         });
@@ -211,9 +214,9 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.showPaymentModal = false;
 
                 if (res.success) {
-                    this.showToastMessage(res.message, 'success');
+                    this.handleMessages(res.message, 'success');
                 } else {
-                    this.showToastMessage(res.message, 'warning');
+                    this.handleMessages(res.message, 'warning');
                 }
 
                 const month = this.form.get('month')?.value;
@@ -227,22 +230,75 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 const msg = err?.error?.message || 'Error al procesar pago';
 
-                this.showToastMessage(msg, 'error');
+                this.handleMessages(msg, 'error');
             }
         });
     }
 
+    // filtro
+    get filteredPayrolls() {
+
+        let data = this.payrollsOrigin;
+
+        if (this.searchTerm) {
+            const term = this.searchTerm.toLowerCase().trim();
+
+            data = data.filter(p =>
+                p.userName?.toLowerCase().includes(term)
+            );
+        }
+
+        if (this.statusFilter === 'approved') {
+            data = data.filter(p => p.approvedByUserId);
+        }
+
+        if (this.statusFilter === 'pending') {
+            data = data.filter(p => !p.approvedByUserId);
+        }
+
+        return data;
+    }
+
+
     // toast para advertencias
     showToastMessage(message: string, type: 'success' | 'warning' | 'error') {
+
+        if (message?.toLowerCase().includes('no tiene salario')) {
+            return;
+        }
+
+        this.errorList = message.split('|').map(x => x.trim()).filter(x => x);
 
         this.toastMessage = message;
         this.toastType = type;
         this.showToast = true;
 
-        // Auto cerrar
         setTimeout(() => {
             this.showToast = false;
         }, 3500);
+    }
+
+
+    // modal para advertencias
+    handleMessages(message: string, type: 'success' | 'warning' | 'error') {
+
+        this.errorList = message.split('|').map(x => x.trim()).filter(x => x);
+
+        if (this.errorList.length <= 2) {
+            this.toastMessage = message;
+            this.toastType = type;
+            this.showToast = true;
+
+            setTimeout(() => {
+                this.showToast = false;
+            }, 3500);
+        }
+
+        else {
+            this.messageText = message;
+            this.modalType = type === 'error' ? 'error' : 'success';
+            this.showMessageModal = true;
+        }
     }
 
 }
