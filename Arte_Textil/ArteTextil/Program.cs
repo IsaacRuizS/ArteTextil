@@ -1,6 +1,4 @@
 using ArteTextil.Business;
-using Hangfire;
-using Hangfire.SqlServer;
 using ArteTextil.Data;
 using ArteTextil.Helpers;
 using ArteTextil.Interfaces;
@@ -25,6 +23,8 @@ builder.Services.AddCors(options =>
 });
 
 // Program.cs
+
+#if !DEBUG
 var connectionString =
     $"Data Source={Environment.GetEnvironmentVariable("DB_SERVER")};" +
     $"Initial Catalog={Environment.GetEnvironmentVariable("DB_NAME")};" +
@@ -37,6 +37,29 @@ var connectionString =
     $"TrustServerCertificate=True;" +
     $"Application Name=\"ArteTextilApp\";" +
     $"Command Timeout=30;";
+#else 
+Env.Load();
+
+var server   = Env.GetString("DB_SERVER");
+var database = Env.GetString("DB_NAME");
+var user     = Env.GetString("DB_USER");
+var password = Env.GetString("DB_PASSWORD");
+
+var connectionString =
+    $"Data Source={server};" +
+    $"Initial Catalog={database};" +
+    $"Persist Security Info=True;" +
+    $"User ID={user};" +
+    $"Password={password};" +
+    $"Pooling=False;" +
+    $"MultipleActiveResultSets=False;" +
+    $"Encrypt=True;" +
+    $"TrustServerCertificate=True;" +
+    $"Application Name=\"ArteTextilApp\";" +
+    $"Command Timeout=30;";
+
+# endif
+
 
 builder.Services.AddDbContext<ArteTextilDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -98,12 +121,6 @@ builder.Services.AddControllers()
          options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
      });
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddHangfire(config =>
-    config.UseSqlServerStorage(connectionString));
-
-builder.Services.AddHangfireServer();
-
 
 builder.Services.AddSwaggerGen(c =>
 {
