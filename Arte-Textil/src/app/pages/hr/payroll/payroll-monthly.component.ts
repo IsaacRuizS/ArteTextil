@@ -80,6 +80,10 @@ export class PayrollMonthlyComponent implements OnInit {
         const month = this.form.get('month')?.value;
         if (!month) return;
 
+        this.searchTerm = '';
+        this.statusFilter = 'all';
+        this.page = 1;
+
         this.load(month);
     }
 
@@ -112,15 +116,6 @@ export class PayrollMonthlyComponent implements OnInit {
 
                 this.shared.setLoading(false);
                 this.cdr.markForCheck();
-            },
-
-            error: (err) => {
-
-                const msg = err?.error?.message || 'Ocurrió un error inesperado';
-
-                this.handleMessages(msg, 'error');
-
-                this.shared.setLoading(false);
             }
         });
     }
@@ -238,7 +233,7 @@ export class PayrollMonthlyComponent implements OnInit {
     // filtro
     get filteredPayrolls() {
 
-        let data = this.payrollsOrigin;
+        let data = this.payrolls;
 
         if (this.searchTerm) {
             const term = this.searchTerm.toLowerCase().trim();
