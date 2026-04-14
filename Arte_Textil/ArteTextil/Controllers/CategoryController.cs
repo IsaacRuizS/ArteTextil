@@ -78,6 +78,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/category/all-active
+        [AllowAnonymous]
         [HttpGet("all-active")]
         public async Task<IActionResult> GetAllActive()
         {

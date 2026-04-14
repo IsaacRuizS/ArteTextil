@@ -39,6 +39,7 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] QuoteDto dto)
         {
