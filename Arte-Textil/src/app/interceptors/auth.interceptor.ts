@@ -43,6 +43,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 error.status === 401 &&
                 !isAuthEndpoint &&
                 isBrowser &&
+                authService.isAuthenticated() &&
                 authService.refreshToken
             ) {
                 return from(authService.refreshAccessToken()).pipe(

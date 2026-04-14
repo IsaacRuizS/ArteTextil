@@ -30,6 +30,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/product/{id}
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
