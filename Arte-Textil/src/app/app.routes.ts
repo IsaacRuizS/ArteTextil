@@ -3,7 +3,6 @@ import { Routes } from '@angular/router';
 import { FullComponent } from './layouts/full/full.component';
 import { BlankComponent } from './layouts/blank/blank.component';
 import { PublicComponent } from './layouts/public/public.component';
-import { PayrollAdjustmentsComponent } from './pages/hr/payroll-adjustments/payroll-adjustments.component';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -12,6 +11,11 @@ export const routes: Routes = [
         component: FullComponent,
         canActivate: [AuthGuard],
         children: [
+            {
+                path: '',
+                loadComponent: () => import('./pages/orders-management/orders-management.component').then(m => m.OrdersManagementComponent),
+                data: { roles: [1, 2, 4] }
+            },
             // HR Routes
             {
                 path: 'hr/attendance',
@@ -147,6 +151,10 @@ export const routes: Routes = [
         component: BlankComponent,
         children: [
             {
+                path: '',
+                loadComponent: () => import('./pages/login/login').then(m => m.Login)
+            },
+            {
                 path: 'login',
                 loadComponent: () => import('./pages/login/login').then(m => m.Login)
             },
@@ -160,7 +168,10 @@ export const routes: Routes = [
         path: '',
         component: PublicComponent,
         children: [
-            //route to load the componenth and inside the comp load the html and scss 
+            {
+                path: '',
+                loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
+            },
             {
                 path: 'marketplace',
                 loadComponent: () => import('./pages/marketplace/marketplace.component').then(m => m.MarketplaceComponent)
