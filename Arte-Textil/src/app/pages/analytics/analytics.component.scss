@@ -7,11 +7,8 @@
     transform: translateY(-3px);
 }
 
-@media (min-width: 600px) {
-    .kpi-card {
-        width: 355px !important;
-        height: 120px !important;
-    }
+.kpi-card {
+    min-height: 100px;
 }
 
 .chart-card {

@@ -13,7 +13,7 @@
 
     <!-- FILTER -->
     <div class="row mb-4 g-2">
-        <div class="col-md-8">
+        <div class="col-12 col-md-8">
             <input
                 type="text"
                 class="form-control"
@@ -21,7 +21,7 @@
                 (input)="onSearch($event)">
         </div>
 
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <select
                 class="form-select"
                 [(ngModel)]="statusFilter"
@@ -36,7 +36,7 @@
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Promoción</th>
@@ -51,18 +51,18 @@
                 <tbody>
                     <tr *ngFor="let p of promotions | paginate: { itemsPerPage: 50, currentPage: page }">
 
-                        <td class="ps-4 fw-semibold">{{ p.name }}</td>
+                        <td data-label="Promoción" class="ps-4 fw-semibold">{{ p.name }}</td>
 
-                        <td>{{ p.productName || getProductName(p.productId) }}</td>
+                        <td data-label="Producto">{{ p.productName || getProductName(p.productId) }}</td>
 
-                        <td>{{ p.discountPercent }}%</td>
+                        <td data-label="Descuento">{{ p.discountPercent }}%</td>
 
-                        <td>
+                        <td data-label="Vigencia">
                             {{ p.startDate | date:'dd/MM/yyyy' }} →
                             {{ p.endDate | date:'dd/MM/yyyy' }}
                         </td>
 
-                        <td>
+                        <td data-label="Estado">
                             <span
                                 class="badge rounded-pill"
                                 [class.bg-success-subtle]="p.isActive"
@@ -73,7 +73,7 @@
                             </span>
                         </td>
 
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button
                                 class="btn btn-sm btn-light text-primary me-2"
                                 (click)="openEditModal(p)">

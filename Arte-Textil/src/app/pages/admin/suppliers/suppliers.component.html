@@ -9,12 +9,12 @@
 
     <!-- FILTER -->
     <div class="row mb-4 g-2">
-        <div class="col-md-8">
+        <div class="col-12 col-md-8">
             <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
                 (input)="onSearch($event)">
         </div>
 
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
                 <option value="0">Todos</option>
                 <option value="1">Activos</option>
@@ -26,7 +26,7 @@
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Proveedor</th>
@@ -39,18 +39,18 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let s of suppliers | paginate: { itemsPerPage: 50, currentPage: page }">
-                        <td class="ps-4 fw-semibold">{{ s.name }}</td>
-                        <td>{{ s.contactPerson }}</td>
-                        <td>{{ s.email }}</td>
-                        <td>{{ s.phone }}</td>
-                        <td>
+                        <td data-label="Proveedor" class="ps-4 fw-semibold">{{ s.name }}</td>
+                        <td data-label="Contacto">{{ s.contactPerson }}</td>
+                        <td data-label="Email">{{ s.email }}</td>
+                        <td data-label="Teléfono">{{ s.phone }}</td>
+                        <td data-label="Estado">
                             <span class="badge rounded-pill" [class.bg-success-subtle]="s.isActive"
                                 [class.text-success]="s.isActive" [class.bg-secondary-subtle]="!s.isActive"
                                 [class.text-secondary]="!s.isActive">
                                 {{ s.isActive ? 'Activo' : 'Inactivo' }}
                             </span>
                         </td>
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(s)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>

@@ -12,11 +12,11 @@
 
     <!-- FILTERS -->
     <div class="row mb-4 g-2">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <input type="text" class="form-control" placeholder="Buscar por nombre, email o rol..."
                 (input)="onSearch($event)">
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
                 <option [value]="0">Todos</option>
                 <option [value]="1">Activos</option>
@@ -28,7 +28,7 @@
     <!-- TABLE -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Nombre</th>
@@ -41,13 +41,13 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let user of filteredUsers | paginate: { itemsPerPage: 10, currentPage: page }">
-                        <td class="ps-4 fw-semibold">{{ user.fullName }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>
+                        <td data-label="Nombre" class="ps-4 fw-semibold">{{ user.fullName }}</td>
+                        <td data-label="Email">{{ user.email }}</td>
+                        <td data-label="Rol">
                             <span class="badge bg-info text-dark">{{ getRoleName(user.roleId) }}</span>
                         </td>
-                        <td>{{ user.phone || 'N/A' }}</td>
-                        <td>
+                        <td data-label="Teléfono">{{ user.phone || 'N/A' }}</td>
+                        <td data-label="Estado">
                             <span class="badge rounded-pill"
                                 [class.bg-success-subtle]="user.isActive"
                                 [class.text-success]="user.isActive"
@@ -56,7 +56,7 @@
                                 {{ user.isActive ? 'Activo' : 'Inactivo' }}
                             </span>
                         </td>
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button class="btn btn-sm btn-light me-1" (click)="openEditModal(user)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>

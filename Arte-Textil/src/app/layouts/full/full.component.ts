@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NgIf } from '@angular/common';
 
 // componentes
 import { HeaderComponent } from '../../components/header/header.component';
@@ -16,7 +17,8 @@ import { AlertPollingService } from '../../services/alert-polling.service';
     imports: [
         HeaderComponent,
         LeftSidebarComponent,
-        RouterOutlet
+        RouterOutlet,
+        NgIf
     ]
 })
 export class FullComponent implements OnInit {

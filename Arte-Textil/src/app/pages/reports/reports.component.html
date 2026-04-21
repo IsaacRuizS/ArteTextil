@@ -155,7 +155,7 @@
               <p class="text-muted text-center py-4 mb-0">Sin resultados para los filtros seleccionados.</p>
             } @else {
               <div class="table-responsive">
-                <table class="table table-hover align-middle small mb-0">
+                <table class="table table-hover align-middle small mb-0 responsive-table">
                   <thead class="table-light">
                     <tr>
                       <th>Código</th>
@@ -173,18 +173,18 @@
                   <tbody>
                     @for (row of paginatedInventory(); track row.productId) {
                       <tr>
-                        <td class="text-muted">{{ row.code }}</td>
-                        <td class="fw-semibold">{{ row.productName }}</td>
-                        <td>{{ row.category }}</td>
-                        <td class="text-center">{{ row.currentStock }}</td>
-                        <td class="text-center text-muted">{{ row.minStock }}</td>
-                        <td class="text-center">
+                        <td data-label="Código" class="text-muted">{{ row.code }}</td>
+                        <td data-label="Producto" class="fw-semibold">{{ row.productName }}</td>
+                        <td data-label="Categoría">{{ row.category }}</td>
+                        <td data-label="Stock Actual" class="text-center">{{ row.currentStock }}</td>
+                        <td data-label="Stock Mín." class="text-center text-muted">{{ row.minStock }}</td>
+                        <td data-label="Nivel" class="text-center">
                           <span class="badge {{ stockLevelBadgeClass(row.stockLevel) }}">{{ row.stockLevel }}</span>
                         </td>
-                        <td class="text-end">{{ row.totalConsumption }}</td>
-                        <td class="text-end">{{ row.totalEntries }}</td>
-                        <td class="text-end">{{ row.rotationIndex !== null ? (row.rotationIndex | number:'1.2-2') : '—' }}</td>
-                        <td class="text-end">{{ row.unitPrice | customCurrency }}</td>
+                        <td data-label="Consumo" class="text-end">{{ row.totalConsumption }}</td>
+                        <td data-label="Entradas" class="text-end">{{ row.totalEntries }}</td>
+                        <td data-label="Rot." class="text-end">{{ row.rotationIndex !== null ? (row.rotationIndex | number:'1.2-2') : '—' }}</td>
+                        <td data-label="Precio" class="text-end">{{ row.unitPrice | customCurrency }}</td>
                       </tr>
                     }
                   </tbody>
@@ -200,7 +200,7 @@
               <p class="text-muted text-center py-4 mb-0">Sin resultados para los filtros seleccionados.</p>
             } @else {
               <div class="table-responsive">
-                <table class="table table-hover align-middle small mb-0">
+                <table class="table table-hover align-middle small mb-0 responsive-table">
                   <thead class="table-light">
                     <tr>
                       <th>#Pedido</th>
@@ -217,15 +217,15 @@
                   <tbody>
                     @for (row of paginatedSales(); track row.orderItemId) {
                       <tr>
-                        <td class="text-muted">#{{ row.orderId }}</td>
-                        <td>{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
-                        <td class="fw-semibold">{{ row.customerName }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ row.orderStatus }}</span></td>
-                        <td>{{ row.productName }}</td>
-                        <td class="text-muted">{{ row.category }}</td>
-                        <td class="text-center">{{ row.quantity }}</td>
-                        <td class="text-end">{{ row.unitPrice | customCurrency }}</td>
-                        <td class="text-end fw-semibold">{{ row.subtotal | customCurrency }}</td>
+                        <td data-label="#Pedido" class="text-muted">#{{ row.orderId }}</td>
+                        <td data-label="Fecha">{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
+                        <td data-label="Cliente" class="fw-semibold">{{ row.customerName }}</td>
+                        <td data-label="Estado"><span class="badge bg-light text-dark border">{{ row.orderStatus }}</span></td>
+                        <td data-label="Producto">{{ row.productName }}</td>
+                        <td data-label="Categoría" class="text-muted">{{ row.category }}</td>
+                        <td data-label="Cant." class="text-center">{{ row.quantity }}</td>
+                        <td data-label="Precio" class="text-end">{{ row.unitPrice | customCurrency }}</td>
+                        <td data-label="Subtotal" class="text-end fw-semibold">{{ row.subtotal | customCurrency }}</td>
                       </tr>
                     }
                   </tbody>
@@ -241,7 +241,7 @@
               <p class="text-muted text-center py-4 mb-0">Sin resultados para los filtros seleccionados.</p>
             } @else {
               <div class="table-responsive">
-                <table class="table table-hover align-middle small mb-0">
+                <table class="table table-hover align-middle small mb-0 responsive-table">
                   <thead class="table-light">
                     <tr>
                       <th>#Pedido</th>
@@ -258,10 +258,10 @@
                   <tbody>
                     @for (row of paginatedOrders(); track row.orderId + '-' + row.productId) {
                       <tr>
-                        <td class="text-muted">#{{ row.orderId }}</td>
-                        <td>{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
-                        <td>{{ row.deliveryDate ? (row.deliveryDate | date:'dd/MM/yyyy') : '—' }}</td>
-                        <td class="text-center">
+                        <td data-label="#Pedido" class="text-muted">#{{ row.orderId }}</td>
+                        <td data-label="Pedido">{{ row.orderDate | date:'dd/MM/yyyy' }}</td>
+                        <td data-label="Entrega">{{ row.deliveryDate ? (row.deliveryDate | date:'dd/MM/yyyy') : '—' }}</td>
+                        <td data-label="Días" class="text-center">
                           @if (row.daysToDelivery !== null) {
                             <span class="badge" [class.bg-success]="row.daysToDelivery <= 7" [class.bg-warning]="row.daysToDelivery > 7 && row.daysToDelivery <= 14" [class.bg-danger]="row.daysToDelivery > 14" [class.text-dark]="row.daysToDelivery > 7">
                               {{ row.daysToDelivery }}d
@@ -270,11 +270,11 @@
                             <span class="text-muted">—</span>
                           }
                         </td>
-                        <td class="fw-semibold">{{ row.customerName }}</td>
-                        <td>{{ row.productName }}</td>
-                        <td class="text-muted">{{ row.category }}</td>
-                        <td class="text-center">{{ row.quantity }}</td>
-                        <td class="text-end fw-semibold">{{ row.subtotal | customCurrency }}</td>
+                        <td data-label="Cliente" class="fw-semibold">{{ row.customerName }}</td>
+                        <td data-label="Producto">{{ row.productName }}</td>
+                        <td data-label="Categoría" class="text-muted">{{ row.category }}</td>
+                        <td data-label="Cant." class="text-center">{{ row.quantity }}</td>
+                        <td data-label="Subtotal" class="text-end fw-semibold">{{ row.subtotal | customCurrency }}</td>
                       </tr>
                     }
                   </tbody>

@@ -13,7 +13,7 @@
   <!-- Buscador -->
   <div *ngIf="isAdmin" class="card shadow-sm border-0 mb-3 p-3">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-12 col-md-6">
 
         <div class="input-group">
           <span class="input-group-text">
@@ -32,7 +32,7 @@
   <div class="card shadow-sm border-0">
     <div class="table-responsive">
 
-      <table class="table mb-0 align-middle">
+      <table class="table mb-0 align-middle responsive-table">
 
         <thead class="bg-light">
           <tr>
@@ -45,10 +45,10 @@
         <tbody>
 
           <tr *ngFor="let s of filteredSalaries | paginate: { itemsPerPage: 50, currentPage: page }">
-            <td>{{ s.userName || s.userId }}</td>
-            <td>{{ s.baseSalary | customCurrency:'₡' }}</td>
+            <td data-label="Usuario">{{ s.userName || s.userId }}</td>
+            <td data-label="Salario Base">{{ s.baseSalary | customCurrency:'₡' }}</td>
 
-            <td class="text-end">
+            <td data-label="" class="text-end">
               <button *ngIf="isAdmin" class="btn btn-sm btn-light" (click)="edit(s)">
                 <i class="mdi mdi-pencil"></i>
               </button>

@@ -13,11 +13,11 @@
 
     <!-- FILTERS -->
     <div class="row mb-4 g-2">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <input type="text" class="form-control" placeholder="Buscar por nombre de rol..." (input)="onSearch($event)">
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
                 <option [value]="0">Todos</option>
                 <option [value]="1">Activos</option>
@@ -29,7 +29,7 @@
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Rol</th>
@@ -41,11 +41,11 @@
 
                 <tbody>
                     <tr *ngFor="let role of filteredRoles | paginate: { itemsPerPage: 10, currentPage: page }">
-                        <td class="ps-4 fw-semibold">{{ role.name }}</td>
+                        <td data-label="Rol" class="ps-4 fw-semibold">{{ role.name }}</td>
 
-                        <td class="text-muted">{{ role.description }}</td>
+                        <td data-label="Descripción" class="text-muted">{{ role.description }}</td>
 
-                        <td>
+                        <td data-label="Estado">
                             <span
                                 class="badge rounded-pill"
                                 [class.bg-success-subtle]="role.isActive"
@@ -57,7 +57,7 @@
                             </span>
                         </td>
 
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button class="btn btn-sm btn-light me-1" (click)="openEditModal(role)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>

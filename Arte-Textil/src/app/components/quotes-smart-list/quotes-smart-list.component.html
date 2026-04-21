@@ -2,7 +2,7 @@
 
     <div class="table-responsive">
 
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0 responsive-table">
 
             <thead class="bg-light">
                 <tr>
@@ -23,26 +23,26 @@
 
                 <tr (click)="toggleExpand(q.quoteId!)" style="cursor: pointer;">
 
-                    <td class="ps-4 fw-semibold">
+                    <td data-label="ID" class="ps-4 fw-semibold">
                         <span class="me-1 text-muted" style="font-size: 0.75rem;">
                             {{ expandedQuoteId === q.quoteId ? '▼' : '▶' }}
                         </span>
                         {{ q.quoteNumber }}
                     </td>
 
-                    <td>
+                    <td data-label="Cliente">
                         {{ q.customer?.fullName }}
                     </td>
 
                     <!-- STATUS -->
-                    <td>
+                    <td data-label="Status">
                         <span class="badge rounded-pill px-3 py-2 fw-semibold" [ngClass]="getStatusClass(q.status)">
                             {{ q.status }}
                         </span>
                     </td>
 
                     <!-- NOTES -->
-                    <td>
+                    <td data-label="Notas">
                         <span *ngIf="(q.notes?.length ?? 0) <= 40">
                             {{ q.notes }}
                         </span>
@@ -53,22 +53,22 @@
                     </td>
 
                     <!-- TOTAL -->
-                    <td>
+                    <td data-label="Total">
                         {{ q.total | customCurrency:'₡' }}
                     </td>
 
                     <!-- CREATED BY -->
-                    <td>
+                    <td data-label="Creado por">
                         {{ q.createdByUser?.fullName ?? "N/A" }}
                     </td>
 
                     <!-- DATE -->
-                    <td>
+                    <td data-label="Fecha">
                         {{ q.createdAt | date:'short' }}
                     </td>
 
                     <!-- ACTIONS -->
-                    <td *ngIf="showActions" class="text-end pe-4" (click)="$event.stopPropagation()">
+                    <td *ngIf="showActions" data-label="" class="text-end pe-4" (click)="$event.stopPropagation()">
 
                         <button class="btn btn-sm btn-light text-primary me-2" (click)="onEdit(q)">
                             <i class="mdi mdi-pencil"></i>

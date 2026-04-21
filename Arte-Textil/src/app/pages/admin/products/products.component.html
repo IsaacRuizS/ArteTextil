@@ -21,12 +21,12 @@
     <!-- FILTER -->
     <div class="mb-4">
         <div class="row mb-4 g-2">
-            <div class="col-md-8">
+            <div class="col-12 col-md-8">
                 <input type="text" class="form-control" placeholder="Buscar por nombre o contacto..."
                     (input)="onSearch($event)">
             </div>
 
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
                     <option value="0">Todos</option>
                     <option value="1">Activos</option>
@@ -88,15 +88,12 @@
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-3 ps-md-4">Código</th>
                         <th>Producto</th>
-
-                        <!-- Ocultar en móvil para no apretar -->
                         <th class="d-none d-lg-table-cell">Descripción</th>
-
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Estado</th>
@@ -113,9 +110,9 @@
                     </tr>
                     } @else {
                     <tr *ngFor="let p of filteredProducts | paginate: { itemsPerPage: 50, currentPage: page }">
-                        <td class="ps-3 ps-md-4 fw-bold text-muted">{{ p.productCode }}</td>
+                        <td data-label="Código" class="ps-3 ps-md-4 fw-bold text-muted">{{ p.productCode }}</td>
 
-                        <td class="fw-semibold">
+                        <td data-label="Producto" class="fw-semibold">
                             <div class="d-flex flex-column">
                                 <span>{{ p.name }}</span>
                                 <span class="text-muted small">
@@ -124,26 +121,23 @@
                             </div>
                         </td>
 
-                        <td class="d-none d-lg-table-cell text-muted small text-truncate" style="max-width: 280px;">
+                        <td data-label="Descripción" class="d-none d-lg-table-cell text-muted small text-truncate" style="max-width: 280px;">
                             {{ p.description || '-' }}
                         </td>
 
-                        <td>₡{{ p.price }}</td>
+                        <td data-label="Precio">₡{{ p.price }}</td>
 
-                        <td>
+                        <td data-label="Stock">
                             <span class="badge" [class.bg-warning-subtle]="p.stock < (p.minStock)"
                                 [class.text-warning-emphasis]="p.stock < (p.minStock)"
                                 [class.bg-success-subtle]="p.stock >= (p.minStock)"
                                 [class.text-success-emphasis]="p.stock >= (p.minStock)">
                                 {{ p.stock }} un.
                             </span>
-
-                            <div class="text-muted small d-none d-md-block">
-                                Mín: {{ p.minStock }}
-                            </div>
+                            <div class="text-muted small">Mín: {{ p.minStock }}</div>
                         </td>
 
-                        <td>
+                        <td data-label="Estado">
                             <span class="badge rounded-pill" [class.bg-success-subtle]="p.isActive"
                                 [class.text-success]="p.isActive" [class.bg-secondary-subtle]="!p.isActive"
                                 [class.text-secondary]="!p.isActive">
@@ -151,7 +145,7 @@
                             </span>
                         </td>
 
-                        <td class="text-end pe-3 pe-md-4">
+                        <td data-label="" class="text-end pe-3 pe-md-4">
                             <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(p)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>

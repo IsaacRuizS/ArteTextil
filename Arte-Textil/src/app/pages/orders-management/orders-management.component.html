@@ -13,11 +13,11 @@
 
     <!-- FILTERS -->
     <div class="row mb-4 g-2">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <input type="text" class="form-control" placeholder="Buscar por estado..." (input)="onSearch($event)">
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
                 <option [value]="0">Todos</option>
                 <option [value]="1">Activos</option>
@@ -29,7 +29,7 @@
     <!-- TABLE -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th>Cliente</th>
@@ -42,18 +42,18 @@
 
                 <tbody>
                     <tr *ngFor="let o of filteredOrders | paginate: { itemsPerPage: 10, currentPage: page }">
-                        <td class="cursor-pointer" (click)="openCustomerModal(o.customer)">
+                        <td data-label="Cliente" class="cursor-pointer" (click)="openCustomerModal(o.customer)">
                             {{ o.customer?.fullName }}
                         </td>
 
-                        <td class="cursor-pointer" (click)="openQuoteModal(o.quote)">
+                        <td data-label="Cotización" class="cursor-pointer" (click)="openQuoteModal(o.quote)">
                             #{{ o.quote?.quoteNumber }}
                         </td>
-                        <td>{{ o.deliveryDate | date:'yyyy-MM-dd' }}</td>
-                        <td>
+                        <td data-label="Entrega">{{ o.deliveryDate | date:'yyyy-MM-dd' }}</td>
+                        <td data-label="Estado">
                             <span class="cursor-pointer badge status-badge" [ngClass]="getStatusColor(o.status)" (click)="openStatusHistory(o.orderId ?? 0)">{{ o.status }}</span>
                         </td>
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
 
                             <!-- EDIT -->
                             <button class="btn btn-sm btn-light me-1" (click)="openEditModal(o)">

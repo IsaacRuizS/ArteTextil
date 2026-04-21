@@ -33,7 +33,7 @@
     @if (!loading && cart.length > 0) {
 
     <div class="table-responsive">
-        <table class="table align-middle">
+        <table class="table align-middle responsive-table">
             <thead class="table-light">
                 <tr>
                     <th>Producto</th>
@@ -50,7 +50,7 @@
 
                 <tr>
                     <!-- Producto -->
-                    <td width="30%">
+                    <td data-label="Producto">
                         <div class="d-flex gap-3 align-items-center">
                             <img [src]="item.mainImageUrl" class="thumb">
                             <div>
@@ -63,7 +63,7 @@
                     </td>
 
                     <!-- Precio original -->
-                    <td>
+                    <td data-label="Precio">
                         @if (item.bestPromotion) {
                         <span class="cart-price-original">{{ item.price | customCurrency:'₡' }}</span>
                         } @else {
@@ -72,7 +72,7 @@
                     </td>
 
                     <!-- Descuento -->
-                    <td>
+                    <td data-label="Descuento">
                         @if (item.bestPromotion) {
                         <span class="badge cart-discount-badge">
                             -{{ item.bestPromotion.discountPercent }}%
@@ -83,17 +83,17 @@
                     </td>
 
                     <!-- Subtotal (precio unitario tras descuento) -->
-                    <td>
+                    <td data-label="Subtotal">
                         <strong class="text-success">{{ getUnitPrice(item) | customCurrency:'₡' }}</strong>
                     </td>
 
                     <!-- Total (subtotal × cantidad) -->
-                    <td>
+                    <td data-label="Total">
                         <strong>{{ getSubtotal(item) | customCurrency:'₡' }}</strong>
                     </td>
 
                     <!-- Cantidad + eliminar -->
-                    <td width="160">
+                    <td data-label="Cantidad">
                         <div class="qty-box d-flex align-items-center gap-2">
                             <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">-</button>
                             <span class="qty">{{ item.quantitySelected }}</span>

@@ -18,12 +18,12 @@
 
     <!-- FILTER -->
     <div class="row mb-4 g-2">
-        <div class="col-md-8">
+        <div class="col-12 col-md-8">
             <input type="text" class="form-control" placeholder="Buscar por nombre..."
                 (input)="onSearch($event)">
         </div>
 
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
                 <option value="0">Todos</option>
                 <option value="1">Activos</option>
@@ -35,7 +35,7 @@
     <!-- LIST -->
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Nombre</th>
@@ -47,9 +47,9 @@
 
                 <tbody>
                     <tr *ngFor="let c of categories | paginate: { itemsPerPage: 50, currentPage: page }">
-                        <td class="ps-4 fw-semibold">{{ c.name }}</td>
-                        <td>{{ c.description || '-' }}</td>
-                        <td>
+                        <td data-label="Nombre" class="ps-4 fw-semibold">{{ c.name }}</td>
+                        <td data-label="Descripción">{{ c.description || '-' }}</td>
+                        <td data-label="Estado">
                             <span class="badge rounded-pill" [class.bg-success-subtle]="c.isActive"
                                 [class.text-success]="c.isActive" [class.bg-secondary-subtle]="!c.isActive"
                                 [class.text-secondary]="!c.isActive">
@@ -57,7 +57,7 @@
                             </span>
                         </td>
 
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(c)">
                                 <i class="mdi mdi-pencil"></i>
                             </button>

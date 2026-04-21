@@ -1,10 +1,10 @@
 <div class="hr-wrapper p-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
         <h2 class="fw-bold mb-0">Planillas Mensuales</h2>
 
-        <form [formGroup]="form" class="d-flex gap-2">
+        <form [formGroup]="form" class="d-flex gap-2 flex-wrap">
             <input type="month" class="form-control" formControlName="month" (change)="onMonthChange()">
 
             <button class="btn btn-primary d-flex align-items-center gap-2" (click)="generate()"
@@ -24,7 +24,7 @@
     <div class="card shadow-sm border-0 mb-3 p-3">
         <div class="row g-2">
 
-            <div class="col-md-6">
+            <div class="col-12 col-md-6">
                 <div class="input-group">
                     <span class="input-group-text">
                         <i class="mdi mdi-magnify"></i>
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <select class="form-select" [(ngModel)]="statusFilter" (change)="page = 1">
 
                     <option value="all">Todos</option>
@@ -52,7 +52,7 @@
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
 
-            <table class="table mb-0">
+            <table class="table mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th>Empleado</th>
@@ -69,32 +69,32 @@
                 <tbody>
                     <tr *ngFor="let p of filteredPayrolls | paginate: { itemsPerPage: 50, currentPage: page }">
 
-                        <td class="fw-semibold">{{ p.userName }}</td>
+                        <td data-label="Empleado" class="fw-semibold">{{ p.userName }}</td>
 
-                        <td>{{ p.year }}-{{ p.month | number:'2.0' }}</td>
+                        <td data-label="Periodo">{{ p.year }}-{{ p.month | number:'2.0' }}</td>
 
-                        <td> {{ p.baseSalary | customCurrency:'₡' }}</td>
+                        <td data-label="Salario Base"> {{ p.baseSalary | customCurrency:'₡' }}</td>
 
-                        <td class="text-success fw-bold">
+                        <td data-label="Extras" class="text-success fw-bold">
                             + {{ p.extras | customCurrency:'₡' }}
                         </td>
 
-                        <td class="text-danger fw-bold">
+                        <td data-label="Rebajos" class="text-danger fw-bold">
                             - {{ p.deductions | customCurrency:'₡' }}
                         </td>
 
-                        <td class="fw-bold fs-6">
+                        <td data-label="Total" class="fw-bold fs-6">
                             {{p.total | customCurrency:'₡'}}
                         </td>
 
-                        <td>
+                        <td data-label="Estado">
                             <span class="badge px-3 py-2" [class.bg-warning]="!p.approvedByUserId"
                                 [class.bg-success]="p.approvedByUserId">
                                 {{ p.approvedByUserId ? 'Aprobada' : 'Pendiente' }}
                             </span>
                         </td>
 
-                        <td class="text-end">
+                        <td data-label="" class="text-end">
 
                             <button class="btn btn-success btn-sm" (click)="openPaymentModal(p)"
                                 [disabled]="p.approvedByUserId">

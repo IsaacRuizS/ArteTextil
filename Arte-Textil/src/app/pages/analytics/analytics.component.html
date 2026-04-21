@@ -7,15 +7,15 @@
     <div class="filter-box card shadow-sm p-3 mb-4">
         <h5 class="fw-semibold mb-3">Filtros</h5>
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Fecha inicio</label>
                 <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio">
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Fecha fin</label>
                 <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin">
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Producto</label>
                 <select class="form-select" [(ngModel)]="filtros.producto">
                     <option value="">Todos</option>
@@ -24,7 +24,7 @@
                     }
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Categoría</label>
                 <select class="form-select" [(ngModel)]="filtros.categoria">
                     <option value="">Todas</option>
@@ -46,25 +46,25 @@
 
     <!-- KPI CARDS -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card kpi-card shadow-sm p-3">
                 <h6 class="text-muted">Cotizaciones del período</h6>
                 <h3 class="fw-bold">{{ kpi.totalCotizaciones }}</h3>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card kpi-card shadow-sm p-3">
                 <h6 class="text-muted">Producto más cotizado</h6>
                 <h4 class="fw-bold">{{ kpi.productoMasCotizado }}</h4>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card kpi-card shadow-sm p-3">
                 <h6 class="text-muted">Total acumulado</h6>
                 <h3 class="fw-bold">{{ kpi.totalAcumulado | customCurrency:'₡' }}</h3>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card kpi-card shadow-sm p-3">
                 <h6 class="text-muted">Tendencia general</h6>
                 <h4 class="fw-bold" [class.text-success]="kpi.tendenciaPositiva"

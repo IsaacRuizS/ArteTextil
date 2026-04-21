@@ -3,6 +3,7 @@
 
 <div class="main-wrapper">
     <app-left-sidebar [isClosed]="sidebarClosed"></app-left-sidebar>
+    <div class="sidebar-overlay" *ngIf="!sidebarClosed" (click)="toggleSidebar()"></div>
     <div class="content-area" [class.sidebar-closed]="sidebarClosed">
         <router-outlet></router-outlet>
     </div>

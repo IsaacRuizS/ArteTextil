@@ -7,17 +7,17 @@
         <h5 class="fw-semibold mb-3">Filtros</h5>
 
         <div class="row g-3">
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Fecha inicio</label>
                 <input type="date" [(ngModel)]="filtros.fechaInicio" class="form-control">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Fecha fin</label>
                 <input type="date" [(ngModel)]="filtros.fechaFin" class="form-control">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Clasificación</label>
                 <select class="form-select" [(ngModel)]="filtros.clasificacion">
                     <option value="">Todas</option>
@@ -28,7 +28,7 @@
                 </select>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
                 <label class="form-label fw-semibold">Actividad reciente</label>
                 <select class="form-select" [(ngModel)]="filtros.actividad">
                     <option value="">Todas</option>
@@ -51,7 +51,7 @@
     <!-- MÉTRICAS -->
     <div class="row g-4 mb-4">
         @for (card of metricCards; track card.title) {
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-md-3">
             <div class="metric-card card shadow-sm p-3 text-center">
                 <h6 class="fw-semibold">{{ card.title }}</h6>
                 <h3 class="fw-bold text-primary">{{ card.value }}</h3>

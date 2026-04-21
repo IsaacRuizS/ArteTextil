@@ -59,7 +59,7 @@
     <!-- RF-03-004: FILTROS -->
     <div class="card border-0 shadow-sm mb-4 p-3">
         <div class="row g-2">
-            <div class="col-md-8">
+            <div class="col-12 col-md-8">
                 <label class="form-label small fw-semibold mb-1">Buscar producto</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0">
@@ -69,7 +69,7 @@
                         [(ngModel)]="searchTerm" (input)="applyFilters()">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <label class="form-label small fw-semibold mb-1">Disponibilidad</label>
                 <select class="form-select" [(ngModel)]="selectedStatus" (change)="applyFilters()">
                     @for (s of statuses; track s) {
@@ -83,7 +83,7 @@
     <!-- RF-03-001: LISTADO DE INVENTARIO -->
     <div class="card border-0 shadow-sm">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 responsive-table">
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Código</th>
@@ -106,19 +106,19 @@
                     } @else {
                     @for (p of products; track p.productId) {
                     <tr>
-                        <td class="ps-4">
+                        <td data-label="Código" class="ps-4">
                             <span class="fw-bold text-muted small">{{ p.productCode }}</span>
                         </td>
-                        <td>
+                        <td data-label="Producto">
                             <div class="fw-semibold">{{ p.name }}</div>
                         </td>
-                        <td class="d-none d-md-table-cell text-muted small">{{ getCategoryName(p.categoryId) }}</td>
-                        <td>
+                        <td data-label="Categoría" class="d-none d-md-table-cell text-muted small">{{ getCategoryName(p.categoryId) }}</td>
+                        <td data-label="Stock">
                             <div class="fw-semibold">{{ p.stock }} | Disponible: {{ p.availableStock }}</div>
                             <div class="text-muted small">Mín: {{ p.minStock }}</div>
                         </td>
-                        <td class="d-none d-lg-table-cell text-muted">₡{{ p.price | number:'1.0-0' }}</td>
-                        <td>
+                        <td data-label="Precio" class="d-none d-lg-table-cell text-muted">₡{{ p.price | number:'1.0-0' }}</td>
+                        <td data-label="Disponibilidad">
                             <span class="badge rounded-pill availability-badge"
                                 [class.badge-disponible]="getAvailabilityStatus(p) === 'Disponible'"
                                 [class.badge-stock-bajo]="getAvailabilityStatus(p) === 'Stock Bajo'"
@@ -127,7 +127,7 @@
                                 {{ getAvailabilityStatus(p) }}
                             </span>
                         </td>
-                        <td class="text-end pe-4">
+                        <td data-label="" class="text-end pe-4">
                             <button class="btn btn-sm btn-light text-primary me-1" title="Ver detalles"
                                 (click)="selectProduct(p)">
                                 <i class="mdi mdi-eye-outline"></i>

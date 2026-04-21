@@ -8,7 +8,7 @@
   <!-- Buscador -->
   <div class="card shadow-sm border-0 mb-3 p-3">
     <div class="row g-2">
-      <div class="col-md-6">
+      <div class="col-12 col-md-6">
         <div class="input-group">
           <span class="input-group-text">
             <i class="mdi mdi-magnify"></i>
@@ -24,7 +24,7 @@
   <!-- Tabla -->
   <div class="card shadow-sm border-0">
     <div class="table-responsive">
-      <table class="table mb-0 align-middle">
+      <table class="table mb-0 align-middle responsive-table">
 
         <thead class="bg-light">
           <tr>
@@ -38,10 +38,10 @@
         <tbody>
 
           <tr *ngFor="let p of filteredPayments | paginate: { itemsPerPage: 50, currentPage: page }">
-            <td>{{ p.userName }}</td>
-            <td>{{ p.amount | customCurrency:'₡' }}</td>
-            <td>{{ p.paymentDate | date:'short' }}</td>
-            <td>{{ p.method }}</td>
+            <td data-label="Usuario">{{ p.userName }}</td>
+            <td data-label="Monto">{{ p.amount | customCurrency:'₡' }}</td>
+            <td data-label="Fecha">{{ p.paymentDate | date:'short' }}</td>
+            <td data-label="Método">{{ p.method }}</td>
           </tr>
 
         </tbody>
