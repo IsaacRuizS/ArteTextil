@@ -12,6 +12,7 @@ import { ProductModel } from '../../shared/models/product.model';
 import { SupplierModel } from '../../shared/models/supplier.model';
 import { TruncatePipe } from "../../shared/pipes/truncate.pipe";
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 
 @Component({
@@ -46,6 +47,7 @@ export class MarketplaceComponent {
     constructor(
         public router: Router,
         private apiProductService: ApiProductService,
+        public authService: AuthService,
         private sharedService: SharedService,
         private cdr: ChangeDetectorRef,
         private apiSupplierService: ApiSupplierService,
@@ -106,6 +108,10 @@ export class MarketplaceComponent {
         this.products = filtered;
 
         this.cdr.markForCheck();
+    }
+
+    goBackToAdmin(): void {
+        this.router.navigate(['/orders-management']);
     }
 
     getFinalPrice(p: ProductModel): number {
