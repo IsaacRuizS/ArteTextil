@@ -40,7 +40,7 @@ export class CartComponent implements OnInit {
     }
 
     onOpenCart() {
-        this.router.navigate(['/quoate']);
+        this.router.navigate(['/quote']);
     }
 
     onBackToMarketplace() {

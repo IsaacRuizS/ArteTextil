@@ -185,7 +185,7 @@ export const routes: Routes = [
                 loadComponent: () => import('./pages/marketplace/cart/cart.component').then(m => m.CartComponent)
             },
             {
-                path: 'quoate',
+                path: 'quote',
                 loadComponent: () =>
                     import('./pages/marketplace/quote/quote.component')
                         .then(m => m.QuoteComponent)
