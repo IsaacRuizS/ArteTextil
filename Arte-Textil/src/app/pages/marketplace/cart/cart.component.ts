@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { ProductModel } from '../../../shared/models/product.model';
 import { CartService } from '../../../services/cart.service';
+import { SharedService } from '../../../services/shared.service';
 
 @Component({
     selector: 'app-cart.component',
@@ -19,7 +20,8 @@ export class CartComponent implements OnInit {
     alertMsg: string | null = null;
     loading = true;
 
-    constructor(private cartService: CartService, public router: Router) { }
+    constructor(private cartService: CartService, public router: Router, 
+        private sharedService: SharedService, private cdr: ChangeDetectorRef,) { }
 
     ngOnInit() {
         this.loadCart();
@@ -31,10 +33,14 @@ export class CartComponent implements OnInit {
             next: (products) => {
                 this.cart = products;
                 this.loading = false;
+                this.cdr.markForCheck();
+                this.sharedService.setLoading(false);
             },
             error: () => {
                 this.cart = this.cartService.getCart();
                 this.loading = false;
+                this.cdr.markForCheck();
+                this.sharedService.setLoading(false);
             }
         });
     }
