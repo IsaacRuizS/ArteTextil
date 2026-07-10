@@ -18,8 +18,8 @@
     <!-- LISTA DE ALERTAS -->
     <div class="row g-3">
         <div class="col-12 col-md-6 col-xl-4" *ngFor="let alert of alerts">
-            <div class="card h-100 shadow-sm border-0 border-start border-4 border-warning">
-                <div class="card-body d-flex flex-column gap-2">
+            <div class="card h-100 shadow-sm border-0 border-start border-4 border-info">
+                <div class="card-body d-flex flex-column gap-2 border">
 
                     <!-- Título + fecha -->
                     <div class="d-flex justify-content-between align-items-start gap-2">
@@ -57,7 +57,7 @@
 <!-- MODAL DETALLE -->
 <div class="modal fade" [class.show]="selectedAlert" [style.display]="selectedAlert ? 'block' : 'none'"
      tabindex="-1" (click)="closeDetail($event)">
-    <div class="modal-dialog modal-fullscreen">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div class="modal-content" (click)="$event.stopPropagation()">
 
             <div class="modal-header border-warning border-bottom-3">
@@ -66,7 +66,7 @@
             </div>
 
             <div class="modal-body">
-                <p class="mb-3" style="white-space: pre-wrap; word-break: break-word;">
+                <p class="mb-3" style="white-space: pre-wrap;">
                     {{ selectedAlert?.message }}
                 </p>
                 <small class="text-muted">
@@ -79,7 +79,7 @@
                     Cerrar
                 </button>
                 <button class="btn btn-success btn-sm" (click)="markAsRead(selectedAlert!); selectedAlert = null">
-                    ✔ Marcar como leída
+                    Marcar como leída
                 </button>
             </div>
 

@@ -76,6 +76,11 @@ export class DashboardComponent implements OnInit {
   }
 
   applyFilters(): void {
+    if (this.filter.from && this.filter.to && this.filter.from > this.filter.to) {
+      this.notificationService.error('La fecha de inicio no puede ser mayor a la fecha fin.');
+      return;
+    }
+
     const from = this.filter.from ? new Date(this.filter.from) : null;
     const to = this.filter.to ? new Date(this.filter.to + 'T23:59:59') : null;
     const now = new Date();

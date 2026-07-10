@@ -27,8 +27,8 @@ export class FullComponent implements OnInit {
 
     sidebarClosed = false;
 
-     ngOnInit(): void {
-        this.alertPolling.start();
+    ngOnInit(): void {
+        //this.alertPolling.start();
     }
 
     toggleSidebar() {

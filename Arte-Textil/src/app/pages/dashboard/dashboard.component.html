@@ -22,21 +22,12 @@
         <div class="row g-3">
             <div class="col-12 col-md-3">
                 <label class="form-label fw-semibold">Desde</label>
-                <input type="date" class="form-control" [(ngModel)]="filter.from">
+                <input type="date" class="form-control" [(ngModel)]="filter.from" [max]="filter.to">
             </div>
 
             <div class="col-12 col-md-3">
                 <label class="form-label fw-semibold">Hasta</label>
                 <input type="date" class="form-control" [(ngModel)]="filter.to" [min]="filter.from">
-            </div>
-
-            <div class="col-12 col-md-3">
-                <label class="form-label fw-semibold">Categoría</label>
-                <select class="form-select" [(ngModel)]="filter.category">
-                    @for (c of categories; track c) {
-                    <option [value]="c">{{ c }}</option>
-                    }
-                </select>
             </div>
 
             <div class="col-12 col-md-3">
