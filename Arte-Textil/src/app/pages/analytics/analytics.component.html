@@ -24,22 +24,13 @@
                     }
                 </select>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-                <label class="form-label fw-semibold">Categoría</label>
-                <select class="form-select" [(ngModel)]="filtros.categoria">
-                    <option value="">Todas</option>
-                    @for (c of categorias; track c) {
-                    <option [value]="c">{{ c }}</option>
-                    }
-                </select>
-            </div>
         </div>
-        <div class="d-flex justify-content-end gap-2 mt-3">
+        <div class="d-flex gap-2 mt-4">
             <button class="btn btn-primary" (click)="aplicarFiltros()">
-                <i class="mdi mdi-magnify me-1"></i> Aplicar filtros
+                Aplicar filtros
             </button>
             <button class="btn btn-secondary" (click)="limpiarFiltros()">
-                <i class="mdi mdi-broom me-1"></i> Limpiar
+               Limpiar
             </button>
         </div>
     </div>
@@ -47,25 +38,25 @@
     <!-- KPI CARDS -->
     <div class="row g-4 mb-4">
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card kpi-card shadow-sm p-3">
+            <div class="card shadow-sm p-3">
                 <h6 class="text-muted">Cotizaciones del período</h6>
                 <h3 class="fw-bold">{{ kpi.totalCotizaciones }}</h3>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card kpi-card shadow-sm p-3">
+            <div class="card shadow-sm p-3">
                 <h6 class="text-muted">Producto más cotizado</h6>
                 <h4 class="fw-bold">{{ kpi.productoMasCotizado }}</h4>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card kpi-card shadow-sm p-3">
+            <div class="card shadow-sm p-3">
                 <h6 class="text-muted">Total acumulado</h6>
                 <h3 class="fw-bold">{{ kpi.totalAcumulado | customCurrency:'₡' }}</h3>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card kpi-card shadow-sm p-3">
+            <div class="card shadow-sm p-3">
                 <h6 class="text-muted">Tendencia general</h6>
                 <h4 class="fw-bold" [class.text-success]="kpi.tendenciaPositiva"
                     [class.text-danger]="!kpi.tendenciaPositiva">

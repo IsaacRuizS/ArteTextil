@@ -41,7 +41,7 @@ private started = false;
 
         if (!this.shownAlerts.has(alert.alertId)) {
 
-          this.notifier.show(`${alert.title}: ${alert.message}`);
+          this.notifier.warning(`${alert.title}: ${alert.message}`);
 
           this.shownAlerts.add(alert.alertId);
 
