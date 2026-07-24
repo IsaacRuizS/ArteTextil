@@ -8,6 +8,7 @@ import { RolModel } from '../../../shared/models/rol.model';
 import { ApiUserService } from '../../../services/api-user.service';
 import { ApiRolService } from '../../../services/api-role.service';
 import { SharedService } from '../../../services/shared.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-users',
@@ -38,6 +39,7 @@ export class UsersComponent implements OnInit {
         private apiUserService: ApiUserService,
         private apiRolService: ApiRolService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder
     ) {
@@ -178,6 +180,7 @@ export class UsersComponent implements OnInit {
             },
             (err: any) => {
                 this.sharedService.setLoading(false);
+                this.notificationService.error(err?.message || 'Error al crear el usuario. Intente de nuevo.');
             }
         );
     }
@@ -194,6 +197,7 @@ export class UsersComponent implements OnInit {
             },
             (err: any) => {
                 this.sharedService.setLoading(false);
+                this.notificationService.error(err?.message || 'Error al actualizar el usuario. Intente de nuevo.');
             }
         );
     }
@@ -211,6 +215,7 @@ export class UsersComponent implements OnInit {
             },
             (err: any) => {
                 this.sharedService.setLoading(false);
+                this.notificationService.error(err?.message || 'Error al cambiar el estado del usuario. Intente de nuevo.');
             }
         );
     }

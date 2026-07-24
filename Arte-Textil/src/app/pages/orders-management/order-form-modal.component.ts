@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ApiCustomerService } from '../../services/api-customer.service';
@@ -60,6 +61,9 @@ export class OrderFormModalComponent {
 
     model: OrderModel = new OrderModel();
 
+    // Fecha mínima permitida para la entrega (hoy, en hora local)
+    minDeliveryDate = this.toDateInputValue(new Date());
+
     orderStatuses = [
         'Nuevo',
         'Corte',
@@ -105,7 +109,18 @@ export class OrderFormModalComponent {
     }
 
     loadQuotes() {
-        this.quoteService.getAll().subscribe(q => this.quotes = q);
+
+        forkJoin({
+            quotes: this.quoteService.getAll(),
+            orders: this.orderService.getAll()
+        }).subscribe(({ quotes, orders }) => {
+
+            const quoteIdsWithOrder = new Set(
+                orders.filter(o => o.isActive).map(o => o.quoteId)
+            );
+
+            this.quotes = quotes.filter(q => q.isActive && !quoteIdsWithOrder.has(q.quoteId));
+        });
     }
 
     loadCustomers() {
@@ -181,9 +196,18 @@ export class OrderFormModalComponent {
             isActive: true
         });
 
-        this.orderService.create(payload).subscribe(() => {
-            this.saved.emit();
-            this.close();
+        this.sharedService.setLoading(true);
+
+        this.orderService.create(payload).subscribe({
+            next: () => {
+                this.sharedService.setLoading(false);
+                this.saved.emit();
+                this.close();
+            },
+            error: (err) => {
+                this.sharedService.setLoading(false);
+                this.notificationService.error(err?.error?.message || 'Error al crear el pedido.');
+            }
         });
     }
 
@@ -281,20 +305,42 @@ export class OrderFormModalComponent {
     }
 
     // VALIDACIONES
+    private toDateInputValue(value: Date | string): string {
+
+        if (typeof value === 'string') return value;
+
+        const month = `${value.getMonth() + 1}`.padStart(2, '0');
+        const day = `${value.getDate()}`.padStart(2, '0');
+
+        return `${value.getFullYear()}-${month}-${day}`;
+    }
+
+    isDeliveryDateValid(): boolean {
+
+        if (!this.orderForm.deliveryDate) return false;
+
+        return this.toDateInputValue(this.orderForm.deliveryDate) >= this.minDeliveryDate;
+    }
+
     canCreateFromExisting(): boolean {
 
         if (!this.selectedQuote) return false;
-        if (!this.orderForm.deliveryDate) return false;
+        if (!this.isDeliveryDateValid()) return false;
 
         return true;
     }
 
+    isCustomerSelected(): boolean {
+
+        return !!this.quoteForm.customerId && this.quoteForm.customerId != 0;
+    }
+
     canCreateFromScratch(): boolean {
 
-        if (!this.quoteForm.customerId || this.quoteForm.customerId == 0)
+        if (!this.isCustomerSelected())
             return false;
 
-        if (!this.orderForm.deliveryDate)
+        if (!this.isDeliveryDateValid())
             return false;
 
         if (!this.quoteForm.items || this.quoteForm.items.length == 0)

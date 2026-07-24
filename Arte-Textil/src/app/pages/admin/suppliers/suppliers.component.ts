@@ -138,10 +138,17 @@ export class SuppliersComponent implements OnInit {
 
         this.sharedService.setLoading(true);
 
+        // El input es type="number", así que Angular guarda el valor como número.
+        // El backend espera un string, por eso se convierte antes de enviarlo.
+        const supplierData: SupplierModel = {
+            ...this.supplierForm.value,
+            phone: String(this.supplierForm.value.phone ?? '')
+        };
+
         if (this.isEditing) {
-            this._editSupplier(this.supplierForm.value);
+            this._editSupplier(supplierData);
         } else {
-            this._createSupplier(this.supplierForm.value);
+            this._createSupplier(supplierData);
         }
     }
 

@@ -94,8 +94,16 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Fecha Entrega</label>
-                    <input type="date" class="form-control" [(ngModel)]="orderForm.deliveryDate">
+                    <label class="form-label fw-semibold">
+                        Fecha Entrega <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" [min]="minDeliveryDate"
+                        [(ngModel)]="orderForm.deliveryDate">
+                    @if (!orderForm.deliveryDate) {
+                    <div class="text-muted small mt-1">La fecha de entrega es obligatoria.</div>
+                    } @else if (!isDeliveryDateValid()) {
+                    <div class="text-danger small mt-1">La fecha de entrega no puede ser anterior a hoy.</div>
+                    }
                 </div>
 
                 <div class="text-end">
@@ -112,13 +120,18 @@
 
                 <!-- Cliente -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Cliente</label>
+                    <label class="form-label fw-semibold">
+                        Cliente <span class="text-danger">*</span>
+                    </label>
                     <select class="form-select" [(ngModel)]="quoteForm.customerId">
                         <option [value]="0">Seleccione cliente</option>
                         @for (c of customers; track c.customerId) {
                         <option [value]="c.customerId">{{ c.fullName }}</option>
                         }
                     </select>
+                    @if (!isCustomerSelected()) {
+                    <div class="text-muted small mt-1">Debe seleccionar un cliente.</div>
+                    }
                 </div>
 
                 <!-- Cabecera columnas -->
@@ -205,8 +218,16 @@
 
                 <!-- Fecha entrega -->
                 <div class="mb-2">
-                    <label class="form-label fw-semibold">Fecha Entrega</label>
-                    <input type="date" class="form-control" [(ngModel)]="orderForm.deliveryDate">
+                    <label class="form-label fw-semibold">
+                        Fecha Entrega <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" [min]="minDeliveryDate"
+                        [(ngModel)]="orderForm.deliveryDate">
+                    @if (!orderForm.deliveryDate) {
+                    <div class="text-muted small mt-1">La fecha de entrega es obligatoria.</div>
+                    } @else if (!isDeliveryDateValid()) {
+                    <div class="text-danger small mt-1">La fecha de entrega no puede ser anterior a hoy.</div>
+                    }
                 </div>
 
                 <div class="text-end">
