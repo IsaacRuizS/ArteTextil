@@ -8,6 +8,7 @@ import { finalize } from 'rxjs';
 import { ApiProductService } from '../../../services/api-product.service';
 import { SharedService } from '../../../services/shared.service';
 import { CartService } from '../../../services/cart.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
     selector: 'app-product-detail',
@@ -34,6 +35,7 @@ export class ProductDetailComponent {
         private apiProductService: ApiProductService,
         private sharedService: SharedService,
         private cartService: CartService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
     ) {
     }
@@ -135,7 +137,7 @@ export class ProductDetailComponent {
                     this.cdr.markForCheck();
                 },
                 error: (err) => {
-                    // manejar error
+                    this.notificationService.error(err?.error?.message || 'Error al cargar el producto. Intente de nuevo.');
                 }
             });
     }

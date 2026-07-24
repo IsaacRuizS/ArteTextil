@@ -13,6 +13,7 @@ import { SupplierModel } from '../../shared/models/supplier.model';
 import { TruncatePipe } from "../../shared/pipes/truncate.pipe";
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 
 @Component({
@@ -52,6 +53,7 @@ export class MarketplaceComponent {
         private cdr: ChangeDetectorRef,
         private apiSupplierService: ApiSupplierService,
         private apiCategoryService: ApiCategoryService,
+        private notificationService: NotificationService,
     ) { }
 
     ngOnInit() {
@@ -154,7 +156,7 @@ export class MarketplaceComponent {
                     this._loadSuppliers();
                 },
                 error: (err) => {
-                    // manejar error
+                    this.notificationService.error(err?.error?.message || 'Error al cargar los productos. Intente de nuevo.');
                 }
             });
     }
@@ -169,7 +171,7 @@ export class MarketplaceComponent {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                // manejar error
+                this.notificationService.error(err?.error?.message || 'Error al cargar las categorías.');
             }
         });
     }
@@ -183,7 +185,7 @@ export class MarketplaceComponent {
                 this.cdr.markForCheck();
             },
             error: (err) => {
-                // manejar error
+                this.notificationService.error(err?.error?.message || 'Error al cargar los proveedores.');
             }
         });
     }

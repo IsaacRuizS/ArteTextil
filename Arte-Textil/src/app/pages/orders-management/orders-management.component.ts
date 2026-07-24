@@ -20,6 +20,7 @@ import { QuoteModalComponent } from '../../components/quote-modal/quote-modal.co
 import { AuthService } from '../../services/auth.service';
 import { UserModel } from '../../shared/models/user.model';
 import { OrderStatusHistoryModalComponent } from '../../components/order-status-history-modal/order-status-history-modal.component';
+import { NotificationService } from '../../services/notification.service';
 
 
 @Component({
@@ -72,6 +73,7 @@ export class OrdersManagementComponent implements OnInit {
     constructor(
         private apiOrderService: ApiOrderService,
         private sharedService: SharedService,
+        private notificationService: NotificationService,
         private cdr: ChangeDetectorRef,
         private authService: AuthService
     ) { }
@@ -102,8 +104,9 @@ export class OrdersManagementComponent implements OnInit {
                 this.sharedService.setLoading(false);
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
                 this.sharedService.setLoading(false);
+                this.notificationService.error(err?.error?.message || 'Error al cargar los pedidos. Intente de nuevo.');
             }
         });
     }
@@ -215,8 +218,9 @@ export class OrdersManagementComponent implements OnInit {
 
                     this.loadOrders();
                 },
-                error: () => {
+                error: (err) => {
                     this.sharedService.setLoading(false);
+                    this.notificationService.error(err?.error?.message || 'Error al cambiar el estado del pedido. Intente de nuevo.');
                 }
             });
     }

@@ -95,7 +95,8 @@ export class VacationsComponent implements OnInit {
 
                     this.cdr.detectChanges();
                 },
-                error: (err) => console.error(err)
+                error: (err) => this.notificationService.error(
+                    err?.error?.message || 'Error al cargar los días disponibles.')
             });
         }
     }

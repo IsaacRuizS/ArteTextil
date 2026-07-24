@@ -113,25 +113,37 @@ export class OrderFormModalComponent {
         forkJoin({
             quotes: this.quoteService.getAll(),
             orders: this.orderService.getAll()
-        }).subscribe(({ quotes, orders }) => {
+        }).subscribe({
+            next: ({ quotes, orders }) => {
 
-            const quoteIdsWithOrder = new Set(
-                orders.filter(o => o.isActive).map(o => o.quoteId)
-            );
+                const quoteIdsWithOrder = new Set(
+                    orders.filter(o => o.isActive).map(o => o.quoteId)
+                );
 
-            this.quotes = quotes.filter(q => q.isActive && !quoteIdsWithOrder.has(q.quoteId));
+                this.quotes = quotes.filter(q => q.isActive && !quoteIdsWithOrder.has(q.quoteId));
+            },
+            error: (err) => {
+                this.notificationService.error(err?.error?.message || 'Error al cargar las cotizaciones disponibles.');
+            }
         });
     }
 
     loadCustomers() {
-        this.customerService.getAll().subscribe(c => this.customers = c);
+        this.customerService.getAll().subscribe({
+            next: (c) => this.customers = c,
+            error: (err) => {
+                this.notificationService.error(err?.error?.message || 'Error al cargar los clientes.');
+            }
+        });
     }
 
     loadProducts() {
-        this.productService.getAllForMarket().subscribe(p => {
-            this.products = p;
+        this.productService.getAllForMarket().subscribe({
+            next: (p) => this.products = p,
+            error: (err) => {
+                this.notificationService.error(err?.error?.message || 'Error al cargar los productos.');
+            }
         });
-
     }
 
     loadQuoteDetails() {

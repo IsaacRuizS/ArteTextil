@@ -116,8 +116,7 @@ export class QuoteComponent implements OnInit {
                 this.quoteForm.reset();
             },
             error: (err) => {
-                // manejar error
-
+                this.errorMsg = err?.error?.message || 'No se pudo enviar tu cotización. Intentá de nuevo.';
             }
         });
     }
