@@ -19,7 +19,7 @@ export class ApiRolService extends ApiBaseService {
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Error desconocido al obtener proveedores.');
+                    throw new Error(res?.message || 'Error desconocido al obtener los roles.');
                 }
 
                 return res.data.map((item: any) => new RolModel(item));
@@ -29,7 +29,7 @@ export class ApiRolService extends ApiBaseService {
                     ? this.getErrorMsg(err)
                     : err.message;
 
-                return Promise.reject(new Error(`Error al cargar proveedores: ${errMsg}`));
+                return Promise.reject(new Error(`Error al cargar los roles: ${errMsg}`));
             });
     }
 
@@ -39,7 +39,7 @@ export class ApiRolService extends ApiBaseService {
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Error al obtener el proveedor.');
+                    throw new Error(res?.message || 'Error al obtener el rol.');
                 }
 
                 return new RolModel(res.data);
@@ -49,7 +49,7 @@ export class ApiRolService extends ApiBaseService {
                     ? this.getErrorMsg(err)
                     : err.message;
 
-                return Promise.reject(new Error(`Error al cargar proveedor: ${errMsg}`));
+                return Promise.reject(new Error(`Error al cargar el rol: ${errMsg}`));
             });
     }
 
@@ -59,7 +59,7 @@ export class ApiRolService extends ApiBaseService {
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Error al crear el proveedor.');
+                    throw new Error(res?.message || 'Error al crear el rol.');
                 }
 
                 return new RolModel(res.data);
@@ -69,7 +69,7 @@ export class ApiRolService extends ApiBaseService {
                     ? this.getErrorMsg(err)
                     : err.message;
 
-                return Promise.reject(new Error(`Error al crear proveedor: ${errMsg}`));
+                return Promise.reject(new Error(`Error al crear el rol: ${errMsg}`));
             });
     }
 
@@ -79,7 +79,7 @@ export class ApiRolService extends ApiBaseService {
             .toPromise()
             .then((res: any) => {
                 if (!res?.success) {
-                    throw new Error(res?.message || 'Error al actualizar el proveedor.');
+                    throw new Error(res?.message || 'Error al actualizar el rol.');
                 }
 
                 return new RolModel(res.data);
@@ -89,7 +89,7 @@ export class ApiRolService extends ApiBaseService {
                     ? this.getErrorMsg(err)
                     : err.message;
 
-                return Promise.reject(new Error(`Error al actualizar proveedor: ${errMsg}`));
+                return Promise.reject(new Error(`Error al actualizar el rol: ${errMsg}`));
             });
     }
 

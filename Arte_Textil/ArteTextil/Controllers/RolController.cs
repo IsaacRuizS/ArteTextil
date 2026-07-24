@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "StaffAccess")]
     [ApiController]
     [Route("api/[controller]")]
     public class RolController : ControllerBase
@@ -18,9 +18,6 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/rol/all
-        // Lectura abierta al personal interno: la pantalla de Usuarios la necesita
-        // para resolver el nombre del rol. La administración de roles sigue en AdminOnly.
-        [Authorize(Policy = "StaffAccess")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -33,7 +30,6 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/rol/{id}
-        [Authorize(Policy = "StaffAccess")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -46,6 +42,7 @@ namespace ArteTextil.Controllers
         }
 
         // POST: api/rol
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] RolDto dto)
         {
@@ -58,6 +55,7 @@ namespace ArteTextil.Controllers
         }
 
         // PUT: api/rol
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] RolDto dto)
         {
@@ -70,6 +68,7 @@ namespace ArteTextil.Controllers
         }
 
         // DELETE: api/rol/{id}
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
