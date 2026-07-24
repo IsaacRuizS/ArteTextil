@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "StaffAccess")]
     [ApiController]
     [Route("api/[controller]")]
     public class OrderController : ControllerBase

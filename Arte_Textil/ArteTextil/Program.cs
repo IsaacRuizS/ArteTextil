@@ -110,6 +110,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ReportsAccess", policy =>
         policy.RequireClaim("roleId", "1", "4"));
 
+    // Pantallas de gestión interna: roles 1 (Admin), 2 (Empleado) y 4 (Gerente).
+    // AdminOnly dejaba fuera al rol 4, que sí tiene estas pantallas en el menú lateral.
+    options.AddPolicy("StaffAccess", policy =>
+        policy.RequireClaim("roleId", "1", "2", "4"));
+
     options.AddPolicy("CustomerOnly", policy =>
         policy.RequireClaim("roleId", "3"));
 });

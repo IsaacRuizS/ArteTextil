@@ -18,6 +18,9 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/rol/all
+        // Lectura abierta al personal interno: la pantalla de Usuarios la necesita
+        // para resolver el nombre del rol. La administración de roles sigue en AdminOnly.
+        [Authorize(Policy = "StaffAccess")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -30,6 +33,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/rol/{id}
+        [Authorize(Policy = "StaffAccess")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
