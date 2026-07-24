@@ -56,6 +56,10 @@ export class ApiBaseService {
                 if (resError.error.Message) {
                     errMsg = resError.error.Message;
                 }
+                // La API responde ApiResponse en camelCase: { success, message, data }
+                else if (resError.error.message) {
+                    errMsg = resError.error.message;
+                }
                 else if (resError.error.error_description) {
                     errMsg = resError.error.error_description;
                 }

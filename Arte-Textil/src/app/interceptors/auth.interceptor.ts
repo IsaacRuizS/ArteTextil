@@ -1,8 +1,26 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { catchError, from, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, from, shareReplay, switchMap, tap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+
+let refreshInFlight: Observable<string> | null = null;
+
+function refreshOnce(authService: AuthService): Observable<string> {
+
+    if (!refreshInFlight) {
+
+        refreshInFlight = from(authService.refreshAccessToken()).pipe(
+            tap({
+                complete: () => { refreshInFlight = null; },
+                error: () => { refreshInFlight = null; }
+            }),
+            shareReplay(1)
+        );
+    }
+
+    return refreshInFlight;
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const platformId = inject(PLATFORM_ID);
@@ -46,7 +64,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 authService.isAuthenticated() &&
                 authService.refreshToken
             ) {
-                return from(authService.refreshAccessToken()).pipe(
+                return refreshOnce(authService).pipe(
+                    catchError(() => {
+                        authService.logout();
+                        return throwError(() => error);
+                    }),
                     switchMap((newToken: string) => {
                         const retryReq = req.clone({
                             setHeaders: {
@@ -54,10 +76,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                             }
                         });
                         return next(retryReq);
-                    }),
-                    catchError(() => {
-                        authService.logout();
-                        return throwError(() => error);
                     })
                 );
             }
