@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
     AbstractControl,
     FormBuilder,
@@ -40,7 +40,8 @@ export class RegisterComponent {
     constructor(
         private formBuilder: FormBuilder,
         private router: Router,
-        private apiUserService: ApiUserService
+        private apiUserService: ApiUserService,
+        private cdr: ChangeDetectorRef
     ) {
         this.registerForm = this.formBuilder.group({
             fullName: ['', [Validators.required, Validators.minLength(3)]],
@@ -65,16 +66,20 @@ export class RegisterComponent {
             fullName: this.f['fullName'].value,
             email: this.f['email'].value,
             password: this.f['password'].value,
-            phone: this.f['phone'].value
+            phone: String(this.f['phone'].value ?? '')
         })
         .then(() => {
             this.success = true;
             this.loading = false;
+
+            this.cdr.markForCheck();
+
             setTimeout(() => this.router.navigate(['/login']), 3000);
         })
         .catch((err: Error) => {
             this.error = err.message;
             this.loading = false;
+            this.cdr.markForCheck();
         });
     }
 }

@@ -147,10 +147,15 @@ export class UsersComponent implements OnInit {
 
         this.sharedService.setLoading(true);
 
+        const userData: UserModel = {
+            ...this.userForm.value,
+            phone: String(this.userForm.value.phone ?? '')
+        };
+
         if (this.isEditing) {
-            this._editUser(this.userForm.value);
+            this._editUser(userData);
         } else {
-            this._createUser(this.userForm.value);
+            this._createUser(userData);
         }
     }
 

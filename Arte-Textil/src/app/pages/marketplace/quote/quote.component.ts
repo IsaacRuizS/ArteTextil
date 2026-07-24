@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { CartService } from '../../../services/cart.service';
@@ -29,7 +29,8 @@ export class QuoteComponent implements OnInit {
         private fb: FormBuilder,
         private cartService: CartService,
         private sharedService: SharedService,
-        private apiQuoteService: ApiQuoteService
+        private apiQuoteService: ApiQuoteService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit() {
@@ -114,9 +115,12 @@ export class QuoteComponent implements OnInit {
                 this.cartService.clearCart();
                 this.cart = [];
                 this.quoteForm.reset();
+
+                this.cdr.markForCheck();
             },
             error: (err) => {
                 this.errorMsg = err?.error?.message || 'No se pudo enviar tu cotización. Intentá de nuevo.';
+                this.cdr.markForCheck();
             }
         });
     }

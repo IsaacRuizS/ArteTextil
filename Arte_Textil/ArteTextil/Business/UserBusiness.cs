@@ -131,54 +131,72 @@ namespace ArteTextil.Business
                     return response;
                 }
 
-                using var transaction = await _context.Database.BeginTransactionAsync();
+                var hasher = new PasswordHasher<User>();
+                var user = new User
+                {
+                    FullName = dto.fullName,
+                    Email = dto.email,
+                    Phone = dto.phone,
+                    PasswordHash = "temp",
+                    RoleId = 3,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                user.PasswordHash = hasher.HashPassword(user, dto.password);
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _repositoryUser.AddAsync(user);
+
+                        var customer = new Customer
+                        {
+                            FullName = dto.fullName,
+                            Email = dto.email,
+                            Phone = dto.phone,
+                            IsActive = true,
+                            UserId = user.UserId,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        await _repositoryCustomer.AddAsync(customer);
+
+                        await _logHelper.LogCreate(
+                            tableName: "Users",
+                            recordId: user.UserId,
+                            newValue: JsonSerializer.Serialize(user)
+                        );
+
+                        await transaction.CommitAsync();
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
+
+                response.Data = _mapper.Map<UserDto>(user);
+                response.Message = "Cuenta creada correctamente. Revisa tu correo para confirmar el registro.";
 
                 try
                 {
-                    var hasher = new PasswordHasher<User>();
-                    var user = new User
-                    {
-                        FullName = dto.fullName,
-                        Email = dto.email,
-                        Phone = dto.phone,
-                        PasswordHash = "temp",
-                        RoleId = 3,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    user.PasswordHash = hasher.HashPassword(user, dto.password);
-
-                    await _repositoryUser.AddAsync(user);
-
-                    var customer = new Customer
-                    {
-                        FullName = dto.fullName,
-                        Email = dto.email,
-                        Phone = dto.phone,
-                        IsActive = true,
-                        UserId = user.UserId,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _repositoryCustomer.AddAsync(customer);
-
-                    await transaction.CommitAsync();
-
-                    await _logHelper.LogCreate(
-                        tableName: "Users",
-                        recordId: user.UserId,
-                        newValue: JsonSerializer.Serialize(user)
-                    );
-
                     await _emailService.SendRegistrationConfirmationAsync(user.FullName, user.Email);
-
-                    response.Data = _mapper.Map<UserDto>(user);
-                    response.Message = "Cuenta creada correctamente. Revisa tu correo para confirmar el registro.";
                 }
-                catch
+                catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    try
+                    {
+                        await _logHelper.LogCreate(
+                            tableName: "Email Register",
+                            recordId: user.UserId,
+                            newValue: $"Error enviando el correo de confirmación al usuario {user.UserId}: {ex.Message}"
+                        );
+                    }
+                    catch
+                    {
+                    }
                 }
             }
             catch (Exception ex)

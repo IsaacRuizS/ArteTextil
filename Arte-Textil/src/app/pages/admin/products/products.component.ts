@@ -16,7 +16,6 @@ import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { ProductImageModel } from '../../../shared/models/productImage.model';
 import { UploadImageService } from '../../../services/upload-image.service';
-import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-products',
@@ -56,6 +55,9 @@ export class ProductsComponent implements OnInit {
     page = 1;
 
     selectedFiles: File[] = [];
+
+    readonly ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    readonly MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
     uploadedImages: ProductImageModel[] = [];
     uploadingImages = false;
 
@@ -252,19 +254,41 @@ export class ProductsComponent implements OnInit {
     }
 
     onImagesSelected(event: any) {
-        const files: File[] = Array.from(event.target.files);
 
-        // Validaciones básicas
+        const input = event.target as HTMLInputElement;
+        const files: File[] = Array.from(input.files ?? []);
+
+        this.selectedFiles = [];
+
+        const rejectedType: string[] = [];
+        const rejectedSize: string[] = [];
+
         for (const file of files) {
 
-            if (file.size > 5 * 1024 * 1024) {
-                Swal.fire('Error', 'Maximo 5MB por imagen', 'error');
-                return;
+            if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+                rejectedType.push(file.name);
+                continue;
             }
 
-            if (!file.type.startsWith('image/')) continue;
-            if (file.size > 5 * 1024 * 1024) continue; // 5MB
+            if (file.size > this.MAX_IMAGE_SIZE_BYTES) {
+                rejectedSize.push(file.name);
+                continue;
+            }
+
             this.selectedFiles.push(file);
+        }
+
+        // Permite volver a elegir el mismo archivo si el usuario lo corrige.
+        input.value = '';
+
+        if (rejectedType.length) {
+            this.notificationService.error(
+                `Solo se permiten imágenes JPG, PNG, GIF o WEBP. Se descartó: ${rejectedType.join(', ')}`);
+        }
+
+        if (rejectedSize.length) {
+            this.notificationService.error(
+                `Máximo 5MB por imagen. Se descartó: ${rejectedSize.join(', ')}`);
         }
 
         this.uploadSelectedImages();

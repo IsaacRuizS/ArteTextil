@@ -85,25 +85,51 @@
             <div class="modal-body">
                 <form [formGroup]="supplierForm">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Nombre Empresa</label>
+                        <label class="form-label small fw-bold text-muted">
+                            Nombre Empresa <span class="text-danger">*</span>
+                        </label>
                         <input type="text" class="form-control" formControlName="name"
                             [class.is-invalid]="supplierForm.get('name')?.invalid && supplierForm.get('name')?.touched">
+                        @if (supplierForm.get('name')?.touched && supplierForm.get('name')?.errors; as errors) {
+                        <div class="invalid-feedback d-block">
+                            @if (errors['required']) { El nombre de la empresa es obligatorio. }
+                            @else if (errors['minlength']) { El nombre debe tener al menos 3 caracteres. }
+                        </div>
+                        }
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Persona de Contacto</label>
+                        <label class="form-label small fw-bold text-muted">
+                            Persona de Contacto <span class="text-danger">*</span>
+                        </label>
                         <input type="text" class="form-control" formControlName="contactPerson"
                             [class.is-invalid]="supplierForm.get('contactPerson')?.invalid && supplierForm.get('contactPerson')?.touched">
+                        @if (supplierForm.get('contactPerson')?.touched && supplierForm.get('contactPerson')?.errors) {
+                        <div class="invalid-feedback d-block">La persona de contacto es obligatoria.</div>
+                        }
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Email</label>
+                            <label class="form-label small fw-bold text-muted">
+                                Email <span class="text-danger">*</span>
+                            </label>
                             <input type="email" class="form-control" formControlName="email"
                                 [class.is-invalid]="supplierForm.get('email')?.invalid && supplierForm.get('email')?.touched">
+                            @if (supplierForm.get('email')?.touched && supplierForm.get('email')?.errors; as errors) {
+                            <div class="invalid-feedback d-block">
+                                @if (errors['required']) { El email es obligatorio. }
+                                @else if (errors['email']) { El formato del email no es válido. }
+                            </div>
+                            }
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Teléfono</label>
+                            <label class="form-label small fw-bold text-muted">
+                                Teléfono <span class="text-danger">*</span>
+                            </label>
                             <input type="number" class="form-control" formControlName="phone"
                                 [class.is-invalid]="supplierForm.get('phone')?.invalid && supplierForm.get('phone')?.touched">
+                            @if (supplierForm.get('phone')?.touched && supplierForm.get('phone')?.errors) {
+                            <div class="invalid-feedback d-block">El teléfono es obligatorio.</div>
+                            }
                         </div>
                     </div>
                 </form>

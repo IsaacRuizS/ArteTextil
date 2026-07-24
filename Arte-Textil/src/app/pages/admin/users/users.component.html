@@ -96,24 +96,36 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">
-                            Nombre Completo
+                            Nombre Completo <span class="text-danger">*</span>
                         </label>
                         <input
                             type="text"
                             class="form-control"
                             formControlName="fullName"
                             [class.is-invalid]="userForm.get('fullName')?.invalid && userForm.get('fullName')?.touched">
+                        @if (userForm.get('fullName')?.touched && userForm.get('fullName')?.errors; as errors) {
+                        <div class="invalid-feedback d-block">
+                            @if (errors['required']) { El nombre completo es obligatorio. }
+                            @else if (errors['minlength']) { El nombre debe tener al menos 3 caracteres. }
+                        </div>
+                        }
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">
-                            Correo Electrónico
+                            Correo Electrónico <span class="text-danger">*</span>
                         </label>
                         <input
                             type="email"
                             class="form-control"
                             formControlName="email"
                             [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                        @if (userForm.get('email')?.touched && userForm.get('email')?.errors; as errors) {
+                        <div class="invalid-feedback d-block">
+                            @if (errors['required']) { El correo electrónico es obligatorio. }
+                            @else if (errors['email']) { El formato del correo no es válido. }
+                        </div>
+                        }
                     </div>
 
                     @if (!isEditing) {
@@ -131,7 +143,9 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Rol</label>
+                            <label class="form-label small fw-bold text-muted">
+                                Rol <span class="text-danger">*</span>
+                            </label>
                             <select
                                 class="form-select"
                                 formControlName="roleId"
@@ -141,14 +155,26 @@
                                 <option [value]="r.roleId">{{ r.name }}</option>
                                 }
                             </select>
+                            @if (userForm.get('roleId')?.touched && userForm.get('roleId')?.errors) {
+                            <div class="invalid-feedback d-block">Debe seleccionar un rol.</div>
+                            }
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Teléfono</label>
+                            <label class="form-label small fw-bold text-muted">
+                                Teléfono <span class="text-danger">*</span>
+                            </label>
                             <input
-                                type="text"
+                                type="number"
                                 class="form-control"
-                                formControlName="phone">
+                                formControlName="phone"
+                                [class.is-invalid]="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
+                            @if (userForm.get('phone')?.touched && userForm.get('phone')?.errors; as errors) {
+                            <div class="invalid-feedback d-block">
+                                @if (errors['required']) { El teléfono es obligatorio. }
+                                @else if (errors['minlength']) { El teléfono debe tener al menos 8 caracteres. }
+                            </div>
+                            }
                         </div>
                     </div>
 

@@ -186,8 +186,10 @@
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Imágenes del producto</label>
 
-                    <input type="file" class="form-control" accept="image/*" multiple
+                    <input type="file" class="form-control" multiple
+                        accept="image/jpeg,image/png,image/gif,image/webp"
                         (change)="onImagesSelected($event)">
+                    <div class="form-text">Formatos permitidos: JPG, PNG, GIF o WEBP. Máximo 5MB por imagen.</div>
                 </div>
 
                 <!-- Preview -->
