@@ -51,7 +51,7 @@ public class QuoteBusiness
         {
             var quotes = await _repositoryQuote.Query()
                 .Where(q => q.DeletedAt == null)
-                .Include(q => q.QuoteItems)
+                .Include(q => q.QuoteItems!.Where(i => i.DeletedAt == null && i.IsActive))
                 .Include(q => q.Customer)
                 .Include(q => q.CreatedByUser)
                 .ToListAsync();
@@ -97,7 +97,7 @@ public class QuoteBusiness
         try
         {
             var quote = await _repositoryQuote.Query()
-                .Include(q => q.QuoteItems)
+                .Include(q => q.QuoteItems!.Where(i => i.DeletedAt == null && i.IsActive))
                 .FirstOrDefaultAsync(q => q.QuoteId == id && q.DeletedAt == null);
 
             if (quote == null)
@@ -658,17 +658,28 @@ public class QuoteBusiness
                 .Include(q => q.QuoteItems)
                 .FirstAsync(q => q.QuoteId == dto.quoteId);
 
+            // Los items eliminados en esta misma operación siguen en el contexto,
+            // así que se descartan del DTO en lugar de filtrarlos en la consulta.
+            var activeItemIds = updated.QuoteItems!
+                .Where(i => i.DeletedAt == null && i.IsActive)
+                .Select(i => i.QuoteItemId)
+                .ToHashSet();
+
+            var updatedDto = _mapper.Map<QuoteDto>(updated);
+
+            updatedDto.items = updatedDto.items?
+                .Where(i => activeItemIds.Contains(i.quoteItemId))
+                .ToList();
+
             // Log usando DTO para evitar ciclos
             await _logHelper.LogUpdate(
                 tableName: "Quotes",
                 recordId: dto.quoteId,
                 previousValue: previousSnapshot,
-                newValue: JsonSerializer.Serialize(
-                    _mapper.Map<QuoteDto>(updated)
-                )
+                newValue: JsonSerializer.Serialize(updatedDto)
             );
 
-            response.Data = _mapper.Map<QuoteDto>(updated);
+            response.Data = updatedDto;
             response.Message = "Cotización actualizada correctamente";
             await transaction.CommitAsync();
 

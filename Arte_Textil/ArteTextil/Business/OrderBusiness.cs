@@ -52,7 +52,7 @@ namespace ArteTextil.Business
                     .Include(o => o.OrderItems)
                     .Include(o => o.OrderStatusHistory)
                     .Include(o => o.Customer)
-                    .Include(o => o.Quote).ThenInclude(q => q.QuoteItems)
+                    .Include(o => o.Quote).ThenInclude(q => q.QuoteItems!.Where(i => i.DeletedAt == null && i.IsActive))
                     .Where(o => o.DeletedAt == null)
                     .ToListAsync();
 
@@ -188,7 +188,7 @@ namespace ArteTextil.Business
                     await _repositoryOrder.SaveAsync();
 
                     // Copiar Items
-                    foreach (var qi in quote.QuoteItems)
+                    foreach (var qi in quote.QuoteItems!.Where(i => i.DeletedAt == null && i.IsActive))
                     {
                         var orderItem = new OrderItem
                         {
