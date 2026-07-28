@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ArteTextil.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PayrollAdjustmentController : ControllerBase
@@ -18,6 +18,7 @@ public class PayrollAdjustmentController : ControllerBase
     }
 
     // POST: api/payrolladjustment
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] PayrollAdjustmentDto dto)
     {
@@ -26,6 +27,7 @@ public class PayrollAdjustmentController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
@@ -36,12 +38,15 @@ public class PayrollAdjustmentController : ControllerBase
     [HttpGet("mine")]
     public async Task<IActionResult> GetMine()
     {
-        var userId = int.Parse(User.FindFirst("id")!.Value);
+        if (!int.TryParse(User.FindFirst("id")?.Value, out var userId))
+            return Unauthorized("Token sin id válido");
+
         var result = await _business.GetByUser(userId);
         return Ok(result);
     }
 
     // DELETE: api/payrolladjustment/3
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

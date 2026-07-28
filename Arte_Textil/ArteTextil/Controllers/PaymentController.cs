@@ -22,6 +22,8 @@ public class PaymentController : ControllerBase
     {
         var result = await _business.Create(dto);
 
+        if (!result.Success) return BadRequest(result);
+
         return Ok(result);
     }
 
@@ -29,6 +31,8 @@ public class PaymentController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var result = await _business.GetAll();
+
+        if (!result.Success) return StatusCode(500, result);
 
         return Ok(result);
     }

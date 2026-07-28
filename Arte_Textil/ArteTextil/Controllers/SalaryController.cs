@@ -47,8 +47,12 @@ public class SalaryController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var userId = int.Parse(User.FindFirst("id")!.Value);
-        var roleId = User.FindFirst("roleId")!.Value;
+        if (!int.TryParse(User.FindFirst("id")?.Value, out var userId))
+            return Unauthorized("Token sin id válido");
+
+        var roleId = User.FindFirst("roleId")?.Value;
+        if (string.IsNullOrWhiteSpace(roleId))
+            return Unauthorized("Token sin rol válido");
 
         var result = await _business.GetAll(userId, roleId);
 

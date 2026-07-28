@@ -120,7 +120,7 @@ export const routes: Routes = [
             {
                 path: 'admin/users',
                 loadComponent: () => import('./pages/admin/users/users.component').then(m => m.UsersComponent),
-                data: { roles: [1, 4] }
+                data: { roles: [1] }
             },
             {
                 path: 'suppliers',

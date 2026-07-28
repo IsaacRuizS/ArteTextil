@@ -102,9 +102,9 @@ builder.Services.AddHostedService<DailyAlertsJobService>();
 
 builder.Services.AddAuthorization(options =>
 {
-    // Solo roles 1 y 2 (Admin / Empleado). RoleId 3 = Customer queda excluido.
+    // Solo administradores.
     options.AddPolicy("AdminOnly", policy =>
-        policy.RequireClaim("roleId", "1", "2"));
+        policy.RequireClaim("roleId", "1"));
 
     // Reportes: roles 1 (Admin) y 4 (Analítica)
     options.AddPolicy("ReportsAccess", policy =>

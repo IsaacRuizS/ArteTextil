@@ -29,7 +29,25 @@
 
     <!-- FILTER -->
     <div *ngIf="isAdmin" class="mb-4">
-        <input type="text" class="form-control" placeholder="Buscar por usuario o fecha..." (input)="onSearch($event)">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="text" class="form-control" placeholder="Buscar por usuario o fecha..."
+                    (input)="onSearch($event)">
+            </div>
+            <div class="col-6 col-md-2">
+                <input type="date" class="form-control" [(ngModel)]="dateFrom" (ngModelChange)="onFilter()">
+            </div>
+            <div class="col-6 col-md-2">
+                <input type="date" class="form-control" [(ngModel)]="dateTo" (ngModelChange)="onFilter()">
+            </div>
+            <div class="col-12 col-md-3">
+                <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onFilter()">
+                    <option value="all">Todos los estados</option>
+                    <option value="complete">Completo</option>
+                    <option value="pending">Pendiente</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <!-- LIST -->
@@ -133,12 +151,20 @@
                                     </option>
 
                                 </select>
+                                <div class="text-danger small mt-1"
+                                    *ngIf="adminAttendanceForm.get('userId')?.touched && adminAttendanceForm.get('userId')?.invalid">
+                                    Debe seleccionar un usuario.
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Check-in</label>
 
                                 <input type="datetime-local" class="form-control" formControlName="checkIn">
+                                <div class="text-danger small mt-1"
+                                    *ngIf="adminAttendanceForm.get('checkIn')?.touched && adminAttendanceForm.get('checkIn')?.invalid">
+                                    Debe indicar la entrada.
+                                </div>
                             </div>
 
                             <div class="mb-3">

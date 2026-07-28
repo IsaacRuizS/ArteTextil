@@ -107,16 +107,28 @@
                             </option>
 
                         </select>
+                        <div class="text-danger small mt-1"
+                            *ngIf="adjustmentForm.get('userId')?.touched && adjustmentForm.get('userId')?.invalid">
+                            Debe seleccionar un usuario.
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Monto</label>
                         <input type="number" class="form-control" formControlName="amount">
+                        <div class="text-danger small mt-1"
+                            *ngIf="adjustmentForm.get('amount')?.touched && adjustmentForm.get('amount')?.invalid">
+                            El monto debe ser mayor que cero.
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Mes</label>
                         <input type="month" class="form-control" formControlName="month">
+                        <div class="text-danger small mt-1"
+                            *ngIf="adjustmentForm.get('month')?.touched && adjustmentForm.get('month')?.invalid">
+                            Debe seleccionar un mes.
+                        </div>
                     </div>
 
                     <div class="mb-3">

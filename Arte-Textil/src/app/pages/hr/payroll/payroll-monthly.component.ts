@@ -142,7 +142,8 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.shared.setLoading(false);
 
                 if (res.success) {
-                    this.handleMessages(res.message, 'success');
+                    const type = this.isEmailWarning(res.message) ? 'warning' : 'success';
+                    this.handleMessages(res.message, type);
                 } else {
                     this.handleMessages(res.message, 'warning');
                 }
@@ -209,7 +210,8 @@ export class PayrollMonthlyComponent implements OnInit {
                 this.showPaymentModal = false;
 
                 if (res.success) {
-                    this.handleMessages(res.message, 'success');
+                    const type = this.isEmailWarning(res.message) ? 'warning' : 'success';
+                    this.handleMessages(res.message, type);
                 } else {
                     this.handleMessages(res.message, 'warning');
                 }
@@ -294,6 +296,10 @@ export class PayrollMonthlyComponent implements OnInit {
             this.modalType = type === 'error' ? 'error' : 'success';
             this.showMessageModal = true;
         }
+    }
+
+    private isEmailWarning(message: string): boolean {
+        return !!message && message.toLowerCase().includes('no se pudo enviar');
     }
 
 }

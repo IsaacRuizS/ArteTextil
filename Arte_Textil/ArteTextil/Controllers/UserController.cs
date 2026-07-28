@@ -7,7 +7,7 @@ namespace ArteTextil.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "StaffAccess")]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly UserBusiness _userBusiness;
@@ -18,6 +18,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/user/all
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
@@ -30,6 +31,7 @@ namespace ArteTextil.Controllers
         }
 
         // GET: api/user/{id}
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -42,6 +44,7 @@ namespace ArteTextil.Controllers
         }
 
         // POST: api/user
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] UserDto dto)
         {
@@ -54,6 +57,7 @@ namespace ArteTextil.Controllers
         }
 
         // PUT: api/user/{id}
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto dto)
         {
@@ -66,6 +70,7 @@ namespace ArteTextil.Controllers
         }
 
         // DELETE: api/user/{id}
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

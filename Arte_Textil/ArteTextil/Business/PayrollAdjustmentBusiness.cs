@@ -32,14 +32,30 @@ public class PayrollAdjustmentBusiness
 
         try
         {
-            if (dto.amount == 0)
+            if (dto.userId <= 0)
             {
                 response.Success = false;
-                response.Message = "El monto no puede ser 0";
+                response.Message = "Debe seleccionar un usuario válido";
                 return response;
             }
 
-            if (dto.type != "Extra" && dto.type != "Rebajo")
+            if (dto.year <= 0 || dto.month < 1 || dto.month > 12)
+            {
+                response.Success = false;
+                response.Message = "Debe indicar año y mes válidos";
+                return response;
+            }
+
+            if (dto.amount <= 0)
+            {
+                response.Success = false;
+                response.Message = "El monto debe ser mayor que 0";
+                return response;
+            }
+
+            var type = dto.type?.Trim().ToLower();
+
+            if (type != "extra" && type != "rebajo")
             {
                 response.Success = false;
                 response.Message = "Tipo inválido (Extra/Rebajo)";
@@ -56,16 +72,6 @@ public class PayrollAdjustmentBusiness
             {
                 response.Success = false;
                 response.Message = "El usuario no tiene salario asignado. No se pueden crear ajustes.";
-                return response;
-            }
-
-            // normalizar tipo
-            var type = dto.type.Trim().ToLower();
-
-            if (type != "extra" && type != "rebajo")
-            {
-                response.Success = false;
-                response.Message = "Tipo inválido (extra/rebajo)";
                 return response;
             }
 
@@ -105,13 +111,6 @@ public class PayrollAdjustmentBusiness
                 isActive = entity.IsActive
             };
 
-            if (dto.year <= 0 || dto.month <= 0)
-            {
-                response.Success = false;
-                response.Message = "Debe indicar año y mes";
-                return response;
-            }
-
             response.Message = "Ajuste creado";
         }
         catch (Exception ex)
@@ -144,6 +143,8 @@ public class PayrollAdjustmentBusiness
                         amount = a.Amount,
                         type = a.Type,
                         reason = a.Reason,
+                        year = a.Year,
+                        month = a.Month,
                         isActive = a.IsActive,
                         createdAt = a.CreatedAt,
                         updatedAt = a.UpdatedAt,

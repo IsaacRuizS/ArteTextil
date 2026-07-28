@@ -104,7 +104,7 @@
 
     @if (showError) {
 
-    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+    <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1065;">
 
         <div class="modal-dialog modal-dialog-centered">
 
@@ -149,7 +149,7 @@
 
     <div *ngIf="showFormModal">
 
-        <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+        <div class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1055;">
 
             <div class="modal-dialog modal-dialog-centered">
 
@@ -184,6 +184,10 @@
                                         {{ u.fullName }}
                                     </option>
                                 </select>
+                                <div class="text-danger small mt-1"
+                                    *ngIf="vacationForm.get('userId')?.touched && vacationForm.get('userId')?.invalid">
+                                    Debe seleccionar un usuario.
+                                </div>
                             </div>
 
                             <!-- START DATE -->
@@ -191,7 +195,11 @@
                                 <label class="form-label small fw-bold text-muted">
                                     Fecha inicio
                                 </label>
-                                <input type="date" class="form-control" formControlName="startDate">
+                                <input type="date" class="form-control" formControlName="startDate" [min]="today">
+                                <div class="text-danger small mt-1"
+                                    *ngIf="vacationForm.get('startDate')?.touched && vacationForm.get('startDate')?.invalid">
+                                    Debe indicar una fecha de inicio.
+                                </div>
                             </div>
 
                             <!-- END DATE -->
@@ -199,7 +207,16 @@
                                 <label class="form-label small fw-bold text-muted">
                                     Fecha fin
                                 </label>
-                                <input type="date" class="form-control" formControlName="endDate">
+                                <input type="date" class="form-control" formControlName="endDate"
+                                    [min]="vacationForm.get('startDate')?.value || today">
+                                <div class="text-danger small mt-1"
+                                    *ngIf="vacationForm.get('endDate')?.touched && vacationForm.get('endDate')?.invalid">
+                                    Debe indicar una fecha fin.
+                                </div>
+                                <div class="text-danger small mt-1"
+                                    *ngIf="vacationForm.touched && vacationForm.hasError('invalidDateRange')">
+                                    La fecha fin no puede ser menor que la fecha inicio.
+                                </div>
                             </div>
 
                             <!-- NOTES -->

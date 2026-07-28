@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { VacationModel } from '../../../shared/models/vacation.model';
 import { ApiVacationService } from '../../../services/api-vacation.service';
 import { SharedService } from '../../../services/shared.service';
@@ -29,6 +29,7 @@ export class VacationsComponent implements OnInit {
     availableState = {
         days: 0
     };
+    today = this.toDateInputValue(new Date());
 
     showError = false;
     errorMessage = '';
@@ -47,12 +48,15 @@ export class VacationsComponent implements OnInit {
         private cdr: ChangeDetectorRef,
         private fb: FormBuilder,
     ) {
-        this.vacationForm = this.fb.group({
-            userId: [null],
-            startDate: ['', Validators.required],
-            endDate: ['', Validators.required],
-            notes: ['']
-        });
+        this.vacationForm = this.fb.group(
+            {
+                userId: [null],
+                startDate: ['', Validators.required],
+                endDate: ['', Validators.required],
+                notes: ['']
+            },
+            { validators: this.dateRangeValidator }
+        );
     }
 
     ngAfterViewInit(): void {
@@ -164,6 +168,9 @@ export class VacationsComponent implements OnInit {
     // Formulario para colaborador
     openCreateModal() {
         this.vacationForm.reset();
+        if (!this.isAdmin) {
+            this.vacationForm.get('userId')?.setValue(this.userId);
+        }
         this.showFormModal = true;
     }
 
@@ -171,24 +178,31 @@ export class VacationsComponent implements OnInit {
 
         if (this.vacationForm.invalid) {
             this.vacationForm.markAllAsTouched();
+            this.showErrorModal(this.getVacationFormError());
             return;
         }
-
-        setTimeout(() => {
-            this.sharedService.setLoading(true);
-        });
 
         if (this.isAdmin && !this.vacationForm.value.userId) {
             this.showErrorModal("Debe seleccionar un usuario");
             return;
         }
 
+        const startDate = this.vacationForm.value.startDate;
+        const endDate = this.vacationForm.value.endDate;
+
+        if (startDate < this.today || endDate < this.today) {
+            this.showErrorModal("Las fechas de vacaciones deben ser presentes o futuras");
+            return;
+        }
+
+        this.sharedService.setLoading(true);
+
         const payload = {
             userId: this.isAdmin
                 ? Number(this.vacationForm.value.userId)
                 : this.userId,
-            startDate: this.vacationForm.value.startDate,
-            endDate: this.vacationForm.value.endDate,
+            startDate,
+            endDate,
             notes: this.vacationForm.value.notes
         };
 
@@ -211,8 +225,6 @@ export class VacationsComponent implements OnInit {
                 this.sharedService.setLoading(false);
             },
             error: (err) => {
-
-                this.showFormModal = false;
 
                 const message =
                     err?.error?.message ||
@@ -263,5 +275,39 @@ export class VacationsComponent implements OnInit {
                 this.sharedService.setLoading(false);
             }
         });
+    }
+
+    private dateRangeValidator(control: AbstractControl): ValidationErrors | null {
+        const start = control.get('startDate')?.value;
+        const end = control.get('endDate')?.value;
+
+        if (!start || !end) return null;
+
+        return end < start ? { invalidDateRange: true } : null;
+    }
+
+    private getVacationFormError(): string {
+        if (this.vacationForm.hasError('invalidDateRange')) {
+            return 'La fecha fin no puede ser menor que la fecha inicio.';
+        }
+
+        if (this.vacationForm.get('startDate')?.hasError('required')) {
+            return 'Debe indicar la fecha de inicio.';
+        }
+
+        if (this.vacationForm.get('endDate')?.hasError('required')) {
+            return 'Debe indicar la fecha fin.';
+        }
+
+        if (this.isAdmin && this.vacationForm.get('userId')?.hasError('required')) {
+            return 'Debe seleccionar un usuario.';
+        }
+
+        return 'Revise los datos de la solicitud.';
+    }
+
+    private toDateInputValue(date: Date): string {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     }
 }

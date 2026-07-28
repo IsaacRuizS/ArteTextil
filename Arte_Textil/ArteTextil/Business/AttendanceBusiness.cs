@@ -203,6 +203,14 @@ public class AttendanceBusiness
 
         try
         {
+            var validationMessage = await ValidateAttendance(dto);
+            if (validationMessage != null)
+            {
+                response.Success = false;
+                response.Message = validationMessage;
+                return response;
+            }
+
             var attendance = new Attendance
             {
                 UserId = dto.userId,
@@ -234,7 +242,16 @@ public class AttendanceBusiness
 
         try
         {
-            var attendance = await _repository.GetByIdAsync(id);
+            if (id <= 0)
+            {
+                response.Success = false;
+                response.Message = "Identificador de asistencia inválido";
+                return response;
+            }
+
+            var attendance = await _repository.FirstOrDefaultAsync(a =>
+                a.AttendanceId == id &&
+                a.DeletedAt == null);
 
             if (attendance == null)
             {
@@ -243,23 +260,32 @@ public class AttendanceBusiness
                 return response;
             }
 
-            // VALIDACIONES PRO
-            if (dto.checkIn != null && dto.checkOut != null)
+            dto.userId = dto.userId <= 0 ? attendance.UserId : dto.userId;
+
+            var validationMessage = await ValidateAttendance(dto);
+            if (validationMessage != null)
             {
-                if (dto.checkOut < dto.checkIn)
-                {
-                    response.Success = false;
-                    response.Message = "El check-out no puede ser menor que el check-in";
-                    return response;
-                }
+                response.Success = false;
+                response.Message = validationMessage;
+                return response;
             }
 
+            var previous = JsonSerializer.Serialize(attendance);
+
+            attendance.UserId = dto.userId;
             attendance.CheckIn = dto.checkIn;
             attendance.CheckOut = dto.checkOut;
             attendance.UpdatedAt = DateTime.UtcNow;
 
             _repository.Update(attendance);
             await _repository.SaveAsync();
+
+            await _logHelper.LogUpdate(
+                "Attendance",
+                attendance.AttendanceId,
+                previous,
+                JsonSerializer.Serialize(attendance)
+            );
 
             response.Data = true;
             response.Message = "Asistencia actualizada correctamente";
@@ -271,6 +297,31 @@ public class AttendanceBusiness
         }
 
         return response;
+    }
+
+    private async Task<string?> ValidateAttendance(AttendanceDto dto)
+    {
+        if (dto == null)
+            return "Debe enviar los datos de la asistencia";
+
+        if (dto.userId <= 0)
+            return "Debe seleccionar un usuario válido";
+
+        var userExists = await _context.Users.AnyAsync(u =>
+            u.UserId == dto.userId &&
+            u.DeletedAt == null &&
+            u.IsActive);
+
+        if (!userExists)
+            return "El usuario seleccionado no existe o está inactivo";
+
+        if (dto.checkIn == null)
+            return "Debe indicar la fecha y hora de entrada";
+
+        if (dto.checkOut != null && dto.checkOut < dto.checkIn)
+            return "El check-out no puede ser menor que el check-in";
+
+        return null;
     }
 
     // Solo para colaboradores, no para admin

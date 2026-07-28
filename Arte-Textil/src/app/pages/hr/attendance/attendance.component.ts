@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 import { AttendanceModel } from '../../../shared/models/attendance.model';
 import { UserModel } from '../../../shared/models/user.model';
@@ -15,7 +15,7 @@ import { NotificationService } from '../../../services/notification.service';
     selector: 'app-attendance',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.Default,
-    imports: [CommonModule, ReactiveFormsModule, NgxPaginationModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, NgxPaginationModule],
     templateUrl: './attendance.component.html',
     styleUrls: ['./attendance.component.scss']
 })
@@ -25,6 +25,9 @@ export class AttendanceComponent implements OnInit {
     attendancesOrigin: AttendanceModel[] = [];
 
     searchTerm = '';
+    dateFrom = '';
+    dateTo = '';
+    statusFilter = 'all';
 
     isAdmin = false;
 
@@ -181,9 +184,21 @@ export class AttendanceComponent implements OnInit {
             return;
         }
 
+        if (this.adminAttendanceForm.invalid) {
+            this.adminAttendanceForm.markAllAsTouched();
+            this.notificationService.warning('Complete los datos requeridos de la asistencia');
+            return;
+        }
+
         this.sharedService.setLoading(true);
 
-        const payload = this.adminAttendanceForm.value;
+        const payload = this.buildAttendancePayload();
+
+        if (payload.checkOut && payload.checkOut < payload.checkIn) {
+            this.notificationService.error('El check-out no puede ser menor que el check-in');
+            this.sharedService.setLoading(false);
+            return;
+        }
 
         if (this.editingAttendanceId) {
 
@@ -203,8 +218,8 @@ export class AttendanceComponent implements OnInit {
                     this.sharedService.setLoading(false);
                 },
 
-                error: () => {
-                    this.notificationService.error('Error al actualizar la asistencia');
+                error: (err) => {
+                    this.notificationService.error(this.getErrorMessage(err, 'Error al actualizar la asistencia'));
                     this.sharedService.setLoading(false);
                 }
             });
@@ -222,8 +237,8 @@ export class AttendanceComponent implements OnInit {
                     this.sharedService.setLoading(false);
                 },
 
-                error: () => {
-                    this.notificationService.error('Error al crear la asistencia');
+                error: (err) => {
+                    this.notificationService.error(this.getErrorMessage(err, 'Error al crear la asistencia'));
                     this.sharedService.setLoading(false);
                 }
             });
@@ -242,22 +257,43 @@ export class AttendanceComponent implements OnInit {
 
     onFilter() {
 
-        this.attendances = this.attendancesOrigin;
-
-        if (!this.searchTerm || this.searchTerm.trim() === '') return;
+        let data = [...this.attendancesOrigin];
 
         const term = this.searchTerm.toLowerCase();
 
-        this.attendances = this.attendances.filter(a =>
+        if (term.trim()) {
+            data = data.filter(a =>
 
-            (a.userName && a.userName.toLowerCase().includes(term))
+                (a.userName && a.userName.toLowerCase().includes(term))
 
-            || a.userId.toString().includes(term)
+                || a.userId.toString().includes(term)
 
-            || (a.checkIn && new Date(a.checkIn).toLocaleDateString().toLowerCase().includes(term))
+                || (a.checkIn && new Date(a.checkIn).toLocaleDateString().toLowerCase().includes(term))
 
-            || (a.checkOut && new Date(a.checkOut).toLocaleDateString().toLowerCase().includes(term))
-        );
+                || (a.checkOut && new Date(a.checkOut).toLocaleDateString().toLowerCase().includes(term))
+            );
+        }
+
+        if (this.dateFrom) {
+            const from = new Date(`${this.dateFrom}T00:00:00`);
+            data = data.filter(a => a.checkIn && new Date(a.checkIn) >= from);
+        }
+
+        if (this.dateTo) {
+            const to = new Date(`${this.dateTo}T23:59:59`);
+            data = data.filter(a => a.checkIn && new Date(a.checkIn) <= to);
+        }
+
+        if (this.statusFilter === 'complete') {
+            data = data.filter(a => !!a.checkOut);
+        }
+
+        if (this.statusFilter === 'pending') {
+            data = data.filter(a => !a.checkOut);
+        }
+
+        this.attendances = data;
+        this.page = 1;
     }
 
     // EDITAR ASISTENCIA ADMIN
@@ -306,5 +342,19 @@ export class AttendanceComponent implements OnInit {
         const pad = (n: number) => n.toString().padStart(2, '0');
 
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    private buildAttendancePayload() {
+        const value = this.adminAttendanceForm.value;
+
+        return {
+            userId: Number(value.userId),
+            checkIn: value.checkIn || null,
+            checkOut: value.checkOut || null
+        };
+    }
+
+    private getErrorMessage(err: any, fallback: string): string {
+        return err?.error?.message || err?.error?.Message || err?.message || fallback;
     }
 }

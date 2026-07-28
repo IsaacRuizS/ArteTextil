@@ -30,15 +30,20 @@ public class PayrollController : ControllerBase
     {
         var result = await _business.GetAll();
 
+        if (!result.Success) return StatusCode(500, result);
+
         return Ok(result);
     }
 
     [HttpPut("approve/{id}")]
     public async Task<IActionResult> Approve(int id)
     {
-        var adminId = int.Parse(User.FindFirst("id")!.Value);
+        if (!int.TryParse(User.FindFirst("id")?.Value, out var adminId))
+            return Unauthorized("Token sin id válido");
 
         var result = await _business.Approve(id, adminId);
+
+        if (!result.Success) return BadRequest(result);
 
         return Ok(result);
     }
@@ -46,9 +51,12 @@ public class PayrollController : ControllerBase
     [HttpPost("process/{id}")]
     public async Task<IActionResult> Process(int id, [FromBody] ProcessPayrollDto dto)
     {
-        var adminId = int.Parse(User.FindFirst("id")!.Value);
+        if (!int.TryParse(User.FindFirst("id")?.Value, out var adminId))
+            return Unauthorized("Token sin id válido");
 
         var result = await _business.ProcessPayroll(id, adminId, dto.Method);
+
+        if (!result.Success) return BadRequest(result);
 
         return Ok(result);
     }
