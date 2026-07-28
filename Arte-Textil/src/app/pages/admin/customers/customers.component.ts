@@ -48,12 +48,12 @@ export class CustomersComponent implements OnInit {
 
         this.customerForm = this.fb.group({
             customerId: [0],
-            fullName: ['', [Validators.required, Validators.minLength(3)]],
-            email: ['', [Validators.email]],
-            phone: [''],
+            fullName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+            phone: ['', [Validators.pattern(/^[0-9+\s-]{8,15}$/)]],
             userId: [''],
-            classification: [''],
-            activityScore: [0],
+            classification: ['', [Validators.required]],
+            activityScore: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
             isActive: [true]
         });
 
@@ -61,6 +61,40 @@ export class CustomersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadCustomers();
+    }
+
+    get formErrors(): string[] {
+
+        const errors: string[] = [];
+        const controls = this.customerForm.controls;
+
+        if (controls['fullName'].touched && controls['fullName'].errors) {
+            if (controls['fullName'].errors['required']) errors.push('El nombre completo es obligatorio.');
+            if (controls['fullName'].errors['minlength']) errors.push('El nombre completo debe tener al menos 3 caracteres.');
+            if (controls['fullName'].errors['maxlength']) errors.push('El nombre completo no puede superar los 100 caracteres.');
+        }
+
+        if (controls['email'].touched && controls['email'].errors) {
+            if (controls['email'].errors['required']) errors.push('El email es obligatorio.');
+            if (controls['email'].errors['email']) errors.push('El email ingresado no es válido.');
+            if (controls['email'].errors['maxlength']) errors.push('El email no puede superar los 100 caracteres.');
+        }
+
+        if (controls['phone'].touched && controls['phone'].errors) {
+            if (controls['phone'].errors['pattern']) errors.push('El teléfono solo puede contener números, espacios, "+" o "-", y debe tener entre 8 y 15 caracteres.');
+        }
+
+        if (controls['classification'].touched && controls['classification'].errors) {
+            if (controls['classification'].errors['required']) errors.push('Debe seleccionar una clasificación.');
+        }
+
+        if (controls['activityScore'].touched && controls['activityScore'].errors) {
+            if (controls['activityScore'].errors['required']) errors.push('El activity score es obligatorio.');
+            if (controls['activityScore'].errors['min']) errors.push('El activity score no puede ser menor a 0.');
+            if (controls['activityScore'].errors['max']) errors.push('El activity score no puede ser mayor a 100.');
+        }
+
+        return errors;
     }
 
     loadCustomers() {

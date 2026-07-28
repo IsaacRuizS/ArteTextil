@@ -77,7 +77,7 @@
                                 Email
                             </label>
 
-                            <input type="email" class="form-control" formControlName="email"
+                            <input type="email" class="form-control" formControlName="email" required
                                 [class.is-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
 
                         </div>
@@ -88,7 +88,8 @@
                                 Teléfono
                             </label>
 
-                            <input type="text" class="form-control" formControlName="phone">
+                            <input type="text" class="form-control" formControlName="phone"
+                                [class.is-invalid]="customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched">
 
                         </div>
 
@@ -103,8 +104,9 @@
                                 Clasificación
                             </label>
 
-                            <select class="form-select" formControlName="classification">
-                                <option value="">Seleccione una clasificación</option>
+                            <select class="form-select" formControlName="classification" required
+                                [class.is-invalid]="customerForm.get('classification')?.invalid && customerForm.get('classification')?.touched">
+                                <option value="" disabled>Seleccione una clasificación</option>
                                 <option value="Cliente Nuevo">Cliente Nuevo</option>
                                 <option value="Cliente Frecuente">Cliente Frecuente</option>
                                 <option value="Cliente Premium">Cliente Premium</option>
@@ -119,13 +121,22 @@
                                 Activity Score
                             </label>
 
-                            <input type="number" class="form-control" formControlName="activityScore">
+                            <input type="number" class="form-control" formControlName="activityScore" required min="0" max="100"
+                                [class.is-invalid]="customerForm.get('activityScore')?.invalid && customerForm.get('activityScore')?.touched">
 
                         </div>
 
                     </div>
 
                 </form>
+
+                @if (formErrors.length > 0) {
+                    <ul class="text-danger small mb-0 ps-3">
+                        @for (error of formErrors; track error) {
+                            <li>{{ error }}</li>
+                        }
+                    </ul>
+                }
 
             </div>
 
