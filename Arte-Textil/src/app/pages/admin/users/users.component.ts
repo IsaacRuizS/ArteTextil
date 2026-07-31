@@ -9,6 +9,11 @@ import { ApiUserService } from '../../../services/api-user.service';
 import { ApiRolService } from '../../../services/api-role.service';
 import { SharedService } from '../../../services/shared.service';
 import { NotificationService } from '../../../services/notification.service';
+import {
+    checkPasswordRequirements,
+    PasswordRequirements,
+    passwordPolicyValidator
+} from '../../../shared/validators/password.validator';
 
 @Component({
     selector: 'app-users',
@@ -48,7 +53,7 @@ export class UsersComponent implements OnInit {
             fullName: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required, Validators.minLength(8)]],
-            passwordHash: ['', [Validators.required]],
+            passwordHash: ['', [Validators.required, passwordPolicyValidator]],
             roleId: [null, Validators.required],
             lastLoginAt: [null],
             isActive: [true]
@@ -157,17 +162,38 @@ export class UsersComponent implements OnInit {
         this.cdr.detectChanges();
     }
 
+    // Checklist en vivo de los requisitos de contraseña.
+    get passwordRequirements(): PasswordRequirements {
+        return checkPasswordRequirements(this.userForm.get('passwordHash')?.value);
+    }
+
     // ACTIONS
     openCreateModal() {
         this.isEditing = false;
         this.userForm.reset({ userId: 0, isActive: true });
+        this._setPasswordValidators(true);
         this.showFormModal = true;
     }
 
     openEditModal(user: UserModel) {
         this.isEditing = true;
-        this.userForm.patchValue(user);
+        this.userForm.patchValue({ ...user, passwordHash: '' });
+        // Al editar, la contraseña es opcional: solo se valida si se escribe una nueva.
+        this._setPasswordValidators(false);
         this.showFormModal = true;
+    }
+
+    private _setPasswordValidators(isRequired: boolean) {
+
+        const passwordControl = this.userForm.get('passwordHash');
+
+        passwordControl?.setValidators(
+            isRequired
+                ? [Validators.required, passwordPolicyValidator]
+                : [passwordPolicyValidator]
+        );
+
+        passwordControl?.updateValueAndValidity();
     }
 
     saveUser() {
@@ -200,7 +226,7 @@ export class UsersComponent implements OnInit {
 
         if (this.userToDelete) {
 
-            this._deleteUser(this.userToDelete.userId);
+            this._updateUserStatus(this.userToDelete.userId, !this.userToDelete.isActive);
         }
     }
 
@@ -238,14 +264,22 @@ export class UsersComponent implements OnInit {
         );
     }
 
-    private _deleteUser(userId: number) {
+    private _updateUserStatus(userId: number, isActive: boolean) {
 
-        this.apiUserService.delete(userId).then(
-            (deleted: boolean) => {
+        this.sharedService.setLoading(true);
+
+        this.apiUserService.updateStatus(userId, isActive).then(
+            () => {
 
                 this.showDeleteModal = false;
                 this.userToDelete = null;
                 this.loadUsers();
+
+                this.notificationService.success(
+                    isActive
+                        ? 'Usuario activado correctamente.'
+                        : 'Usuario desactivado correctamente.'
+                );
 
                 this.sharedService.setLoading(false);
             },
