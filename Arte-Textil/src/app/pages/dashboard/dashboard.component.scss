@@ -30,3 +30,28 @@
     margin-top: 6px;
   }
 }
+
+// Widget de alertas
+.dashboard-alerts {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.dashboard-alert {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f8f9fa;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}

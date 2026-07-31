@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { ApiAlertService } from '../../services/api-alert.service';
@@ -28,7 +29,8 @@ export class DashboardComponent implements OnInit {
     private productApi: ApiProductService,
     private quoteApi: ApiQuoteService,
     private shared: SharedService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {}
 
   private _allOrders: OrderModel[] = [];
@@ -49,7 +51,6 @@ export class DashboardComponent implements OnInit {
         this._allQuotes = quotes;
         this.kpis.stockAvailable = products.reduce((sum, p) => sum + (p.availableStock ?? 0), 0);
         this.alerts = alerts;
-        this.alertIndex = 0;
         this.recalculate(allOrders, quotes);
         this.shared.setLoading(false);
       },
@@ -138,10 +139,34 @@ export class DashboardComponent implements OnInit {
   productionStages: { name: string; active: number; total: number }[] = [];
 
   alerts: AlertModel[] = [];
-  alertIndex = 0;
 
-  get currentAlert(): AlertModel | null {
-    return this.alerts[this.alertIndex] ?? null;
+  // Ícono según el tema de la alerta.
+  alertIcon(alert: AlertModel): string {
+    switch (alert.type) {
+      case 'Stock':     return 'mdi-package-variant';
+      case 'Orden':     return 'mdi-truck-delivery';
+      case 'Promocion': return 'mdi-tag-multiple';
+      default:          return 'mdi-bell-outline';
+    }
+  }
+
+  // Color del punto de prioridad.
+  alertDotClass(alert: AlertModel): string {
+    switch (alert.severity) {
+      case 'Alta':  return 'bg-danger';
+      case 'Media': return 'bg-warning';
+      default:      return 'bg-info';
+    }
+  }
+
+  // Las alertas viejas traen el texto en la primera línea con contenido.
+  alertSummary(alert: AlertModel): string {
+    const lines = (alert.message ?? '').split('\n');
+    return lines.find(line => line.trim().length > 0)?.trim() ?? '';
+  }
+
+  goToAlerts() {
+    this.router.navigateByUrl('/analytics/alerts');
   }
 
   lastUpdateLabel = new Date().toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
