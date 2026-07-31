@@ -20,15 +20,15 @@
                     </label>
 
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" value="existing" [(ngModel)]="mode">
-                        <label class="form-check-label">
+                        <input id="cot-exist" class="form-check-input" type="radio" value="existing" [(ngModel)]="mode">
+                        <label for="cot-exist" class="form-check-label">
                             Cotización existente
                         </label>
                     </div>
 
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" value="new" [(ngModel)]="mode">
-                        <label class="form-check-label">
+                        <input id="new-cot" class="form-check-input" type="radio" value="new" [(ngModel)]="mode">
+                        <label for="new-cot" class="form-check-label">
                             Crear nueva cotización
                         </label>
                     </div>

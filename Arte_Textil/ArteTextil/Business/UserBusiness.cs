@@ -356,20 +356,21 @@ namespace ArteTextil.Business
 
                 var previousSnapshot = JsonSerializer.Serialize(user);
 
-                user.IsActive = false;
-                user.DeletedAt = DateTime.UtcNow;
+                user.IsActive = !user.IsActive;
+                user.UpdatedAt = DateTime.UtcNow;
 
                 _repositoryUser.Update(user);
                 await _repositoryUser.SaveAsync();
 
-                await _logHelper.LogDelete(
+                await _logHelper.LogUpdate(
                     tableName: "Users",
                     recordId: user.UserId,
-                    previousValue: previousSnapshot
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(user)
                 );
 
                 response.Data = true;
-                response.Message = "usuario eliminado correctamente";
+                response.Message = user.IsActive ? "usuario activado correctamente" : "usuario desactivado correctamente";
             }
             catch (Exception ex)
             {
