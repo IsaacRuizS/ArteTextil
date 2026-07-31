@@ -11,6 +11,7 @@ import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AuthService } from '../../../services/auth.service';
+import { sortUsersByName } from '../../../shared/utils/sort-users';
 
 @Component({
     selector: 'app-salaries',
@@ -31,6 +32,10 @@ export class SalaryComponent implements OnInit {
     page = 1;
     isAdmin: boolean = false;
 
+    // El salario base siempre es un monto positivo; el tope evita errores de digitación.
+    readonly MIN_SALARY = 1;
+    readonly MAX_SALARY = 100_000_000;
+
     constructor(
         private api: ApiSalaryService,
         private apiUser: ApiUserService,
@@ -42,7 +47,11 @@ export class SalaryComponent implements OnInit {
     ) {
         this.form = this.fb.group({
             userId: ['', Validators.required],
-            baseSalary: [0, [Validators.required, Validators.min(1)]]
+            baseSalary: [null, [
+                Validators.required,
+                Validators.min(this.MIN_SALARY),
+                Validators.max(this.MAX_SALARY)
+            ]]
         });
     }
 
@@ -50,7 +59,10 @@ export class SalaryComponent implements OnInit {
         this.isAdmin = this.authService.currentUserValue?.roleId === 1;
         this.load();
         if (this.isAdmin) {
-            this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => {
+            this.apiUser.getAll().then(u => {
+                this.users = sortUsersByName(u.filter(x => x.isActive));
+                this.cdr.markForCheck();
+            }).catch(() => {
                 this.notificationService.error('Error al cargar los usuarios');
             });
         }
@@ -87,7 +99,25 @@ export class SalaryComponent implements OnInit {
     openCreate() {
         this.showModal = true;
         this.editingId = null;
-        this.form.reset({ userId: '', baseSalary: 0 });
+        this.form.reset({ userId: '', baseSalary: null });
+    }
+
+    get modalTitle(): string {
+        return this.editingId ? 'Editar salario' : 'Nuevo salario';
+    }
+
+    // Mensaje específico según el error del salario base.
+    get baseSalaryError(): string | null {
+
+        const control = this.form.get('baseSalary');
+
+        if (!control?.touched || !control?.errors) return null;
+
+        if (control.errors['required']) return 'Debe indicar el salario base.';
+        if (control.errors['min']) return 'El salario base debe ser mayor que cero. No se admiten valores negativos.';
+        if (control.errors['max']) return `El salario base no puede superar ₡${this.MAX_SALARY.toLocaleString('es-CR')}.`;
+
+        return 'El salario base no es válido.';
     }
 
     edit(s: SalaryModel) {
@@ -100,6 +130,8 @@ export class SalaryComponent implements OnInit {
 
         if (this.form.invalid) {
             this.form.markAllAsTouched();
+            this.notificationService.error(
+                this.baseSalaryError || 'Revise los campos marcados antes de guardar.');
             return;
         }
 
@@ -128,6 +160,8 @@ export class SalaryComponent implements OnInit {
                 next: () => {
                     this.showModal = false;
                     this.load();
+                    this.notificationService.success(
+                        this.editingId ? 'Salario actualizado correctamente.' : 'Salario creado correctamente.');
                     this.shared.setLoading(false);
                 },
 
@@ -145,6 +179,8 @@ export class SalaryComponent implements OnInit {
                 next: () => {
                     this.showModal = false;
                     this.load();
+                    this.notificationService.success(
+                        this.editingId ? 'Salario actualizado correctamente.' : 'Salario creado correctamente.');
                     this.shared.setLoading(false);
                 },
 

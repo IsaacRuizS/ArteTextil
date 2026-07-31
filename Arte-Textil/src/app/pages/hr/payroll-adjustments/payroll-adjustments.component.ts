@@ -10,6 +10,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { NotificationService } from '../../../services/notification.service';
 import { NgZone } from '@angular/core';
+import { sortUsersByName } from '../../../shared/utils/sort-users';
 
 @Component({
     selector: 'app-payroll-adjustments',
@@ -40,6 +41,12 @@ export class PayrollAdjustmentsComponent implements OnInit {
     modalType: 'success' | 'error' = 'error';
     showMessageModal = false;
 
+    // Tope de seguridad para evitar montos escritos por error (ej. un cero de más).
+    readonly MAX_AMOUNT = 10_000_000;
+
+    // Un ajuste no puede registrarse para un mes futuro.
+    readonly maxMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+
     constructor(
         private apiAdjustment: ApiPayrollAdjustmentService,
         private apiUser: ApiUserService,
@@ -52,11 +59,20 @@ export class PayrollAdjustmentsComponent implements OnInit {
         this.adjustmentForm = this.fb.group({
             adjustmentId: [0],
             userId: ['', Validators.required],
-            amount: ['', [Validators.required, Validators.min(1)]],
+            amount: ['', [Validators.required, Validators.min(1), Validators.max(this.MAX_AMOUNT)]],
             type: ['Extra', Validators.required],
-            reason: [''],
-            month: ['', Validators.required]
+            reason: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(250)]],
+            month: ['', [Validators.required]]
         });
+    }
+
+    get isFutureMonth(): boolean {
+        const month = this.adjustmentForm?.get('month')?.value;
+        return !!month && month > this.maxMonth;
+    }
+
+    get canSubmit(): boolean {
+        return this.adjustmentForm.valid && !this.isFutureMonth;
     }
 
     ngOnInit(): void {
@@ -79,7 +95,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         this.apiUser.getAll()
             .then((users) => {
-                this.users = users;
+                this.users = sortUsersByName(users.filter(u => u.isActive));
                 this.cdr.markForCheck();
             })
             .catch(() => {
@@ -138,10 +154,61 @@ export class PayrollAdjustmentsComponent implements OnInit {
     openCreateModal() {
         this.adjustmentForm.reset({
             adjustmentId: 0,
+            userId: '',
+            amount: '',
             type: 'Extra',
+            reason: '',
             month: ''
         });
         this.showFormModal = true;
+    }
+
+    // Primer error pendiente, con el detalle de qué corregir.
+    private getFormError(): string {
+
+        const controls = this.adjustmentForm.controls;
+
+        if (controls['userId'].errors?.['required']) {
+            return 'Debe seleccionar el colaborador al que se aplica el ajuste.';
+        }
+
+        if (controls['amount'].errors?.['required']) {
+            return 'Debe indicar el monto del ajuste.';
+        }
+
+        if (controls['amount'].errors?.['min']) {
+            return 'El monto debe ser mayor que cero. Para descontar dinero use el tipo "Rebajo".';
+        }
+
+        if (controls['amount'].errors?.['max']) {
+            return `El monto no puede superar ₡${this.MAX_AMOUNT.toLocaleString('es-CR')}.`;
+        }
+
+        if (controls['month'].errors?.['required']) {
+            return 'Debe seleccionar el mes de planilla al que corresponde el ajuste.';
+        }
+
+        if (this.isFutureMonth) {
+            return 'No se pueden registrar ajustes para un mes futuro.';
+        }
+
+        if (controls['type'].errors?.['required']) {
+            return 'Debe indicar si el ajuste es un Extra o un Rebajo.';
+        }
+
+        if (controls['reason'].errors?.['required']) {
+            return 'Debe indicar la razón del ajuste.';
+        }
+
+        if (controls['reason'].errors?.['minlength']) {
+            return 'La razón debe tener al menos 5 caracteres.';
+        }
+
+        if (controls['reason'].errors?.['maxlength']) {
+            return 'La razón no puede superar los 250 caracteres.';
+        }
+
+        return 'Revise los datos del ajuste antes de guardar.';
     }
 
     // modal para error
@@ -160,17 +227,13 @@ export class PayrollAdjustmentsComponent implements OnInit {
     // crear ajuste
     saveAdjustment() {
 
-        if (this.adjustmentForm.invalid) {
+        if (!this.canSubmit) {
             this.adjustmentForm.markAllAsTouched();
+            this.showModal(this.getFormError(), 'error');
             return;
         }
 
         const monthValue = this.adjustmentForm.value.month;
-
-        if (!monthValue) {
-            this.showModal("Seleccione un mes", 'error');
-            return;
-        }
 
         const [year, month] = monthValue.split('-');
 
@@ -221,25 +284,33 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         if (!this.adjustmentToDelete) return;
 
+        // Se guardan los datos antes de limpiar la referencia, para poder
+        // construir el mensaje correcto dentro del callback.
+        const deleted = this.adjustmentToDelete;
+
         this.sharedService.setLoading(true);
 
-        this.apiAdjustment.delete(this.adjustmentToDelete.adjustmentId).subscribe({
+        this.apiAdjustment.delete(deleted.adjustmentId).subscribe({
             next: () => {
                 this.showDeleteModal = false;
                 this.adjustmentToDelete = null;
                 this.loadAdjustments();
                 this.sharedService.setLoading(false);
+
+                // El mensaje debe emitirse solo cuando la operación realmente
+                // fue exitosa, no de forma sincrónica al lanzar la petición.
+                this.showModal(
+                    `Movimiento eliminado correctamente. Ya no se aplicará en la planilla de ${deleted.userName}.`,
+                    'success'
+                );
             },
-            error: () => {
-                this.notificationService.error('Error al eliminar el ajuste de nómina');
+            error: (err) => {
                 this.sharedService.setLoading(false);
+                this.showModal(
+                    err?.error?.message || err?.message || 'No se pudo eliminar el movimiento.',
+                    'error'
+                );
             }
         });
-        this.showModal(
-            this.adjustmentToDelete?.isActive
-                ? 'Ajuste ocultado correctamente'
-                : 'Ajuste activado correctamente',
-            'success'
-        );
     }
 }

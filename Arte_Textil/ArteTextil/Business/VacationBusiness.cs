@@ -15,6 +15,7 @@ public class VacationBusiness
     private readonly IMapper _mapper;
     private readonly ISystemLogHelper _logHelper;
 
+    // Días ganados: 1 por cada mes COMPLETO trabajado desde el ingreso.
     private async Task<int> CalculateAvailableDays(int userId)
     {
         var user = await _repository.Context.Users
@@ -22,12 +23,34 @@ public class VacationBusiness
 
         if (user == null) return 0;
 
-        var monthsWorked = (DateTime.UtcNow.Year - user.CreatedAt.Year) * 12
-                         + DateTime.UtcNow.Month - user.CreatedAt.Month;
+        return CalculateEarnedDays(user.CreatedAt);
+    }
 
-        if (monthsWorked < 0) monthsWorked = 0;
+    private static int CalculateEarnedDays(DateTime hireDate)
+    {
+        var today = DateTime.UtcNow.Date;
+        var start = hireDate.Date;
 
-        return monthsWorked; // 1 día por mes
+        var monthsWorked = (today.Year - start.Year) * 12 + today.Month - start.Month;
+
+        // Si aún no se cumple el día del mes, ese mes todavía no está completo.
+        if (today.Day < start.Day) monthsWorked--;
+
+        return monthsWorked < 0 ? 0 : monthsWorked; // 1 día por mes completo
+    }
+
+    // Días comprometidos: aprobados + pendientes de resolución.
+    // Las solicitudes pendientes también reservan saldo, de lo contrario un
+    // colaborador podría enviar varias solicitudes que sumadas exceden su saldo.
+    private async Task<int> CalculateCommittedDays(int userId)
+    {
+        var vacations = await _repository.Query()
+            .Where(v => v.UserId == userId
+                && (v.Status == "Aprobada" || v.Status == "Pendiente")
+                && v.DeletedAt == null)
+            .ToListAsync();
+
+        return vacations.Sum(v => (v.EndDate.Date - v.StartDate.Date).Days + 1);
     }
 
     public VacationBusiness(
@@ -59,24 +82,18 @@ public class VacationBusiness
             // Calcular días solicitados
             var daysRequested = (endDate - startDate).Days + 1;
 
-            // Calcular disponibles
-            var availableDays = await CalculateAvailableDays(dto.userId);
+            // Saldo = días ganados por antigüedad - días ya comprometidos
+            var earnedDays = await CalculateAvailableDays(dto.userId);
+            var committedDays = await CalculateCommittedDays(dto.userId);
 
-            // Calcular días ya usados
-            var vacations = await _repository.Query()
-    .Where(v => v.UserId == dto.userId
-        && v.Status == "Aprobada"
-        && v.DeletedAt == null)
-    .ToListAsync();
-
-            var usedDays = vacations.Sum(v => (v.EndDate.Date - v.StartDate.Date).Days + 1);
-
-            var remainingDays = availableDays - usedDays;
+            var remainingDays = Math.Max(earnedDays - committedDays, 0);
 
             if (daysRequested > remainingDays)
             {
                 response.Success = false;
-                response.Message = $"No tiene días suficientes. Disponibles: {remainingDays}";
+                response.Message = remainingDays == 0
+                    ? "No tiene días de vacaciones disponibles. Se acumula 1 día por cada mes completo trabajado."
+                    : $"Está solicitando {daysRequested} día(s) y solo tiene {remainingDays} disponible(s).";
                 return response;
             }
 
@@ -177,17 +194,119 @@ public class VacationBusiness
     // Calcular días disponibles
     public async Task<int> GetAvailableDays(int userId)
     {
-        var available = await CalculateAvailableDays(userId);
+        var earned = await CalculateAvailableDays(userId);
+        var committed = await CalculateCommittedDays(userId);
 
-        var vacations = await _repository.Query()
-            .Where(v => v.UserId == userId
-                && v.Status == "Aprobada"
-                && v.DeletedAt == null)
-            .ToListAsync();
+        return Math.Max(earned - committed, 0);
+    }
 
-        var used = vacations.Sum(v => (v.EndDate.Date - v.StartDate.Date).Days + 1);
+    // Desglose del saldo, para mostrarlo en pantalla sin adivinar el cálculo.
+    public async Task<ApiResponse<VacationBalanceDto>> GetBalance(int userId)
+    {
+        var response = new ApiResponse<VacationBalanceDto>();
 
-        return Math.Max(available - used, 0);
+        try
+        {
+            var user = await _repository.Context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.DeletedAt == null && u.IsActive);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "Usuario no encontrado o inactivo";
+                return response;
+            }
+
+            var vacations = await _repository.Query()
+                .Where(v => v.UserId == userId && v.DeletedAt == null)
+                .ToListAsync();
+
+            var days = (Vacation v) => (v.EndDate.Date - v.StartDate.Date).Days + 1;
+
+            var earned = CalculateEarnedDays(user.CreatedAt);
+            var approved = vacations.Where(v => v.Status == "Aprobada").Sum(days);
+            var pending = vacations.Where(v => v.Status == "Pendiente").Sum(days);
+
+            var today = DateTime.UtcNow.Date;
+            var monthsWorked = (today.Year - user.CreatedAt.Year) * 12 + today.Month - user.CreatedAt.Month;
+            if (today.Day < user.CreatedAt.Date.Day) monthsWorked--;
+
+            response.Data = new VacationBalanceDto
+            {
+                userId = user.UserId,
+                userName = user.FullName,
+                hireDate = user.CreatedAt,
+                monthsWorked = monthsWorked < 0 ? 0 : monthsWorked,
+                earnedDays = earned,
+                approvedDays = approved,
+                pendingDays = pending,
+                availableDays = Math.Max(earned - approved - pending, 0)
+            };
+
+            response.Message = "Saldo de vacaciones obtenido";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
+    // Saldo de todos los colaboradores activos (para el administrador).
+    public async Task<ApiResponse<List<VacationBalanceDto>>> GetAllBalances()
+    {
+        var response = new ApiResponse<List<VacationBalanceDto>>();
+
+        try
+        {
+            var users = await _repository.Context.Users
+                .Where(u => u.DeletedAt == null && u.IsActive)
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
+            var vacations = await _repository.Query()
+                .Where(v => v.DeletedAt == null
+                    && (v.Status == "Aprobada" || v.Status == "Pendiente"))
+                .ToListAsync();
+
+            var days = (Vacation v) => (v.EndDate.Date - v.StartDate.Date).Days + 1;
+            var today = DateTime.UtcNow.Date;
+
+            response.Data = users.Select(u =>
+            {
+                var own = vacations.Where(v => v.UserId == u.UserId).ToList();
+
+                var earned = CalculateEarnedDays(u.CreatedAt);
+                var approved = own.Where(v => v.Status == "Aprobada").Sum(days);
+                var pending = own.Where(v => v.Status == "Pendiente").Sum(days);
+
+                var monthsWorked = (today.Year - u.CreatedAt.Year) * 12 + today.Month - u.CreatedAt.Month;
+                if (today.Day < u.CreatedAt.Date.Day) monthsWorked--;
+
+                return new VacationBalanceDto
+                {
+                    userId = u.UserId,
+                    userName = u.FullName,
+                    hireDate = u.CreatedAt,
+                    monthsWorked = monthsWorked < 0 ? 0 : monthsWorked,
+                    earnedDays = earned,
+                    approvedDays = approved,
+                    pendingDays = pending,
+                    availableDays = Math.Max(earned - approved - pending, 0)
+                };
+            }).ToList();
+
+            response.Message = "Saldos de vacaciones obtenidos";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
     }
 
     // Ver propias solicitudes
