@@ -7,6 +7,7 @@ import { ApiSupplierService } from '../../../services/api-supplier.service';
 import { SharedService } from '../../../services/shared.service';
 import { NotificationService } from '../../../services/notification.service';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-suppliers',
     standalone: true,
@@ -61,8 +62,8 @@ export class SuppliersComponent implements OnInit {
         this.apiSupplierService.getAll().subscribe({
             next: (suppliers: SupplierModel[]) => {
 
-                this.suppliers = suppliers;
-                this.suppliersOrigins = suppliers;
+                this.suppliersOrigins = sortByDateDesc(suppliers);
+                this.suppliers = this.suppliersOrigins;
 
                 this.onFilterInfo();
 

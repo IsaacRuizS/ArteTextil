@@ -9,6 +9,7 @@ import { ApiUserService } from '../../../services/api-user.service';
 import { ApiRolService } from '../../../services/api-role.service';
 import { SharedService } from '../../../services/shared.service';
 import { NotificationService } from '../../../services/notification.service';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 import {
     checkPasswordRequirements,
     PasswordRequirements,
@@ -112,8 +113,8 @@ export class UsersComponent implements OnInit {
         this.apiUserService.getAll().then(
             (users: UserModel[]) => {
 
-                this.users = users;
-                this.usersOrigins = users;
+                this.usersOrigins = sortByDateDesc(users);
+                this.users = this.usersOrigins;
 
                 this.applyFilters();
                 this.loadRoles();

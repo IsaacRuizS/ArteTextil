@@ -1,6 +1,9 @@
 export class PayrollMonthlyModel {
 
     constructor(init?: Partial<PayrollMonthlyModel>) {
+        if (init && typeof init.createdAt === 'string') {
+            init.createdAt = new Date(init.createdAt);
+        }
         Object.assign(this, init);
     }
 
@@ -25,5 +28,8 @@ export class PayrollMonthlyModel {
     approvedByUserId?: number;
 
     isActive!: boolean;
+
+    /** Fecha de generación de la planilla. Se usa para ordenar el listado. */
+    createdAt?: Date;
 
 }

@@ -11,6 +11,7 @@ import { VacationBalanceModel } from '../../../shared/models/vacation-balance.mo
 import { NgxPaginationModule } from 'ngx-pagination';
 import { sortUsersByName } from '../../../shared/utils/sort-users';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-vacations',
     standalone: true,
@@ -171,8 +172,8 @@ export class VacationsComponent implements OnInit {
 
         request.subscribe({
             next: (data) => {
-                this.vacations = data;
-                this.vacationsOrigin = data;
+                this.vacationsOrigin = sortByDateDesc(data);
+                this.vacations = this.vacationsOrigin;
                 this.sharedService.setLoading(false);
             },
             error: () => {

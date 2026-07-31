@@ -7,6 +7,7 @@ import { SharedService } from '../../services/shared.service';
 import { NotificationService } from '../../services/notification.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 
+import { sortByDateDesc } from '../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-category-management',
     standalone: true,
@@ -84,8 +85,8 @@ export class CategoryManagementComponent implements OnInit {
         this.apiCategoryService.getAll().subscribe({
             next: (categories: CategoryModel[]) => {
 
-                this.categories = categories;
-                this.categoriesOrigins = categories;
+                this.categoriesOrigins = sortByDateDesc(categories);
+                this.categories = this.categoriesOrigins;
 
                 this.onFilterInfo();
 

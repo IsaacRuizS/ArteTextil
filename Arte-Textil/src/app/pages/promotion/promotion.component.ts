@@ -12,6 +12,7 @@ import { PromotionModel } from '../../shared/models/promotion.model';
 import { ProductModel } from '../../shared/models/product.model';
 import { SharedService } from '../../services/shared.service';
 
+import { sortByDateDesc } from '../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-promotion',
     standalone: true,
@@ -68,8 +69,8 @@ export class PromotionComponent implements OnInit {
 
         this.apiPromotionService.getAll().subscribe({
             next: data => {
-                this.promotions = data;
-                this.promotionsOrigins = data;
+                this.promotionsOrigins = sortByDateDesc(data);
+                this.promotions = this.promotionsOrigins;
                 this.onFilterInfo();
                 this.sharedService.setLoading(false);
                 this.cdr.markForCheck();

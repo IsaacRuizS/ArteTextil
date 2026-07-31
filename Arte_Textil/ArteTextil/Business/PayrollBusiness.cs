@@ -180,7 +180,8 @@ public class PayrollBusiness
                         deductions = p.Deductions,
                         total = p.Total,
                         approvedByUserId = p.ApprovedByUserId,
-                        isActive = p.IsActive
+                        isActive = p.IsActive,
+                        createdAt = p.CreatedAt
                     }
                 ).ToListAsync();
 

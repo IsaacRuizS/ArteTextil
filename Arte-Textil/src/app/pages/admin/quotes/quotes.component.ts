@@ -11,6 +11,7 @@ import { QuotesModalComponent } from './quotes-modal/quotes-modal.component';
 import { QuotesSmartListComponent } from '../../../components/quotes-smart-list/quotes-smart-list.component';
 
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-quotes',
     standalone: true,
@@ -54,8 +55,8 @@ export class QuotesComponent implements OnInit {
 
             next: (quotes) => {
 
-                this.quotes = quotes;
-                this.quotesOrigins = quotes;
+                this.quotesOrigins = sortByDateDesc(quotes);
+                this.quotes = this.quotesOrigins;
 
                 this.onFilterInfo();
 

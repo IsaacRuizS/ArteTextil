@@ -11,6 +11,8 @@ import { NotificationService } from '../../services/notification.service';
 import { ProductModel } from '../../shared/models/product.model';
 import { CategoryModel } from '../../shared/models/category.model';
 
+import { sortByDateDesc } from '../../shared/utils/sort-by-date';
+
 @Component({
     selector: 'app-inventory',
     standalone: true,
@@ -61,7 +63,7 @@ export class InventoryComponent implements OnInit {
             .pipe(finalize(() => this.sharedService.setLoading(false)))
             .subscribe({
                 next: (products: ProductModel[]) => {
-                    this.productsOrigins = [...products];
+                    this.productsOrigins = sortByDateDesc(products);
                     this.applyFilters();
                     this.cdr.markForCheck();
                 },

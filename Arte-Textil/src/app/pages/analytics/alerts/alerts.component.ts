@@ -5,6 +5,7 @@ import { ApiAlertService } from '../../../services/api-alert.service';
 import { AlertModel } from '../../../shared/models/alert.model';
 import { SharedService } from '../../../services/shared.service';
 import { NotificationService } from '../../../services/notification.service';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 
 @Component({
     selector: 'app-alerts',
@@ -51,9 +52,7 @@ export class AlertsComponent implements OnInit {
         this.api.getAll().subscribe({
             next: data => {
                 // Más recientes primero.
-                this.alerts = [...data].sort(
-                    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                );
+                this.alerts = sortByDateDesc(data);
                 this.shared.setLoading(false);
                 this.cdr.detectChanges();
             },

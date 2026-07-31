@@ -23,4 +23,7 @@ public class PayrollMonthlyDto
     public int? approvedByUserId { get; set; }
 
     public bool isActive { get; set; }
+
+    /// <summary>Fecha de generación de la planilla. La usa el listado para ordenar de más reciente a más antiguo.</summary>
+    public DateTime createdAt { get; set; }
 }

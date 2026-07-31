@@ -6,6 +6,7 @@ import { RolModel } from '../../../shared/models/rol.model';
 import { ApiRolService } from '../../../services/api-role.service';
 import { SharedService } from '../../../services/shared.service';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-roles',
     standalone: true,
@@ -56,8 +57,8 @@ export class RolesComponent implements OnInit {
         this.apiRolService.getAll().then(
             (Roles: RolModel[]) => {
 
-                this.roles = Roles;
-                this.rolesOrigins = Roles;
+                this.rolesOrigins = sortByDateDesc(Roles);
+                this.roles = this.rolesOrigins;
 
                 this.applyFilters();
 

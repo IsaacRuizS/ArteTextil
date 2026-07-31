@@ -17,6 +17,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ProductImageModel } from '../../../shared/models/productImage.model';
 import { UploadImageService } from '../../../services/upload-image.service';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-products',
     standalone: true,
@@ -108,8 +109,8 @@ export class ProductsComponent implements OnInit {
             .subscribe({
                 next: (products: ProductModel[]) => {
 
-                    this.products = [...products];
-                    this.productsOrigins = [...products];
+                    this.productsOrigins = sortByDateDesc(products);
+                    this.products = [...this.productsOrigins];
 
                     this._refreshCategoryFilterOptions();
 

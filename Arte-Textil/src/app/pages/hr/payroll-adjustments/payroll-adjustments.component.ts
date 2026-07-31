@@ -12,6 +12,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { NgZone } from '@angular/core';
 import { sortUsersByName } from '../../../shared/utils/sort-users';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-payroll-adjustments',
     standalone: true,
@@ -114,8 +115,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         request.subscribe({
             next: (data: PayrollAdjustmentModel[]) => {
-                this.adjustments = data;
-                this.adjustmentsOrigin = data;
+                this.adjustmentsOrigin = sortByDateDesc(data);
+                this.adjustments = this.adjustmentsOrigin;
                 this.cdr.markForCheck();
                 this.sharedService.setLoading(false);
             },

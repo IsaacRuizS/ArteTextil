@@ -63,7 +63,8 @@ public class SalaryBusiness
                 salaryId = entity.SalaryId,
                 userId = entity.UserId,
                 baseSalary = entity.BaseSalary,
-                isActive = entity.IsActive
+                isActive = entity.IsActive,
+                createdAt = entity.CreatedAt
             };
 
             response.Message = "Salario creado";
@@ -104,7 +105,8 @@ public class SalaryBusiness
                         userId = s.UserId,
                         userName = u.FullName,
                         baseSalary = s.BaseSalary,
-                        isActive = s.IsActive
+                        isActive = s.IsActive,
+                        createdAt = s.CreatedAt
                     }
                 ).ToList();
 

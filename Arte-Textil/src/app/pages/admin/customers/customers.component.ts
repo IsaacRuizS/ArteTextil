@@ -10,6 +10,7 @@ import { SharedService } from '../../../services/shared.service';
 import { NotificationService } from '../../../services/notification.service';
 import { CustomersSmartListComponent } from '../../../components/customers-smart-list/customers-smart-list.component';
 
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-customers',
     standalone: true,
@@ -105,8 +106,8 @@ export class CustomersComponent implements OnInit {
 
             next: (customers: CustomerModel[]) => {
 
-                this.customers = customers;
-                this.customersOrigins = customers;
+                this.customersOrigins = sortByDateDesc(customers);
+                this.customers = this.customersOrigins;
 
                 this.onFilterInfo();
 

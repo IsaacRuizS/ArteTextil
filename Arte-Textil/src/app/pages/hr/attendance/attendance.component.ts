@@ -19,6 +19,7 @@ import { SharedService } from '../../../services/shared.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NotificationService } from '../../../services/notification.service';
 import { sortUsersByName } from '../../../shared/utils/sort-users';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 
 @Component({
     selector: 'app-attendance',
@@ -145,16 +146,10 @@ export class AttendanceComponent implements OnInit {
         }
     }
 
-    // Más recientes primero: la asistencia del día queda arriba de la lista.
+    // Más recientes primero, igual que el resto de los listados del sistema.
+    // Si un registro no trae createdAt se usa el check-in como respaldo.
     private sortByCheckInDesc(data: AttendanceModel[]): AttendanceModel[] {
-
-        return [...data].sort((a, b) => {
-
-            const dateA = a.checkIn ? new Date(a.checkIn).getTime() : 0;
-            const dateB = b.checkIn ? new Date(b.checkIn).getTime() : 0;
-
-            return dateB - dateA;
-        });
+        return sortByDateDesc(data, a => a.createdAt ?? a.checkIn);
     }
 
     // CHECK IN

@@ -10,6 +10,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { PayrollMonthlyModel } from '../../../shared/models/payroll-monthly.model';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 
 @Component({
     selector: 'app-payroll-monthly',
@@ -95,10 +96,10 @@ export class PayrollMonthlyComponent implements OnInit {
 
             next: (data) => {
 
-                this.payrollsOrigin = data;
+                this.payrollsOrigin = sortByDateDesc(data);
 
                 if (!period) {
-                    this.payrolls = data;
+                    this.payrolls = this.payrollsOrigin;
                 } else {
 
                     const [year, month] = period.split('-');
@@ -106,7 +107,7 @@ export class PayrollMonthlyComponent implements OnInit {
                     const y = Number(year);
                     const m = Number(month);
 
-                    this.payrolls = data.filter(p =>
+                    this.payrolls = this.payrollsOrigin.filter(p =>
                         p.year === y && p.month === m
                     );
                 }

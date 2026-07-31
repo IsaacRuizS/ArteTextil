@@ -23,6 +23,7 @@ import { OrderStatusHistoryModalComponent } from '../../components/order-status-
 import { NotificationService } from '../../services/notification.service';
 
 
+import { sortByDateDesc } from '../../shared/utils/sort-by-date';
 @Component({
     selector: 'app-orders-management',
     standalone: true,
@@ -96,8 +97,8 @@ export class OrdersManagementComponent implements OnInit {
         this.apiOrderService.getAll().subscribe({
             next: (orders: OrderModel[]) => {
 
-                this.orders = orders;
-                this.ordersOrigin = orders;
+                this.ordersOrigin = sortByDateDesc(orders);
+                this.orders = this.ordersOrigin;
 
                 this.applyFilters();
 

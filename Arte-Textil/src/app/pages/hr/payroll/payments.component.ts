@@ -7,6 +7,7 @@ import { PaymentModel } from '../../../shared/models/payment.model';
 import { CustomCurrencyPipe } from '../../../shared/pipes/crc-currency.pipe';
 import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 
 
 @Component({
@@ -34,8 +35,10 @@ export class PaymentsComponent implements OnInit {
         this.shared.setLoading(true);
         this.api.getAll().subscribe({
             next: d => {
-                this.paymentsOrigin = d;
-                this.payments = d;
+                // El DTO de pagos no expone createdAt: la fecha de pago es el
+                // equivalente natural para ordenar de más reciente a más antiguo.
+                this.paymentsOrigin = sortByDateDesc(d, 'paymentDate');
+                this.payments = this.paymentsOrigin;
                 this.shared.setLoading(false);
                 this.cdr.markForCheck();
             }, error: () => {

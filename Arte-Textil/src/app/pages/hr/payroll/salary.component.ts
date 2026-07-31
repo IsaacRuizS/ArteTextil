@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AuthService } from '../../../services/auth.service';
 import { sortUsersByName } from '../../../shared/utils/sort-users';
+import { sortByDateDesc } from '../../../shared/utils/sort-by-date';
 
 @Component({
     selector: 'app-salaries',
@@ -84,8 +85,8 @@ export class SalaryComponent implements OnInit {
         this.shared.setLoading(true);
         this.api.getAll().subscribe({
             next: data => {
-                this.salariesOrigin = data;
-                this.salaries = data;
+                this.salariesOrigin = sortByDateDesc(data);
+                this.salaries = this.salariesOrigin;
                 this.shared.setLoading(false);
                 this.cdr.markForCheck();
             },
