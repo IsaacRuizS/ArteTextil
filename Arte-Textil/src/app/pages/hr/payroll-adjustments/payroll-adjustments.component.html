@@ -1,10 +1,15 @@
 <div class="hr-wrapper p-4">
 
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0">Ajustes de Planilla</h2>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Extras y Rebajos</h2>
+            <div class="text-muted small">
+                Montos que se suman o restan al salario base en la planilla del mes.
+            </div>
+        </div>
         <button class="btn btn-primary" (click)="openCreateModal()">
-            <i class="mdi mdi-plus-circle me-1"></i>Nuevo Ajuste
+            <i class="mdi mdi-plus-circle me-1"></i>Nuevo movimiento
         </button>
     </div>
 
@@ -63,12 +68,10 @@
                         <td data-label="Tipo">{{ a.type }}</td>
                         <td data-label="Razón">{{ a.reason || '-' }}</td>
                         <td data-label="" class="text-end pe-4">
-                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(a)">
-
-                                <i class="mdi"
-                                    [ngClass]="a.isActive ? 'mdi-eye text-primary' : 'mdi-eye-off text-secondary'">
-                                </i>
-
+                            <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(a)"
+                                title="Eliminar movimiento" aria-label="Eliminar movimiento">
+                                <i class="mdi mdi-trash-can-outline me-1"></i>
+                                Eliminar
                             </button>
                         </td>
                     </tr>
@@ -89,7 +92,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Nuevo Ajuste</h5>
+                <h5 class="modal-title fw-bold">Nuevo movimiento de planilla</h5>
                 <button type="button" class="btn-close" (click)="showFormModal = false"></button>
             </div>
 
@@ -97,8 +100,9 @@
                 <form [formGroup]="adjustmentForm">
 
                     <div class="mb-3">
-                        <label class="form-label">Usuario</label>
-                        <select class="form-select" formControlName="userId">
+                        <label class="form-label">Usuario <span class="text-danger">*</span></label>
+                        <select class="form-select" formControlName="userId"
+                            [class.is-invalid]="adjustmentForm.get('userId')?.touched && adjustmentForm.get('userId')?.invalid">
 
                             <option value="">Seleccione usuario</option>
 
@@ -107,29 +111,69 @@
                             </option>
 
                         </select>
+                        <div class="invalid-feedback d-block"
+                            *ngIf="adjustmentForm.get('userId')?.touched && adjustmentForm.get('userId')?.invalid">
+                            Debe seleccionar el colaborador al que se aplica el ajuste.
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Monto</label>
-                        <input type="number" class="form-control" formControlName="amount">
+                        <label class="form-label">Monto (₡) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" min="1" [max]="MAX_AMOUNT" step="1"
+                            formControlName="amount"
+                            [class.is-invalid]="adjustmentForm.get('amount')?.touched && adjustmentForm.get('amount')?.invalid">
+
+                        <div class="invalid-feedback d-block"
+                            *ngIf="adjustmentForm.get('amount')?.touched && adjustmentForm.get('amount')?.errors as errors">
+                            <ng-container *ngIf="errors['required']">Debe indicar el monto del ajuste.</ng-container>
+                            <ng-container *ngIf="errors['min']">
+                                El monto debe ser mayor que cero. Para descontar dinero use el tipo "Rebajo".
+                            </ng-container>
+                            <ng-container *ngIf="errors['max']">
+                                El monto no puede superar ₡{{ MAX_AMOUNT | number }}.
+                            </ng-container>
+                        </div>
+
+                        <div class="form-text" *ngIf="!adjustmentForm.get('amount')?.errors">
+                            Siempre en positivo: el signo lo define el tipo de ajuste.
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Mes</label>
-                        <input type="month" class="form-control" formControlName="month">
+                        <label class="form-label">Mes de planilla <span class="text-danger">*</span></label>
+                        <input type="month" class="form-control" [max]="maxMonth" formControlName="month"
+                            [class.is-invalid]="(adjustmentForm.get('month')?.touched && adjustmentForm.get('month')?.invalid) || isFutureMonth">
+
+                        <div class="invalid-feedback d-block"
+                            *ngIf="adjustmentForm.get('month')?.touched && adjustmentForm.get('month')?.errors?.['required']">
+                            Debe seleccionar el mes de planilla al que corresponde el ajuste.
+                        </div>
+
+                        <div class="invalid-feedback d-block" *ngIf="isFutureMonth">
+                            No se pueden registrar ajustes para un mes futuro.
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Tipo</label>
+                        <label class="form-label">Tipo <span class="text-danger">*</span></label>
                         <select class="form-select" formControlName="type">
-                            <option value="Extra">Extra</option>
-                            <option value="Rebajo">Rebajo</option>
+                            <option value="Extra">Extra (suma al salario)</option>
+                            <option value="Rebajo">Rebajo (resta del salario)</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Razón</label>
-                        <textarea class="form-control" formControlName="reason"></textarea>
+                        <label class="form-label">Razón <span class="text-danger">*</span></label>
+                        <textarea class="form-control" rows="3" maxlength="250" formControlName="reason"
+                            placeholder="Ej.: Horas extra del 12 al 18 de marzo"
+                            [class.is-invalid]="adjustmentForm.get('reason')?.touched && adjustmentForm.get('reason')?.invalid"></textarea>
+
+                        <div class="invalid-feedback d-block"
+                            *ngIf="adjustmentForm.get('reason')?.touched && adjustmentForm.get('reason')?.errors as errors">
+                            <ng-container *ngIf="errors['required']">Debe indicar la razón del ajuste.</ng-container>
+                            <ng-container *ngIf="errors['minlength']">La razón debe tener al menos 5 caracteres.</ng-container>
+                            <ng-container *ngIf="errors['maxlength']">La razón no puede superar los 250 caracteres.</ng-container>
+                        </div>
                     </div>
 
                 </form>
@@ -140,7 +184,7 @@
                     Cancelar
                 </button>
 
-                <button class="btn btn-primary" (click)="saveAdjustment()">
+                <button class="btn btn-primary" [disabled]="!canSubmit" (click)="saveAdjustment()">
                     Guardar
                 </button>
             </div>
@@ -155,32 +199,26 @@
         <div class="modal-content">
 
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">
-                    {{ adjustmentToDelete?.isActive ? 'Ocultar ajuste' : 'Activar ajuste' }}
-                </h5>
+                <h5 class="modal-title fw-bold">¿Eliminar movimiento?</h5>
 
                 <button type="button" class="btn-close" (click)="showDeleteModal = false">
                 </button>
             </div>
             <div class="modal-body text-center">
 
-                <div class="mb-3 display-4" [ngClass]="{
-            'text-warning': adjustmentToDelete?.isActive,
-            'text-success': !adjustmentToDelete?.isActive
-         }">
-
-                    <i class="mdi" [ngClass]="{
-            'mdi-eye-off': adjustmentToDelete?.isActive,
-            'mdi-eye': !adjustmentToDelete?.isActive
-           }">
-                    </i>
-
+                <div class="mb-3 display-4 text-danger">
+                    <i class="mdi mdi-trash-can-outline"></i>
                 </div>
 
-                <p class="text-muted small">
-                    {{ adjustmentToDelete?.isActive
-                    ? 'Este ajuste dejará de aplicarse en planilla.'
-                    : 'Este ajuste volverá a aplicarse en planilla.' }}
+                <p class="mb-2">
+                    {{ adjustmentToDelete?.type }} de
+                    <strong>{{ adjustmentToDelete?.amount | customCurrency:'₡' }}</strong>
+                    para <strong>{{ adjustmentToDelete?.userName }}</strong>.
+                </p>
+
+                <p class="text-muted small mb-0">
+                    Se eliminará de forma permanente y dejará de aplicarse en planilla.
+                    Esta acción no se puede deshacer.
                 </p>
 
             </div>
@@ -190,11 +228,11 @@
                     Cancelar
                 </button>
 
-                <button class="btn px-4" [ngClass]="adjustmentToDelete?.isActive ? 'btn-warning' : 'btn-success'"
-                    (click)="confirmDelete()">
-
-                    {{ adjustmentToDelete?.isActive ? 'Ocultar' : 'Activar' }}
-
+                <button class="btn btn-danger px-4" (click)="confirmDelete()">
+                    Sí, eliminar
                 </button>
 
             </div>
+        </div>
+    </div>
+</div>

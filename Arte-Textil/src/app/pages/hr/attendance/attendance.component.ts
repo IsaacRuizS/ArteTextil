@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+    ReactiveFormsModule,
+    FormBuilder,
+    FormGroup,
+    Validators,
+    FormsModule,
+    AbstractControl,
+    ValidationErrors
+} from '@angular/forms';
 
 import { AttendanceModel } from '../../../shared/models/attendance.model';
 import { UserModel } from '../../../shared/models/user.model';
@@ -10,6 +18,7 @@ import { ApiUserService } from '../../../services/api-user.service';
 import { SharedService } from '../../../services/shared.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NotificationService } from '../../../services/notification.service';
+import { sortUsersByName } from '../../../shared/utils/sort-users';
 
 @Component({
     selector: 'app-attendance',
@@ -47,12 +56,39 @@ export class AttendanceComponent implements OnInit {
         private fb: FormBuilder
     ) {
 
-        this.adminAttendanceForm = this.fb.group({
-            userId: ['', Validators.required],
-            checkIn: ['', Validators.required],
-            checkOut: ['']
-        });
+        this.adminAttendanceForm = this.fb.group(
+            {
+                userId: ['', Validators.required],
+                checkIn: ['', Validators.required],
+                checkOut: ['']
+            },
+            { validators: [this.checkRangeValidator, this.futureCheckInValidator] }
+        );
 
+    }
+
+    // El check-out no puede ser anterior o igual al check-in.
+    private checkRangeValidator(control: AbstractControl): ValidationErrors | null {
+
+        const checkIn = control.get('checkIn')?.value;
+        const checkOut = control.get('checkOut')?.value;
+
+        if (!checkIn || !checkOut) return null;
+
+        return checkOut <= checkIn ? { invalidRange: true } : null;
+    }
+
+    // No se permite registrar asistencias en el futuro.
+    private futureCheckInValidator(control: AbstractControl): ValidationErrors | null {
+
+        const now = new Date();
+        const checkIn = control.get('checkIn')?.value;
+        const checkOut = control.get('checkOut')?.value;
+
+        if (checkIn && new Date(checkIn) > now) return { futureCheckIn: true };
+        if (checkOut && new Date(checkOut) > now) return { futureCheckOut: true };
+
+        return null;
     }
 
     ngOnInit(): void {
@@ -77,8 +113,8 @@ export class AttendanceComponent implements OnInit {
 
             this.apiAttendance.getAll().subscribe({
                 next: (data) => {
-                    this.attendances = data;
-                    this.attendancesOrigin = data;
+                    this.attendancesOrigin = this.sortByCheckInDesc(data);
+                    this.onFilter();
                     this.cdr.markForCheck();
                     this.sharedService.setLoading(false);
                 },
@@ -92,8 +128,8 @@ export class AttendanceComponent implements OnInit {
 
             this.apiAttendance.getMine().subscribe({
                 next: (data) => {
-                    this.attendances = data;
-                    this.attendancesOrigin = data;
+                    this.attendancesOrigin = this.sortByCheckInDesc(data);
+                    this.onFilter();
                     this.cdr.markForCheck();
                     this.sharedService.setLoading(false);
                 },
@@ -104,6 +140,18 @@ export class AttendanceComponent implements OnInit {
             });
 
         }
+    }
+
+    // Más recientes primero: la asistencia del día queda arriba de la lista.
+    private sortByCheckInDesc(data: AttendanceModel[]): AttendanceModel[] {
+
+        return [...data].sort((a, b) => {
+
+            const dateA = a.checkIn ? new Date(a.checkIn).getTime() : 0;
+            const dateB = b.checkIn ? new Date(b.checkIn).getTime() : 0;
+
+            return dateB - dateA;
+        });
     }
 
     // CHECK IN
@@ -146,13 +194,48 @@ export class AttendanceComponent implements OnInit {
 
     openAdminAttendance() {
 
-        this.adminAttendanceForm.reset();
+        // Debe limpiarse el id de edición, de lo contrario el modal de "nueva
+        // asistencia" terminaría actualizando el último registro editado.
+        this.editingAttendanceId = null;
+
+        this.adminAttendanceForm.reset({ userId: '', checkIn: '', checkOut: '' });
 
         this.showAdminModal = true;
 
         if (this.users.length === 0) {
             this.loadUsers();
         }
+    }
+
+    closeAdminModal() {
+        this.showAdminModal = false;
+        this.editingAttendanceId = null;
+    }
+
+    get modalTitle(): string {
+        return this.editingAttendanceId ? 'Editar asistencia' : 'Registrar asistencia';
+    }
+
+    // Mensaje del error a nivel de formulario (rango / fechas futuras).
+    get formLevelError(): string | null {
+
+        const form = this.adminAttendanceForm;
+
+        if (!form.touched && !form.dirty) return null;
+
+        if (form.hasError('invalidRange')) {
+            return 'La hora de salida debe ser posterior a la hora de entrada.';
+        }
+
+        if (form.hasError('futureCheckIn')) {
+            return 'La hora de entrada no puede estar en el futuro.';
+        }
+
+        if (form.hasError('futureCheckOut')) {
+            return 'La hora de salida no puede estar en el futuro.';
+        }
+
+        return null;
     }
 
     // CARGAR USUARIOS
@@ -162,7 +245,7 @@ export class AttendanceComponent implements OnInit {
         this.apiUser.getAll()
             .then((users: UserModel[]) => {
 
-                this.users = users;
+                this.users = sortUsersByName(users.filter(u => u.isActive));
 
                 this.cdr.markForCheck();
 
@@ -181,6 +264,13 @@ export class AttendanceComponent implements OnInit {
             return;
         }
 
+        if (this.adminAttendanceForm.invalid) {
+            this.adminAttendanceForm.markAllAsTouched();
+            this.notificationService.warning(
+                this.formLevelError || 'Complete los datos requeridos de la asistencia.');
+            return;
+        }
+
         this.sharedService.setLoading(true);
 
         const payload = this.adminAttendanceForm.value;
@@ -194,11 +284,11 @@ export class AttendanceComponent implements OnInit {
 
                 next: () => {
 
-                    this.showAdminModal = false;
-
-                    this.editingAttendanceId = null;
+                    this.closeAdminModal();
 
                     this.loadAttendances();
+
+                    this.notificationService.success('Asistencia actualizada correctamente.');
 
                     this.sharedService.setLoading(false);
                 },
@@ -215,9 +305,11 @@ export class AttendanceComponent implements OnInit {
 
                 next: () => {
 
-                    this.showAdminModal = false;
+                    this.closeAdminModal();
 
                     this.loadAttendances();
+
+                    this.notificationService.success('Asistencia registrada correctamente.');
 
                     this.sharedService.setLoading(false);
                 },
@@ -271,7 +363,7 @@ export class AttendanceComponent implements OnInit {
             this.apiUser.getAll()
                 .then((users: UserModel[]) => {
 
-                    this.users = users;
+                    this.users = sortUsersByName(users.filter(u => u.isActive));
 
                     this.setFormValues(attendance);
 

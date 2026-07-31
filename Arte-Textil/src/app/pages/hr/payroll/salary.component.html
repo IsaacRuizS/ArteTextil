@@ -49,7 +49,8 @@
             <td data-label="Salario Base">{{ s.baseSalary | customCurrency:'₡' }}</td>
 
             <td data-label="" class="text-end">
-              <button *ngIf="isAdmin" class="btn btn-sm btn-light" (click)="edit(s)">
+              <button *ngIf="isAdmin" class="btn btn-sm btn-light" (click)="edit(s)"
+                title="Editar salario base" aria-label="Editar salario base">
                 <i class="mdi mdi-pencil"></i>
               </button>
             </td>
@@ -75,7 +76,7 @@
 
         <!-- Header -->
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold">Salario</h5>
+          <h5 class="modal-title fw-bold">{{ modalTitle }}</h5>
           <button class="btn-close" (click)="showModal=false"></button>
         </div>
 
@@ -84,19 +85,33 @@
           <form [formGroup]="form">
 
             <div class="mb-3">
-              <label class="form-label">Usuario</label>
-              <select class="form-select" formControlName="userId">
+              <label class="form-label">Usuario <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="userId"
+                [class.is-invalid]="form.get('userId')?.touched && form.get('userId')?.invalid">
                 <option value="">Seleccione usuario</option>
 
                 <option *ngFor="let u of users" [value]="u.userId">
                   {{ u.fullName }}
                 </option>
               </select>
+              <div class="invalid-feedback d-block" *ngIf="form.get('userId')?.touched && form.get('userId')?.invalid">
+                Debe seleccionar un usuario.
+              </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Salario base</label>
-              <input type="number" class="form-control" formControlName="baseSalary">
+              <label class="form-label">Salario base (₡) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" [min]="MIN_SALARY" [max]="MAX_SALARY" step="1"
+                placeholder="Ej.: 450000" formControlName="baseSalary"
+                [class.is-invalid]="form.get('baseSalary')?.touched && form.get('baseSalary')?.invalid">
+
+              <div class="invalid-feedback d-block" *ngIf="baseSalaryError as error">
+                {{ error }}
+              </div>
+
+              <div class="form-text" *ngIf="!baseSalaryError">
+                Monto mensual en colones. Debe ser un valor positivo.
+              </div>
             </div>
 
           </form>
@@ -108,7 +123,7 @@
             Cancelar
           </button>
 
-          <button class="btn btn-primary" (click)="save()">
+          <button class="btn btn-primary" [disabled]="form.invalid" (click)="save()">
             Guardar
           </button>
         </div>
