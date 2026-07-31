@@ -48,7 +48,7 @@ export class UsersComponent implements OnInit {
             fullName: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.required, Validators.email]],
             phone: ['', [Validators.required, Validators.minLength(8)]],
-            passwordHash: ['',],
+            passwordHash: ['', [Validators.required]],
             roleId: [null, Validators.required],
             lastLoginAt: [null],
             isActive: [true]
@@ -57,6 +57,37 @@ export class UsersComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers();
+    }
+
+    get formErrors(): string[] {
+
+        const errors: string[] = [];
+        const controls = this.userForm.controls;
+
+        if (controls['fullName'].touched && controls['fullName'].errors) {
+            if (controls['fullName'].errors['required']) errors.push('El nombre completo es obligatorio.');
+            if (controls['fullName'].errors['minlength']) errors.push('El nombre completo debe tener al menos 3 caracteres.');
+        }
+
+        if (controls['email'].touched && controls['email'].errors) {
+            if (controls['email'].errors['required']) errors.push('El correo electrónico es obligatorio.');
+            if (controls['email'].errors['email']) errors.push('El formato del correo no es válido.');
+        }
+
+        if (controls['phone'].touched && controls['phone'].errors) {
+            if (controls['phone'].errors['required']) errors.push('El teléfono es obligatorio.');
+            if (controls['phone'].errors['minlength']) errors.push('El teléfono debe tener al menos 8 caracteres.');
+        }
+
+        if (!this.isEditing && controls['passwordHash'].touched && controls['passwordHash'].errors) {
+            if (controls['passwordHash'].errors['required']) errors.push('La contraseña es obligatoria.');
+        }
+
+        if (controls['roleId'].touched && controls['roleId'].errors) {
+            if (controls['roleId'].errors['required']) errors.push('Debe seleccionar un rol.');
+        }
+
+        return errors;
     }
 
     loadRoles() {

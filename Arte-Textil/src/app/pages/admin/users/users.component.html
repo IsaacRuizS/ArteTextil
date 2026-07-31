@@ -103,12 +103,6 @@
                             class="form-control"
                             formControlName="fullName"
                             [class.is-invalid]="userForm.get('fullName')?.invalid && userForm.get('fullName')?.touched">
-                        @if (userForm.get('fullName')?.touched && userForm.get('fullName')?.errors; as errors) {
-                        <div class="invalid-feedback d-block">
-                            @if (errors['required']) { El nombre completo es obligatorio. }
-                            @else if (errors['minlength']) { El nombre debe tener al menos 3 caracteres. }
-                        </div>
-                        }
                     </div>
 
                     <div class="mb-3">
@@ -120,12 +114,6 @@
                             class="form-control"
                             formControlName="email"
                             [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
-                        @if (userForm.get('email')?.touched && userForm.get('email')?.errors; as errors) {
-                        <div class="invalid-feedback d-block">
-                            @if (errors['required']) { El correo electrónico es obligatorio. }
-                            @else if (errors['email']) { El formato del correo no es válido. }
-                        </div>
-                        }
                     </div>
 
                     @if (!isEditing) {
@@ -155,9 +143,6 @@
                                 <option [value]="r.roleId">{{ r.name }}</option>
                                 }
                             </select>
-                            @if (userForm.get('roleId')?.touched && userForm.get('roleId')?.errors) {
-                            <div class="invalid-feedback d-block">Debe seleccionar un rol.</div>
-                            }
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -169,16 +154,18 @@
                                 class="form-control"
                                 formControlName="phone"
                                 [class.is-invalid]="userForm.get('phone')?.invalid && userForm.get('phone')?.touched">
-                            @if (userForm.get('phone')?.touched && userForm.get('phone')?.errors; as errors) {
-                            <div class="invalid-feedback d-block">
-                                @if (errors['required']) { El teléfono es obligatorio. }
-                                @else if (errors['minlength']) { El teléfono debe tener al menos 8 caracteres. }
-                            </div>
-                            }
                         </div>
                     </div>
 
                 </form>
+
+                @if (formErrors.length > 0) {
+                    <ul class="text-danger small mb-0 ps-3">
+                        @for (error of formErrors; track error) {
+                            <li>{{ error }}</li>
+                        }
+                    </ul>
+                }
             </div>
 
             <!-- FOOTER -->
