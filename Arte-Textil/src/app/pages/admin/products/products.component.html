@@ -27,10 +27,10 @@
             </div>
 
             <div class="col-12 col-md-4">
-                <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
-                    <option value="0">Todos</option>
-                    <option value="1">Activos</option>
-                    <option value="2">Inactivos</option>
+                <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusChanged()">
+                    <option [ngValue]="0">Todos</option>
+                    <option [ngValue]="1">Activos</option>
+                    <option [ngValue]="2">Inactivos</option>
                 </select>
             </div>
         </div>
@@ -48,39 +48,52 @@
                 <!-- Filtro por categoría -->
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold">Categoría</label>
-                    <select class="form-select" [(ngModel)]="filterCategory" (change)="onFilterChange()">
-                        <option [value]="null">Todas las categorías</option>
-                        @for (cat of categories; track cat.categoryId) {
-                        <option [value]="cat.categoryId">{{ cat.name }}</option>
+                    <select class="form-select" [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+                        <option [ngValue]="null">Todas las categorías ({{ productsOrigins.length }})</option>
+                        @for (cat of filterCategories; track cat.categoryId) {
+                        <option [ngValue]="cat.categoryId">{{ categoryFilterLabel(cat) }}</option>
                         }
                     </select>
+                    @if (filterCategories.length === 0) {
+                    <div class="form-text">Aún no hay productos asignados a ninguna categoría.</div>
+                    }
                 </div>
 
                 <!-- Filtro por precio mínimo -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Precio mínimo</label>
-                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMin"
-                        (input)="onFilterChange()">
+                    <input type="number" min="0" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMin"
+                        (ngModelChange)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por precio máximo -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Precio máximo</label>
-                    <input type="number" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMax"
-                        (input)="onFilterChange()">
+                    <input type="number" min="0" class="form-control" placeholder="₡ 0" [(ngModel)]="filterPriceMax"
+                        (ngModelChange)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por fecha desde -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Creado desde</label>
-                    <input type="date" class="form-control" [(ngModel)]="filterDateFrom" (change)="onFilterChange()">
+                    <input type="date" class="form-control" [(ngModel)]="filterDateFrom"
+                        (ngModelChange)="onFilterChange()">
                 </div>
 
                 <!-- Filtro por fecha hasta -->
                 <div class="col-md-2">
                     <label class="form-label small fw-semibold">Creado hasta</label>
-                    <input type="date" class="form-control" [(ngModel)]="filterDateTo" (change)="onFilterChange()">
+                    <input type="date" class="form-control" [(ngModel)]="filterDateTo"
+                        (ngModelChange)="onFilterChange()">
                 </div>
+            </div>
+
+            @if (filterRangeError) {
+            <div class="text-danger small mt-2">{{ filterRangeError }}</div>
+            }
+
+            <div class="text-muted small mt-2">
+                Mostrando {{ filteredProducts.length }} de {{ productsOrigins.length }} productos.
             </div>
         </div>
     </div>
@@ -105,7 +118,14 @@
                     @if (filteredProducts.length === 0) {
                     <tr>
                         <td colspan="7" class="text-center text-muted py-4">
+                            @if (productsOrigins.length === 0) {
                             No hay productos registrados.
+                            } @else {
+                            <div class="mb-2">Ningún producto coincide con los filtros aplicados.</div>
+                            <button class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">
+                                <i class="mdi mdi-filter-remove-outline me-1"></i>Limpiar filtros
+                            </button>
+                            }
                         </td>
                     </tr>
                     } @else {
@@ -114,7 +134,16 @@
 
                         <td data-label="Producto" class="fw-semibold">
                             <div class="d-flex flex-column">
-                                <span>{{ p.name }}</span>
+                                <span>
+                                    {{ p.name }}
+                                    <!-- El catálogo público no lista productos sin imagen. -->
+                                    @if (!hasImage(p)) {
+                                    <span class="badge bg-warning-subtle text-warning-emphasis fw-normal ms-1"
+                                        title="Sin imagen: no aparece en el catálogo del cliente">
+                                        Sin imagen
+                                    </span>
+                                    }
+                                </span>
                                 <span class="text-muted small">
                                     {{ getCategoryName(p.categoryId) }}
                                 </span>
@@ -146,15 +175,18 @@
                         </td>
 
                         <td data-label="" class="text-end pe-3 pe-md-4">
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(p)">
+                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(p)"
+                                title="Editar producto" aria-label="Editar producto">
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(p)">
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(p)"
+                                [title]="p.isActive ? 'Ocultar producto del catálogo' : 'Mostrar producto en el catálogo'"
+                                [attr.aria-label]="p.isActive ? 'Ocultar producto del catálogo' : 'Mostrar producto en el catálogo'">
                                 @if (p.isActive) {
-                                <i class="mdi mdi-eye-off"></i>
+                                <i class="mdi mdi-eye-off text-secondary"></i>
                                 }@else {
-                                <i class="mdi mdi-eye-outline"></i>
+                                <i class="mdi mdi-eye-outline text-success"></i>
                                 }
                             </button>
                         </td>

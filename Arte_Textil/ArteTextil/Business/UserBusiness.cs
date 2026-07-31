@@ -111,6 +111,15 @@ namespace ArteTextil.Business
                     return response;
                 }
 
+                var passwordError = ValidatePassword(dto.password);
+
+                if (passwordError != null)
+                {
+                    response.Success = false;
+                    response.Message = passwordError;
+                    return response;
+                }
+
                 var emailUsedInUsers = await _repositoryUser.AnyAsync(
                     u => u.Email == dto.email && u.DeletedAt == null);
 
@@ -231,6 +240,15 @@ namespace ArteTextil.Business
                     return response;
                 }
 
+                var passwordError = ValidatePassword(dto.passwordHash);
+
+                if (passwordError != null)
+                {
+                    response.Success = false;
+                    response.Message = passwordError;
+                    return response;
+                }
+
                 var exists = await _repositoryUser.AnyAsync(s => s.Email == dto.email && s.DeletedAt == null);
 
                 if (exists)
@@ -312,6 +330,15 @@ namespace ArteTextil.Business
 
                 if (!string.IsNullOrWhiteSpace(dto.passwordHash))
                 {
+                    var passwordError = ValidatePassword(dto.passwordHash);
+
+                    if (passwordError != null)
+                    {
+                        response.Success = false;
+                        response.Message = passwordError;
+                        return response;
+                    }
+
                     var hasher = new PasswordHasher<User>();
                     user.PasswordHash = hasher.HashPassword(user, dto.passwordHash);
                 }
@@ -333,6 +360,69 @@ namespace ArteTextil.Business
             {
                 response.Success = false;
                 response.Message = $"Error al actualizar usuario: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+        // Se separa del Delete lógico: aquí NO se toca DeletedAt, de modo que
+        // el usuario sigue apareciendo en GetAll y el filtro de "Inactivos" funciona.
+        public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
+        {
+            var response = new ApiResponse<bool>();
+
+            try
+            {
+                var user = await _repositoryUser.FirstOrDefaultAsync(s => s.UserId == id && s.DeletedAt == null);
+
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "Usuario no encontrado";
+                    return response;
+                }
+
+                var previousSnapshot = JsonSerializer.Serialize(user);
+
+                user.IsActive = isActive;
+                user.UpdatedAt = DateTime.UtcNow;
+
+                _repositoryUser.Update(user);
+                await _repositoryUser.SaveAsync();
+
+                // Al desactivar un usuario se revocan sus refresh tokens para
+                // que no pueda seguir renovando la sesión.
+                if (!isActive)
+                {
+                    var activeTokens = await _refreshTokenRepository.GetAllAsync(
+                        t => t.UserId == user.UserId && t.RevokedAt == null);
+
+                    foreach (var activeToken in activeTokens)
+                    {
+                        activeToken.RevokedAt = DateTime.UtcNow;
+                        _refreshTokenRepository.Update(activeToken);
+                    }
+
+                    await _refreshTokenRepository.SaveAsync();
+                }
+
+                await _logHelper.LogUpdate(
+                    tableName: "Users",
+                    recordId: user.UserId,
+                    previousValue: previousSnapshot,
+                    newValue: JsonSerializer.Serialize(user)
+                );
+
+                response.Data = true;
+                response.Message = isActive
+                    ? "Usuario activado correctamente"
+                    : "Usuario desactivado correctamente";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al actualizar el estado del usuario: {ex.Message}";
             }
 
             return response;
@@ -551,6 +641,28 @@ namespace ArteTextil.Business
             }
 
             return response;
+        }
+
+        // POLÍTICA DE CONTRASEÑA
+        // Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.
+        private static string? ValidatePassword(string? password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                return "La contraseña es obligatoria.";
+
+            if (password.Length < 8)
+                return "La contraseña debe tener al menos 8 caracteres.";
+
+            if (!password.Any(char.IsUpper))
+                return "La contraseña debe incluir al menos una letra mayúscula.";
+
+            if (!password.Any(char.IsDigit))
+                return "La contraseña debe incluir al menos un número.";
+
+            if (!password.Any(c => !char.IsLetterOrDigit(c)))
+                return "La contraseña debe incluir al menos un carácter especial (por ejemplo: !#$%&*?@).";
+
+            return null;
         }
     }
 }

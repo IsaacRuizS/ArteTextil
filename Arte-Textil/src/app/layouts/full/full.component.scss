@@ -33,10 +33,16 @@
 .sidebar-overlay {
     display: none;
 
+    // Solo en móvil/tablet: oscurece el contenido y cierra el menú al tocarlo.
+    // Queda por debajo del sidebar (z-index 1000) para no bloquear sus enlaces.
     @media (max-width: 992px) {
         display: block;
         position: fixed;
-        inset: 0;
+        top: 60px;
+        right: 0;
+        bottom: 0;
+        left: 0;
         z-index: 999;
+        background: rgba(0, 0, 0, 0.45);
     }
 }

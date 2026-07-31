@@ -30,26 +30,31 @@
                 <div class="mb-3">
 
                     <label class="form-label small fw-bold text-muted">
-                        Cliente
+                        Cliente <span class="text-danger">*</span>
                     </label>
 
                     <select
                         class="form-select"
-                        [(ngModel)]="quoteForm.customerId">
+                        [(ngModel)]="quoteForm.customerId"
+                        [class.is-invalid]="customerError">
 
-                        <option [value]="0">
+                        <option [ngValue]="0">
                             Seleccione cliente
                         </option>
 
                         @for (c of customers; track c.customerId) {
 
-                        <option [value]="c.customerId">
+                        <option [ngValue]="c.customerId">
                             {{ c.fullName }}
                         </option>
 
                         }
 
                     </select>
+
+                    @if (customerError; as error) {
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    }
 
                 </div>
 
@@ -112,15 +117,16 @@
                             <select
                                 class="form-select"
                                 [(ngModel)]="item.productId"
-                                (change)="updatePrice(item)">
+                                (ngModelChange)="updatePrice(item)"
+                                [class.is-invalid]="itemError(item)">
 
-                                <option [value]="0">
+                                <option [ngValue]="0">
                                     Seleccione producto
                                 </option>
 
                                 @for (p of products; track p.productId) {
 
-                                <option [value]="p.productId">
+                                <option [ngValue]="p.productId">
                                     {{ p.name }} (Stock: {{ p.availableStock }})
                                 </option>
 
@@ -139,9 +145,11 @@
                                 type="number"
                                 class="form-control"
                                 min="1"
+                                step="1"
                                 [(ngModel)]="item.quantity"
                                 (change)="validateStock(i)"
-                                (ngModelChange)="calculateTotal()">
+                                (ngModelChange)="calculateTotal()"
+                                [class.is-invalid]="!item.quantity || item.quantity < 1">
 
                         </div>
 
@@ -193,7 +201,9 @@
 
                             <button
                                 class="btn btn-danger btn-sm"
-                                (click)="removeItem(i)">
+                                (click)="removeItem(i)"
+                                title="Quitar producto de la cotización"
+                                aria-label="Quitar producto de la cotización">
                                 ✕
                             </button>
 
@@ -201,6 +211,16 @@
 
                     </div>
 
+                    @if (itemError(item); as error) {
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                    }
+
+                    }
+
+                    @if (!quoteForm.items?.length) {
+                    <div class="text-muted small mt-2">
+                        Aún no hay productos. Agregue al menos uno para poder guardar la cotización.
+                    </div>
                     }
 
                     <br>
@@ -230,6 +250,17 @@
 
                 </div>
 
+                @if (validationErrors.length) {
+                <div class="alert alert-warning py-2 px-3 small mb-0">
+                    <div class="fw-semibold mb-1">Para guardar la cotización:</div>
+                    <ul class="mb-0 ps-3">
+                        @for (error of validationErrors; track error) {
+                        <li>{{ error }}</li>
+                        }
+                    </ul>
+                </div>
+                }
+
             </div>
 
 
@@ -245,6 +276,7 @@
 
                 <button
                     class="btn btn-primary px-4"
+                    [disabled]="!isValid"
                     (click)="saveQuote()">
                     Guardar
                 </button>

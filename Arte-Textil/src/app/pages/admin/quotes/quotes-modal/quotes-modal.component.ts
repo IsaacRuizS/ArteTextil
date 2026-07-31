@@ -96,15 +96,98 @@ export class QuotesModalComponent implements OnInit {
 
     }
 
-    saveQuote() {
+    // VALIDACIONES
+    // Se recalculan en cada cambio para poder deshabilitar el botón Guardar y
+    // mostrar el detalle exacto de lo que falta.
+    get customerError(): string | null {
+
+        return Number(this.quoteForm.customerId) > 0
+            ? null
+            : 'Debe seleccionar el cliente de la cotización.';
+    }
+
+    itemError(item: QuoteItemModel): string | null {
+
+        if (!Number(item.productId)) {
+            return 'Seleccione un producto.';
+        }
+
+        const quantity = Number(item.quantity);
+
+        if (!quantity || isNaN(quantity)) {
+            return 'Indique la cantidad.';
+        }
+
+        if (quantity < 1) {
+            return 'La cantidad debe ser al menos 1.';
+        }
+
+        if (!Number.isInteger(quantity)) {
+            return 'La cantidad debe ser un número entero.';
+        }
+
+        if (this.isDuplicatedProduct(item)) {
+            return 'Este producto ya está agregado en otra línea.';
+        }
+
+        return null;
+    }
+
+    isDuplicatedProduct(item: QuoteItemModel): boolean {
+
+        const productId = Number(item.productId);
+
+        if (!productId) return false;
+
+        return this.quoteForm.items!
+            .filter(i => Number(i.productId) === productId).length > 1;
+    }
+
+    get validationErrors(): string[] {
+
+        const errors: string[] = [];
+
+        if (this.customerError) {
+            errors.push(this.customerError);
+        }
 
         if (!this.quoteForm.items?.length) {
+            errors.push('Debe agregar al menos un producto a la cotización.');
+            return errors;
+        }
 
-            this.notificationService.warning("Debe agregar al menos un producto");
+        this.quoteForm.items.forEach((item, index) => {
+            const error = this.itemError(item);
+            if (error) {
+                errors.push(`Línea ${index + 1}: ${error}`);
+            }
+        });
+
+        return errors;
+    }
+
+    get isValid(): boolean {
+        return this.validationErrors.length === 0;
+    }
+
+    saveQuote() {
+
+        if (!this.isValid) {
+
+            this.notificationService.warning(this.validationErrors[0]);
 
             return;
 
         }
+
+        // El select devuelve string: se normaliza antes de enviar al API.
+        this.quoteForm.customerId = Number(this.quoteForm.customerId);
+
+        this.quoteForm.items = this.quoteForm.items!.map(item => new QuoteItemModel({
+            ...item,
+            productId: Number(item.productId),
+            quantity: Number(item.quantity)
+        }));
 
         this.calculateTotal();
 
@@ -153,21 +236,36 @@ export class QuotesModalComponent implements OnInit {
     }
 
     validateStock(index: number) {
-        
+
         const item = this.quoteForm.items![index];
         const itemOrigin = this.quote?.items![index];
+
+        // Corrige cantidades inválidas antes de comparar contra el stock.
+        const quantity = Math.floor(Number(item.quantity));
+
+        if (!quantity || isNaN(quantity) || quantity < 1) {
+            item.quantity = 1;
+            this.notificationService.warning('La cantidad mínima es 1.');
+            this.calculateTotal();
+            return;
+        }
+
+        item.quantity = quantity;
+
         const product = this.products.find(p => p.productId == item.productId);
-        if (!product) return; 
+        if (!product) return;
 
         // stock real disponible considerando lo que ya tiene el item
         const maxAllowed = product.availableStock + (itemOrigin?.quantity ?? 0);
 
         if (item.quantity > maxAllowed) {
-            this.notificationService.warning('Stock insuficiente');
+            this.notificationService.warning(
+                `Stock insuficiente para ${product.name}. Disponible: ${maxAllowed} unidad(es).`);
 
             item.quantity = maxAllowed;
-            this.calculateTotal();
         }
+
+        this.calculateTotal();
     }
 
     calculateTotal() {
@@ -189,6 +287,14 @@ export class QuotesModalComponent implements OnInit {
     }
 
     addItem() {
+
+        // Evita apilar líneas vacías: primero hay que completar la anterior.
+        const lastItem = this.quoteForm.items?.[this.quoteForm.items.length - 1];
+
+        if (lastItem && !Number(lastItem.productId)) {
+            this.notificationService.warning('Seleccione un producto en la línea anterior antes de agregar otra.');
+            return;
+        }
 
         this.quoteForm.items!.push(new QuoteItemModel({
             quoteItemId: 0,

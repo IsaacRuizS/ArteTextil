@@ -40,10 +40,36 @@ export class CategoryManagementComponent implements OnInit {
     ) {
         this.categoryForm = this.fb.group({
             categoryId: [0],
-            name: ['', [Validators.required, Validators.minLength(3)]],
-            description: [''],
+            name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(60)]],
+            description: ['', [Validators.maxLength(250)]],
             isActive: [true]
         });
+    }
+
+    // Valida que no exista otra categoría activa con el mismo nombre.
+    private _isDuplicateName(name: string, categoryId: number): boolean {
+
+        const normalized = name.trim().toLowerCase();
+
+        return this.categoriesOrigins.some(c =>
+            c.categoryId !== categoryId &&
+            (c.name ?? '').trim().toLowerCase() === normalized
+        );
+    }
+
+    // Para deshabilitar el botón Guardar.
+    get hasDuplicateName(): boolean {
+
+        const name = (this.categoryForm.get('name')?.value ?? '').trim();
+
+        if (!name) return false;
+
+        return this._isDuplicateName(name, this.categoryForm.get('categoryId')?.value ?? 0);
+    }
+
+    // Para mostrar el mensaje solo después de que el usuario tocó el campo.
+    get duplicateNameError(): boolean {
+        return !!this.categoryForm.get('name')?.touched && this.hasDuplicateName;
     }
 
     ngOnInit(): void {
@@ -87,13 +113,12 @@ export class CategoryManagementComponent implements OnInit {
 
         this.categories = this.categoriesOrigins;
 
-        if (this.statusFilter > 0) {
+        const filter = +this.statusFilter;
 
-            if (this.statusFilter == 1) {
-                this.categories = this.categories.filter(c => c.isActive);
-            } else if (this.statusFilter == 2) {
-                this.categories = this.categories.filter(c => !c.isActive);
-            }
+        if (filter === 1) {
+            this.categories = this.categories.filter(c => c.isActive);
+        } else if (filter === 2) {
+            this.categories = this.categories.filter(c => !c.isActive);
         }
 
         if (this.searchTerm != null && this.searchTerm.trim() != '') {
@@ -130,15 +155,27 @@ export class CategoryManagementComponent implements OnInit {
 
         if (this.categoryForm.invalid) {
             this.categoryForm.markAllAsTouched();
+            this.notificationService.warning('Revise los campos marcados antes de guardar.');
+            return;
+        }
+
+        const name = (this.categoryForm.get('name')?.value ?? '').trim();
+        const categoryId = this.categoryForm.get('categoryId')?.value ?? 0;
+
+        if (this._isDuplicateName(name, categoryId)) {
+            this.categoryForm.get('name')?.markAsTouched();
+            this.notificationService.error(`Ya existe una categoría llamada "${name}".`);
             return;
         }
 
         this.sharedService.setLoading(true);
 
+        const data = { ...this.categoryForm.value, name };
+
         if (this.isEditing) {
-            this._editCategory(this.categoryForm.value);
+            this._editCategory(data);
         } else {
-            this._createCategory(this.categoryForm.value);
+            this._createCategory(data);
         }
     }
 
@@ -184,10 +221,12 @@ export class CategoryManagementComponent implements OnInit {
             next: () => {
                 this.showFormModal = false;
                 this.loadCategories();
+                this.notificationService.success(`Categoría "${data.name}" creada correctamente.`);
                 this.sharedService.setLoading(false);
             },
-            error: () => {
-                this.notificationService.error('Error al crear la categoría. Intente de nuevo.');
+            error: (err) => {
+                this.notificationService.error(
+                    err?.error?.message || err?.message || 'Error al crear la categoría. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });
@@ -200,10 +239,12 @@ export class CategoryManagementComponent implements OnInit {
             next: () => {
                 this.showFormModal = false;
                 this.loadCategories();
+                this.notificationService.success(`Categoría "${data.name}" actualizada correctamente.`);
                 this.sharedService.setLoading(false);
             },
-            error: () => {
-                this.notificationService.error('Error al actualizar la categoría. Intente de nuevo.');
+            error: (err) => {
+                this.notificationService.error(
+                    err?.error?.message || err?.message || 'Error al actualizar la categoría. Intente de nuevo.');
                 this.sharedService.setLoading(false);
             }
         });

@@ -2,8 +2,8 @@
 <app-header (toggleSidebar)="toggleSidebar()"></app-header>
 
 <div class="main-wrapper">
-    <app-left-sidebar [isClosed]="sidebarClosed"></app-left-sidebar>
-    <div class="sidebar-overlay" *ngIf="!sidebarClosed" (click)="toggleSidebar()"></div>
+    <app-left-sidebar [isClosed]="sidebarClosed" (navigated)="onSidebarNavigate()"></app-left-sidebar>
+    <div class="sidebar-overlay" *ngIf="showOverlay" (click)="toggleSidebar()"></div>
     <div class="content-area" [class.sidebar-closed]="sidebarClosed">
         <router-outlet></router-outlet>
     </div>

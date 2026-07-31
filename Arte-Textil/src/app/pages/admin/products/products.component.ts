@@ -50,7 +50,12 @@ export class ProductsComponent implements OnInit {
     filterDateFrom: string = '';
     filterDateTo: string = '';
 
-    statusFilter: number = 1; // 0: all, 1: active, 2: inactive
+    // 0: todos, 1: activos, 2: inactivos.
+    // El catálogo de administración muestra TODO por defecto (con o sin imagen,
+    // activos o no). Ocultar productos es responsabilidad del catálogo público.
+    statusFilter: number = 0;
+
+    filterRangeError = '';
 
     page = 1;
 
@@ -106,6 +111,8 @@ export class ProductsComponent implements OnInit {
                     this.products = [...products];
                     this.productsOrigins = [...products];
 
+                    this._refreshCategoryFilterOptions();
+
                     this.applyFilters();
 
                     this.cdr.markForCheck();
@@ -127,6 +134,11 @@ export class ProductsComponent implements OnInit {
                     const firstActive = this.categories.find(c => c.isActive) ?? this.categories[0];
                     this.productForm.patchValue({ categoryId: firstActive.categoryId });
                 }
+
+                // Las opciones del filtro dependen de categorías y productos:
+                // hay que recalcularlas cuando llega cualquiera de los dos.
+                this._refreshCategoryFilterOptions();
+
                 this.cdr.markForCheck();
             },
             error: () => {
@@ -180,11 +192,15 @@ export class ProductsComponent implements OnInit {
         this.filterPriceMax = null;
         this.filterDateFrom = '';
         this.filterDateTo = '';
+        this.statusFilter = 0;
+        this.filterRangeError = '';
         this.applyFilters();
     }
 
     applyFilters() {
         let filtered = [...this.productsOrigins];
+
+        this._validateFilterRanges();
 
         // Filtro por término de búsqueda
         if (this.searchTerm && this.searchTerm.trim() !== '') {
@@ -195,18 +211,18 @@ export class ProductsComponent implements OnInit {
             );
         }
 
-        if (this.statusFilter > 0) {
+        const status = +this.statusFilter;
 
-            if (this.statusFilter == 1) {
-                filtered = filtered.filter(x => x.isActive);
-            } else if (this.statusFilter == 2) {
-                filtered = filtered.filter(x => !x.isActive);
-            }
+        if (status === 1) {
+            filtered = filtered.filter(x => x.isActive);
+        } else if (status === 2) {
+            filtered = filtered.filter(x => !x.isActive);
         }
 
         // Filtro por categoría (RF-04-006)
-        if (this.filterCategory) {
-            filtered = filtered.filter(p => p.categoryId === this.filterCategory);
+        if (this.filterCategory !== null && this.filterCategory !== undefined) {
+            const categoryId = +this.filterCategory;
+            filtered = filtered.filter(p => Number(p.categoryId) === categoryId);
         }
 
         // Filtro por precio (RF-04-006)
@@ -218,25 +234,40 @@ export class ProductsComponent implements OnInit {
         }
 
         // Filtro por fecha de creación (RF-04-006)
+        // Se construye la fecha en horario local para que el día seleccionado
+        // sea el mismo que ve el usuario y no se corra por zona horaria.
         if (this.filterDateFrom) {
-            const dateFrom = new Date(this.filterDateFrom);
+            const dateFrom = new Date(`${this.filterDateFrom}T00:00:00`);
             filtered = filtered.filter(p => {
-                if (!p.createdAt) return true;
-                const created = new Date(p.createdAt);
-                return created >= dateFrom;
+                if (!p.createdAt) return false;
+                return new Date(p.createdAt) >= dateFrom;
             });
         }
         if (this.filterDateTo) {
-            const dateTo = new Date(this.filterDateTo);
-            dateTo.setHours(23, 59, 59, 999); // Incluir todo el día
+            const dateTo = new Date(`${this.filterDateTo}T23:59:59`);
             filtered = filtered.filter(p => {
-                if (!p.createdAt) return true;
-                const created = new Date(p.createdAt);
-                return created <= dateTo;
+                if (!p.createdAt) return false;
+                return new Date(p.createdAt) <= dateTo;
             });
         }
 
         this.products = filtered;
+        this.page = 1;
+    }
+
+    private _validateFilterRanges() {
+
+        this.filterRangeError = '';
+
+        if (this.filterPriceMin !== null && this.filterPriceMax !== null &&
+            +this.filterPriceMin > +this.filterPriceMax) {
+            this.filterRangeError = 'El precio mínimo no puede ser mayor que el precio máximo.';
+            return;
+        }
+
+        if (this.filterDateFrom && this.filterDateTo && this.filterDateFrom > this.filterDateTo) {
+            this.filterRangeError = 'La fecha "Creado desde" no puede ser posterior a "Creado hasta".';
+        }
     }
 
     get filteredProducts(): ProductModel[] {
@@ -245,6 +276,58 @@ export class ProductsComponent implements OnInit {
 
     onFilterInfo() {
         this.applyFilters();
+    }
+
+    /**
+     * Categorías que realmente tienen productos registrados.
+     * No tiene sentido ofrecer un filtro que siempre devuelve la tabla vacía.
+     * Se calcula sobre `productsOrigins` (todos los productos cargados), no
+     * sobre la lista ya filtrada, para que las opciones no desaparezcan al
+     * seleccionar una.
+     */
+    filterCategories: CategoryModel[] = [];
+
+    private productCountByCategory = new Map<number, number>();
+
+    private _refreshCategoryFilterOptions() {
+
+        const counts = new Map<number, number>();
+
+        for (const product of this.productsOrigins) {
+
+            const categoryId = Number(product.categoryId);
+
+            if (!categoryId) continue;
+
+            counts.set(categoryId, (counts.get(categoryId) ?? 0) + 1);
+        }
+
+        this.productCountByCategory = counts;
+
+        this.filterCategories = this.categories
+            .filter(c => (counts.get(Number(c.categoryId)) ?? 0) > 0)
+            .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'es', { sensitivity: 'base' }));
+
+        // Si la categoría seleccionada dejó de tener productos, se limpia el
+        // filtro para no dejar la tabla vacía sin motivo visible.
+        if (this.filterCategory !== null &&
+            !this.filterCategories.some(c => Number(c.categoryId) === Number(this.filterCategory))) {
+            this.filterCategory = null;
+        }
+    }
+
+    /**
+     * El catálogo público descarta los productos sin imagen, así que en
+     * administración se marcan para que se entienda por qué no se ven.
+     */
+    hasImage(product: ProductModel): boolean {
+        // El catálogo público solo recibe imágenes activas, por eso no basta
+        // con que el producto tenga imágenes: debe tener al menos una activa.
+        return !!product.productImages?.some(img => img.isActive);
+    }
+
+    categoryFilterLabel(category: CategoryModel): string {
+        return `${category.name} (${this.productCountByCategory.get(Number(category.categoryId)) ?? 0})`;
     }
 
     getCategoryName(categoryId: number | null | undefined): string {

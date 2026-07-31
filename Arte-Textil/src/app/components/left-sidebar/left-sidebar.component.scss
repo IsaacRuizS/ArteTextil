@@ -2,13 +2,22 @@
     width: 240px;
     height: calc(100vh - 60px);
     position: fixed;
-    z-index: 100;
+    // Debe quedar por encima del overlay del layout (z-index 999), de lo
+    // contrario en móvil/tablet el overlay tapa el menú y no se puede tocar.
+    z-index: 1000;
     top: 60px;
     left: 0;
     background: #1f2937;
     padding: 1rem;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     transition: transform 0.25s ease;
+
+    // En pantallas angostas el menú no debe ocupar casi todo el ancho.
+    @media (max-width: 575.98px) {
+        width: min(80vw, 260px);
+    }
 }
 
 .sidebar.sidebar-closed {
@@ -23,5 +32,11 @@
     &:hover {
         background: rgba(255,255,255,0.1);
         color: white;
+    }
+
+    &.active {
+        background: rgba(255,255,255,0.16);
+        color: white;
+        font-weight: 600;
     }
 }

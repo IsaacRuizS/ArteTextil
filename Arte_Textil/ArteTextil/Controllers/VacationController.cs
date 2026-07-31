@@ -113,6 +113,30 @@ public class VacationController : ControllerBase
         return Ok(days);
     }
 
+    // GET: api/vacation/balance  (COLABORADOR: desglose de su propio saldo)
+    [HttpGet("balance")]
+    public async Task<IActionResult> GetBalance()
+    {
+        var userId = GetUserIdFromToken();
+        if (userId == null) return Unauthorized();
+
+        var result = await _business.GetBalance(userId.Value);
+        if (!result.Success) return NotFound(result);
+
+        return Ok(result);
+    }
+
+    // GET: api/vacation/balances  (ADMIN: saldo de todos los colaboradores)
+    [Authorize(Policy = "AdminOnly")]
+    [HttpGet("balances")]
+    public async Task<IActionResult> GetAllBalances()
+    {
+        var result = await _business.GetAllBalances();
+        if (!result.Success) return StatusCode(500, result);
+
+        return Ok(result);
+    }
+
     private int? GetUserIdFromToken()
     {
         var claim = User.FindFirst("id");

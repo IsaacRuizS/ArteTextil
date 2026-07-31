@@ -42,8 +42,11 @@
                         </button>
                         <button class="btn btn-sm btn-outline-success"
                                 (click)="markAsRead(alert)"
-                                title="Marcar como leída">
-                            ✔
+                                [disabled]="isMarking(alert)"
+                                title="Marcar como leída"
+                                aria-label="Marcar como leída">
+                            <span *ngIf="isMarking(alert)" class="spinner-border spinner-border-sm"></span>
+                            <i *ngIf="!isMarking(alert)" class="mdi mdi-check"></i>
                         </button>
                     </div>
 

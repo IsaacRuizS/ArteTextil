@@ -21,10 +21,10 @@
         </div>
 
         <div class="col-md-4">
-            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
-                <option value="0">Todos</option>
-                <option value="1">Activos</option>
-                <option value="2">Inactivos</option>
+            <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusChanged()">
+                <option [ngValue]="0">Todos</option>
+                <option [ngValue]="1">Activos</option>
+                <option [ngValue]="2">Inactivos</option>
             </select>
         </div>
 
@@ -146,7 +146,8 @@
                     Cancelar
                 </button>
 
-                <button type="button" class="btn btn-primary px-4" (click)="saveCustomer()">
+                <button type="button" class="btn btn-primary px-4" [disabled]="customerForm.invalid"
+                    (click)="saveCustomer()">
                     Guardar
                 </button>
 

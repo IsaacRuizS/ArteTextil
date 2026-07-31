@@ -10,38 +10,81 @@
 
             <div class="modal-body">
 
-                @if (errorMsg) {
-                <div class="alert alert-danger">{{ errorMsg }}</div>
-                }
-
-                <label class="form-label fw-semibold">Nombre *</label>
-                <input class="form-control mb-3" [(ngModel)]="form.name">
-
-                <label class="form-label fw-semibold">Descripción</label>
-                <textarea class="form-control mb-3" [(ngModel)]="form.description" rows="2"></textarea>
-
-                <label class="form-label fw-semibold">Producto *</label>
-                <select class="form-select mb-3" [(ngModel)]="form.productId">
-                    <option [value]="0">Seleccione</option>
-                    @for (p of products; track p.productId) {
-                    <option [value]="p.productId">{{ p.name }}</option>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                    <input class="form-control" maxlength="100" [(ngModel)]="form.name"
+                        (ngModelChange)="validate()" (blur)="markTouched('name')"
+                        [class.is-invalid]="showError('name')">
+                    @if (showError('name'); as error) {
+                    <div class="invalid-feedback d-block">{{ error }}</div>
                     }
-                </select>
+                </div>
 
-                <label class="form-label fw-semibold">Descuento (%) *</label>
-                <input type="number" class="form-control mb-3" [(ngModel)]="form.discountPercent" min="1" max="100">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Descripción</label>
+                    <textarea class="form-control" rows="2" maxlength="250" [(ngModel)]="form.description"
+                        (ngModelChange)="validate()" (blur)="markTouched('description')"
+                        [class.is-invalid]="showError('description')"></textarea>
+                    @if (showError('description'); as error) {
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    }
+                </div>
 
-                <label class="form-label fw-semibold">Fecha inicio *</label>
-                <input type="date" class="form-control mb-3" [(ngModel)]="form.startDate">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Producto <span class="text-danger">*</span></label>
+                    <select class="form-select" [(ngModel)]="form.productId"
+                        (ngModelChange)="validate(); markTouched('productId')"
+                        [class.is-invalid]="showError('productId')">
+                        <option [ngValue]="0">Seleccione un producto</option>
+                        @for (p of products; track p.productId) {
+                        <option [ngValue]="p.productId">{{ p.name }}</option>
+                        }
+                    </select>
+                    @if (showError('productId'); as error) {
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    }
+                </div>
 
-                <label class="form-label fw-semibold">Fecha fin *</label>
-                <input type="date" class="form-control mb-3" [(ngModel)]="form.endDate">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Descuento (%) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" min="1" max="100" [(ngModel)]="form.discountPercent"
+                        (ngModelChange)="validate()" (blur)="markTouched('discountPercent')"
+                        [class.is-invalid]="showError('discountPercent')">
+                    @if (showError('discountPercent'); as error) {
+                    <div class="invalid-feedback d-block">{{ error }}</div>
+                    } @else {
+                    <div class="form-text">Valor entre 1 y 100.</div>
+                    }
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" [(ngModel)]="form.startDate"
+                            (ngModelChange)="validate(); markTouched('startDate')"
+                            [class.is-invalid]="showError('startDate')">
+                        @if (showError('startDate'); as error) {
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        }
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Fecha fin <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" [min]="form.startDate || today"
+                            [(ngModel)]="form.endDate"
+                            (ngModelChange)="validate(); markTouched('endDate')"
+                            [class.is-invalid]="showError('endDate')">
+                        @if (showError('endDate'); as error) {
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                        }
+                    </div>
+                </div>
 
             </div>
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" (click)="close.emit()">Cancelar</button>
-                <button class="btn btn-primary" (click)="save()">
+                <button class="btn btn-primary" [disabled]="!isValid" (click)="save()">
                     {{ promotion ? 'Guardar cambios' : 'Crear promoción' }}
                 </button>
             </div>

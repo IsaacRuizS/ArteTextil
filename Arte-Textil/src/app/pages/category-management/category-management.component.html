@@ -24,10 +24,10 @@
         </div>
 
         <div class="col-12 col-md-4">
-            <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusChanged()">
-                <option value="0">Todos</option>
-                <option value="1">Activos</option>
-                <option value="2">Inactivos</option>
+            <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusChanged()">
+                <option [ngValue]="0">Todos</option>
+                <option [ngValue]="1">Activos</option>
+                <option [ngValue]="2">Inactivos</option>
             </select>
         </div>
     </div>
@@ -58,15 +58,18 @@
                         </td>
 
                         <td data-label="" class="text-end pe-4">
-                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(c)">
+                            <button class="btn btn-sm btn-light text-primary me-2" (click)="openEditModal(c)"
+                                title="Editar categoría" aria-label="Editar categoría">
                                 <i class="mdi mdi-pencil"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)">
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(c)"
+                                [title]="c.isActive ? 'Desactivar categoría' : 'Activar categoría'"
+                                [attr.aria-label]="c.isActive ? 'Desactivar categoría' : 'Activar categoría'">
                                 @if (c.isActive) {
-                                    <i class="mdi mdi-eye-off"></i>
+                                    <i class="mdi mdi-eye-off text-secondary"></i>
                                 }@else {
-                                    <i class="mdi mdi-eye-outline"></i>
+                                    <i class="mdi mdi-eye-outline text-success"></i>
                                 }
                             </button>
                         </td>
@@ -95,13 +98,35 @@
                 <form [formGroup]="categoryForm">
 
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Nombre</label>
-                        <input type="text" class="form-control" formControlName="name">
+                        <label class="form-label small fw-bold text-muted">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" maxlength="60" formControlName="name"
+                            [class.is-invalid]="(categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched) || duplicateNameError">
+
+                        @if (categoryForm.get('name')?.touched && categoryForm.get('name')?.errors; as errors) {
+                        <div class="invalid-feedback d-block">
+                            @if (errors['required']) { El nombre de la categoría es obligatorio. }
+                            @else if (errors['minlength']) { El nombre debe tener al menos 3 caracteres. }
+                            @else if (errors['maxlength']) { El nombre no puede superar los 60 caracteres. }
+                        </div>
+                        } @else if (duplicateNameError) {
+                        <div class="invalid-feedback d-block">
+                            Ya existe una categoría con ese nombre.
+                        </div>
+                        }
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Descripción</label>
-                        <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                        <textarea class="form-control" rows="3" maxlength="250" formControlName="description"
+                            [class.is-invalid]="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched"></textarea>
+
+                        @if (categoryForm.get('description')?.touched && categoryForm.get('description')?.errors?.['maxlength']) {
+                        <div class="invalid-feedback d-block">
+                            La descripción no puede superar los 250 caracteres.
+                        </div>
+                        }
                     </div>
 
                     @if (isEditing) {
@@ -119,7 +144,9 @@
 
             <div class="modal-footer border-0 pt-0">
                 <button class="btn btn-light" (click)="showFormModal = false">Cancelar</button>
-                <button class="btn btn-primary px-4" (click)="saveCategory()">Guardar</button>
+                <button class="btn btn-primary px-4"
+                    [disabled]="categoryForm.invalid || hasDuplicateName"
+                    (click)="saveCategory()">Guardar</button>
             </div>
         </div>
     </div>

@@ -192,8 +192,16 @@ export class PromotionComponent implements OnInit {
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción creada correctamente', 'success');
             },
-            error: () => Swal.fire('Error', 'No se pudo crear la promoción', 'error')
+            error: (err) => Swal.fire(
+                'No se pudo crear la promoción',
+                this.getErrorMessage(err, 'Revise los datos e intente de nuevo.'),
+                'error'
+            )
         });
+    }
+
+    private getErrorMessage(err: any, fallback: string): string {
+        return err?.error?.message || err?.error?.Message || err?.message || fallback;
     }
 
     saveUpdatedPromotion(formData: any) {
@@ -209,7 +217,11 @@ export class PromotionComponent implements OnInit {
                 this.loadPromotions();
                 Swal.fire('Éxito', 'Promoción actualizada correctamente', 'success');
             },
-            error: () => Swal.fire('Error', 'No se pudo actualizar la promoción', 'error')
+            error: (err) => Swal.fire(
+                'No se pudo actualizar la promoción',
+                this.getErrorMessage(err, 'Revise los datos e intente de nuevo.'),
+                'error'
+            )
         });
     }
 }

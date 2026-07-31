@@ -122,6 +122,26 @@ export class ApiUserService extends ApiBaseService {
             });
     }
 
+    // PATCH: api/user/{id}/status
+    updateStatus(id: number, isActive: boolean): Promise<boolean> {
+        return this.http.patch(`${this.baseUrl}/api/user/${id}/status`, isActive, this.getHttpOptions())
+            .toPromise()
+            .then((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al cambiar el estado del usuario.');
+                }
+
+                return res.data === true;
+            })
+            .catch((err: HttpErrorResponse | Error) => {
+                const errMsg = err instanceof HttpErrorResponse
+                    ? this.getErrorMsg(err)
+                    : err.message;
+
+                return Promise.reject(new Error(errMsg));
+            });
+    }
+
     // DELETE: api/user/{id}
     delete(id: number): Promise<boolean> {
         return this.http.delete(`${this.baseUrl}/api/user/${id}`, this.getHttpOptions())

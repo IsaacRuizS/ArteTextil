@@ -11,16 +11,32 @@ import {
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ApiUserService } from '../../services/api-user.service';
+import {
+    checkPasswordRequirements,
+    PasswordRequirements,
+    passwordPolicyValidator
+} from '../../shared/validators/password.validator';
 
 const passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+
     const password = control.get('password');
     const confirm = control.get('confirmPassword');
-    if (password && confirm && password.value !== confirm.value) {
-        confirm.setErrors({ mismatch: true });
-        return { mismatch: true };
-    }
-    confirm?.setErrors(null);
-    return null;
+
+    if (!password || !confirm) return null;
+
+    // Se conservan los errores propios del control (por ejemplo 'required') y
+    // solo se agrega o quita 'mismatch'.
+    const { mismatch, ...otherErrors } = confirm.errors ?? {};
+
+    const hasMismatch = !!confirm.value && password.value !== confirm.value;
+
+    const errors = hasMismatch
+        ? { ...otherErrors, mismatch: true }
+        : otherErrors;
+
+    confirm.setErrors(Object.keys(errors).length ? errors : null);
+
+    return hasMismatch ? { mismatch: true } : null;
 };
 
 @Component({
@@ -44,15 +60,20 @@ export class RegisterComponent {
         private cdr: ChangeDetectorRef
     ) {
         this.registerForm = this.formBuilder.group({
-            fullName: ['', [Validators.required, Validators.minLength(3)]],
-            email: ['', [Validators.required, Validators.email]],
-            phone: ['', Validators.required],
-            password: ['', [Validators.required, Validators.minLength(6)]],
+            fullName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+            email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+            phone: ['', [Validators.required, Validators.pattern(/^[0-9+\s-]{8,15}$/)]],
+            password: ['', [Validators.required, passwordPolicyValidator]],
             confirmPassword: ['', Validators.required]
         }, { validators: passwordMatchValidator });
     }
 
     get f() { return this.registerForm.controls; }
+
+    // Checklist en vivo de los requisitos de contraseña.
+    get passwordRequirements(): PasswordRequirements {
+        return checkPasswordRequirements(this.f['password'].value);
+    }
 
     onSubmit() {
         this.submitted = true;

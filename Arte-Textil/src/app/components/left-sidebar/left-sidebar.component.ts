@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -10,6 +11,9 @@ import { AuthService } from '../../services/auth.service';
 export class LeftSidebarComponent {
 
     @Input() isClosed = false;
+
+    // Avisa al layout para que cierre el menú en móvil/tablet tras navegar.
+    @Output() navigated = new EventEmitter<void>();
 
     filteredMenu: any[] = [];
     menu: any[] = [
@@ -49,10 +53,10 @@ export class LeftSidebarComponent {
             children: [
                 { label: 'Asistencia', link: '/hr/attendance', roles: [1, 2, 4] },
                 { label: 'Vacaciones', link: '/hr/vacations', roles: [1, 2, 4] },
-                { label: 'Ajustes de Planilla', link: '/hr/payroll', roles: [1] },
+                { label: 'Extras y Rebajos', link: '/hr/payroll', roles: [1] },
                 { label: 'Salarios', link: '/hr/payroll/salaries', roles: [1 , 2, 4] },
                 { label: 'Planillas Mensuales', link: '/hr/payroll/monthly', roles: [1] },
-                { label: 'Pagos', link: '/hr/payroll/payments', roles: [1] }
+                { label: 'Pagos de Planilla', link: '/hr/payroll/payments', roles: [1] }
             ]
         },
 
@@ -68,7 +72,7 @@ export class LeftSidebarComponent {
         }
     ];
 
-    constructor(private authService: AuthService) { }
+    constructor(private authService: AuthService, private router: Router) { }
 
     ngOnInit() {
         this.filteredMenu = this.menu
@@ -92,9 +96,25 @@ export class LeftSidebarComponent {
     onOpen(item: any) {
         if (item.children) {
             item.collapsed = !item.collapsed;
-        } else if (item.link) {
-            window.location.href = item.link;
+            return;
         }
+
+        if (item.link) {
+            // Navegación con Router: evita recargar toda la aplicación.
+            this.router.navigateByUrl(item.link);
+            this.navigated.emit();
+        }
+    }
+
+    isActive(item: any): boolean {
+
+        if (!item.link) return false;
+
+        // Coincidencia exacta: '/hr/payroll' no debe marcarse activo cuando la
+        // ruta actual es '/hr/payroll/salaries'.
+        const currentPath = this.router.url.split('?')[0].split('#')[0];
+
+        return currentPath === item.link;
     }
 
     hasAccess(item: any): boolean {

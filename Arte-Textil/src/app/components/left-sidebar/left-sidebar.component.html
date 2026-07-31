@@ -5,7 +5,7 @@
         @for (item of filteredMenu; track item.label) {
         <li class="nav-item">
             <a class="nav-link cursor-pointer d-flex justify-content-between align-items-center" (click)="onOpen(item)"
-                [class.active]="!item.children && false">
+                [class.active]="isActive(item)">
 
                 <span>{{ item.label }}</span>
 
@@ -20,7 +20,8 @@
             <ul class="nav flex-column ms-3">
                 @for (subItem of item.children; track subItem.label) {
                 <li class="nav-item">
-                    <a class="nav-link cursor-pointer py-1 small" (click)="onOpen(subItem)">
+                    <a class="nav-link cursor-pointer py-1 small" (click)="onOpen(subItem)"
+                        [class.active]="isActive(subItem)">
                         <i class="mdi mdi-circle-small me-1"></i> {{ subItem.label }}
                     </a>
                 </li>

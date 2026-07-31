@@ -1,23 +1,62 @@
 <div class="hr-wrapper p-4">
 
   <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold mb-0">Pagos</h2>
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Pagos de Planilla</h2>
+      <div class="text-muted small">
+        Historial de pagos procesados a los colaboradores.
+      </div>
+    </div>
+
+    <button class="btn btn-outline-success" (click)="onGenerateExcel()" title="Exportar la lista filtrada">
+      <i class="mdi mdi-file-excel me-1"></i>Exportar Excel
+    </button>
   </div>
 
-  <!-- Buscador -->
+  <!-- Filtros -->
   <div class="card shadow-sm border-0 mb-3 p-3">
-    <div class="row g-2">
-      <div class="col-12 col-md-6">
+    <div class="row g-3 align-items-end">
+
+      <div class="col-12 col-lg-4">
+        <label class="form-label small fw-semibold mb-1">Buscar</label>
         <div class="input-group">
           <span class="input-group-text">
             <i class="mdi mdi-magnify"></i>
           </span>
 
-          <input type="text" class="form-control" placeholder="Buscar por empleado o método..." [(ngModel)]="searchTerm"
-            (ngModelChange)="page = 1">
+          <input type="text" class="form-control" placeholder="Empleado o método..." [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()">
         </div>
       </div>
+
+      <div class="col-6 col-lg-3">
+        <label class="form-label small fw-semibold mb-1">Pagado desde</label>
+        <input type="date" class="form-control" [(ngModel)]="dateFrom" (ngModelChange)="onFilterChange()"
+          [class.is-invalid]="dateRangeError">
+      </div>
+
+      <div class="col-6 col-lg-3">
+        <label class="form-label small fw-semibold mb-1">Pagado hasta</label>
+        <input type="date" class="form-control" [(ngModel)]="dateTo" (ngModelChange)="onFilterChange()"
+          [class.is-invalid]="dateRangeError">
+      </div>
+
+      <div class="col-12 col-lg-2">
+        <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+          <i class="mdi mdi-filter-remove-outline me-1"></i>Limpiar
+        </button>
+      </div>
+
+    </div>
+
+    <div class="text-danger small mt-2" *ngIf="dateRangeError">
+      {{ dateRangeError }}
+    </div>
+
+    <div class="text-muted small mt-2">
+      {{ filteredPayments.length }} de {{ paymentsOrigin.length }} pago(s) ·
+      Total: <strong>{{ totalFiltered | customCurrency:'₡' }}</strong>
     </div>
   </div>
 
@@ -42,6 +81,12 @@
             <td data-label="Monto">{{ p.amount | customCurrency:'₡' }}</td>
             <td data-label="Fecha">{{ p.paymentDate | date:'short' }}</td>
             <td data-label="Método">{{ p.method }}</td>
+          </tr>
+
+          <tr *ngIf="filteredPayments.length === 0">
+            <td colspan="4" class="text-center text-muted py-4">
+              No hay pagos que coincidan con los filtros.
+            </td>
           </tr>
 
         </tbody>

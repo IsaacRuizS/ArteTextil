@@ -37,8 +37,6 @@ export class VacationsComponent implements OnInit {
     myBalance: VacationBalanceModel | null = null;
     balances: VacationBalanceModel[] = [];
 
-    today = this.toDateInputValue(new Date());
-
     showError = false;
     errorMessage = '';
 
@@ -240,18 +238,9 @@ export class VacationsComponent implements OnInit {
             return;
         }
 
+        // El rango y las fechas pasadas ya los cubre el validador del formulario.
         const startDate = this.vacationForm.value.startDate;
         const endDate = this.vacationForm.value.endDate;
-
-        this.sharedService.setLoading(true);
-
-        const startDate = this.vacationForm.value.startDate;
-        const endDate = this.vacationForm.value.endDate;
-
-        if (startDate < this.today || endDate < this.today) {
-            this.showErrorModal("Las fechas de vacaciones deben ser presentes o futuras");
-            return;
-        }
 
         this.sharedService.setLoading(true);
 

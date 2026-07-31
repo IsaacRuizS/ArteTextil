@@ -59,6 +59,9 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     
     page = 1;
 
+    // Se expone al template para avisar cuando el filtro deja la gráfica vacía.
+    hasDemandData = true;
+
     constructor(
         private quoteApi: ApiQuoteService,
         private demandApi: ApiDemandService,
@@ -156,7 +159,53 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         // Gráficas
         this.updateLineChart(active);
         this.updateBarChart(active);
-        this.updatePredictionChart(this.demandData);
+
+        // La predicción también debe respetar los filtros, no usar el set completo.
+        const demand = this.filteredDemand();
+        this.hasDemandData = demand.length > 0;
+        this.updatePredictionChart(demand);
+    }
+
+    /**
+     * Aplica los mismos filtros de producto y fecha a la serie de demanda.
+     * El histórico se recorta por rango de fechas; la predicción se mantiene
+     * porque siempre proyecta hacia adelante desde el último mes con datos.
+     */
+    private filteredDemand(): DemandModel[] {
+
+        let data = [...this.demandData];
+
+        if (this.filtros.producto) {
+            data = data.filter(d => d.productName === this.filtros.producto);
+        }
+
+        const fromKey = this.monthKeyFromDate(this.filtros.fechaInicio);
+        const toKey = this.monthKeyFromDate(this.filtros.fechaFin);
+
+        if (fromKey) {
+            data = data.filter(d => d.isForecast || this.monthKey(d) >= fromKey);
+        }
+
+        if (toKey) {
+            data = data.filter(d => d.isForecast || this.monthKey(d) <= toKey);
+        }
+
+        return data;
+    }
+
+    /** Clave comparable 'YYYYMM' a partir de un registro de demanda. */
+    private monthKey(d: DemandModel): number {
+        return d.year * 100 + d.monthNumber;
+    }
+
+    /** Clave comparable 'YYYYMM' a partir de un input date ('YYYY-MM-DD'). */
+    private monthKeyFromDate(value: string): number | null {
+
+        if (!value) return null;
+
+        const [year, month] = value.split('-');
+
+        return Number(year) * 100 + Number(month);
     }
 
     private topProduct(quotes: QuoteModel[]): string {

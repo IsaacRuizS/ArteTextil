@@ -22,9 +22,9 @@
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Categoría</label>
                 <select class="form-select" [(ngModel)]="filters.categoryId">
-                    <option value="0">Todas</option>
-                    @for (c of categories; track c) {
-                    <option [value]="c.categoryId">{{ c.name }}</option>
+                    <option value="0">Todas ({{ productsOrigins.length }})</option>
+                    @for (c of categories; track c.categoryId) {
+                    <option [value]="c.categoryId">{{ categoryOptionLabel(c) }}</option>
                     }
                 </select>
             </div>
@@ -33,9 +33,9 @@
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Proveedor</label>
                 <select class="form-select" [(ngModel)]="filters.supplierId">
-                    <option value="0">Todos</option>
-                    @for (s of suppliers; track s) {
-                    <option [value]="s.supplierId">{{ s.name }}</option>
+                    <option value="0">Todos ({{ productsOrigins.length }})</option>
+                    @for (s of suppliers; track s.supplierId) {
+                    <option [value]="s.supplierId">{{ supplierOptionLabel(s) }}</option>
                     }
                 </select>
             </div>
@@ -43,13 +43,15 @@
             <!-- Precio mínimo -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Precio mínimo</label>
-                <input type="number" class="form-control" [(ngModel)]="filters.minPrice">
+                <input type="number" min="0" class="form-control" [(ngModel)]="filters.minPrice"
+                    [class.is-invalid]="filterError">
             </div>
 
             <!-- Precio máximo -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Precio máximo</label>
-                <input type="number" class="form-control" [(ngModel)]="filters.maxPrice">
+                <input type="number" min="0" class="form-control" [(ngModel)]="filters.maxPrice"
+                    [class.is-invalid]="filterError">
             </div>
 
 
@@ -63,13 +65,20 @@
                 </div>
             </div>
 
+            <!-- ERROR DE FILTROS -->
+            @if (filterError) {
+            <div class="col-12">
+                <div class="text-danger small">{{ filterError }}</div>
+            </div>
+            }
+
             <!-- BOTONES -->
             <div class="col-12 d-flex justify-content-end gap-2 mt-3">
                 <button class="btn btn-outline-secondary" (click)="onClearFilters()">
                     Limpiar
                 </button>
 
-                <button class="btn btn-primary" (click)="onFilter()">
+                <button class="btn btn-primary" [disabled]="filterError" (click)="onFilter()">
                     Aplicar filtros
                 </button>
             </div>
@@ -91,7 +100,6 @@
 
         @for (p of filteredProducts; track p.productId) {
 
-        @if (p.mainImageUrl !== 'assets/images/no-image.jpg') {
         <div class="col-md-4 col-lg-3" (click)="onOpenProduct(p)">
             <div class="product-card card shadow-sm">
 
@@ -144,10 +152,18 @@
                 </div>
             </div>
         </div>
-        }
 
         }
 
     </div>
+
+    <!-- Los productos sin imagen no se listan en el catálogo público. -->
+    @if (hiddenWithoutImage > 0 && authService.hasRole([1, 2, 4])) {
+    <div class="alert alert-warning small mt-4 mb-0">
+        <i class="mdi mdi-image-off-outline me-1"></i>
+        {{ hiddenWithoutImage }} producto(s) activo(s) no aparecen en el catálogo porque no tienen imagen.
+        Agrégales una desde el módulo de Productos para que sean visibles.
+    </div>
+    }
 
 </div>

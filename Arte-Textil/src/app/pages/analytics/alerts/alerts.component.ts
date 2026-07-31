@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiAlertService } from '../../../services/api-alert.service';
@@ -26,11 +26,20 @@ export class AlertsComponent implements OnInit {
     alerts: AlertModel[] = [];
     selectedAlert: AlertModel | null = null;
 
+    // Ids con una petición de "marcar como leída" en curso, para evitar
+    // que un segundo clic dispare la misma llamada dos veces.
+    private markingIds = new Set<number>();
+
     constructor(
         private api: ApiAlertService,
         private shared: SharedService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private cdr: ChangeDetectorRef
     ) {}
+
+    isMarking(alert: AlertModel): boolean {
+        return this.markingIds.has(alert.alertId);
+    }
 
     ngOnInit(): void {
         this.load();
@@ -41,12 +50,17 @@ export class AlertsComponent implements OnInit {
 
         this.api.getAll().subscribe({
             next: data => {
-                this.alerts = data;
+                // Más recientes primero.
+                this.alerts = [...data].sort(
+                    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                );
                 this.shared.setLoading(false);
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.notificationService.error('No se pudieron cargar las alertas. Intente de nuevo.');
                 this.shared.setLoading(false);
+                this.cdr.detectChanges();
             }
         });
     }
@@ -60,10 +74,32 @@ export class AlertsComponent implements OnInit {
     }
 
     markAsRead(alert: AlertModel) {
+
+        if (!alert?.alertId || this.markingIds.has(alert.alertId)) return;
+
+        this.markingIds.add(alert.alertId);
+
+        // Se quita de inmediato de la lista (UI optimista) y se restaura si el
+        // API falla. Antes la tarjeta solo desaparecía cuando algo más
+        // disparaba la detección de cambios, lo que obligaba a un segundo clic.
+        const previous = this.alerts;
+        this.alerts = this.alerts.filter(x => x.alertId !== alert.alertId);
+        this.cdr.detectChanges();
+
         this.api.markAsRead(alert.alertId).subscribe({
             next: () => {
-                this.alerts = this.alerts.filter(x => x.alertId !== alert.alertId);
+                this.markingIds.delete(alert.alertId);
+                this.cdr.detectChanges();
+            },
+            error: (err) => {
+                // Se revierte para que el usuario no crea que quedó marcada.
+                this.markingIds.delete(alert.alertId);
+                this.alerts = previous;
+                this.notificationService.error(
+                    err?.error?.message || err?.message || 'No se pudo marcar la alerta como leída.');
+                this.cdr.detectChanges();
             }
         });
     }
+
 }

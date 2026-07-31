@@ -69,6 +69,19 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
+        // PATCH: api/user/{id}/status
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] bool isActive)
+        {
+            var result = await _userBusiness.UpdateIsActive(id, isActive);
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         // DELETE: api/user/{id}
         [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id}")]

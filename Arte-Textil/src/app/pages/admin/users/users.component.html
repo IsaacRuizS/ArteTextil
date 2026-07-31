@@ -57,11 +57,15 @@
                             </span>
                         </td>
                         <td data-label="" class="text-end pe-4">
-                            <button class="btn btn-sm btn-light me-1" (click)="openEditModal(user)">
+                            <button class="btn btn-sm btn-light me-1" (click)="openEditModal(user)"
+                                title="Editar usuario" aria-label="Editar usuario">
                                 <i class="mdi mdi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(user)">
-                                <i class="mdi" [ngClass]="user.isActive ? 'mdi-eye-off' : 'mdi-eye-outline'"></i>
+                            <button class="btn btn-sm btn-light" (click)="openDeleteModal(user)"
+                                [title]="user.isActive ? 'Desactivar usuario' : 'Activar usuario'"
+                                [attr.aria-label]="user.isActive ? 'Desactivar usuario' : 'Activar usuario'">
+                                <i class="mdi"
+                                    [ngClass]="user.isActive ? 'mdi-account-off text-danger' : 'mdi-account-check text-success'"></i>
                             </button>
                         </td>
                     </tr>
@@ -116,18 +120,49 @@
                             [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
                     </div>
 
-                    @if (!isEditing) {
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">
-                            Contraseña
+                            Contraseña @if (!isEditing) { <span class="text-danger">*</span> }
                         </label>
                         <input
                             type="password"
                             class="form-control"
                             formControlName="passwordHash"
                             [class.is-invalid]="userForm.get('passwordHash')?.invalid && userForm.get('passwordHash')?.touched">
+
+                        @if (isEditing) {
+                        <div class="form-text">Dejar en blanco para mantener la contraseña actual.</div>
+                        }
+
+                        @if (userForm.get('passwordHash')?.touched && userForm.get('passwordHash')?.errors?.['required']) {
+                        <div class="invalid-feedback d-block">La contraseña es obligatoria.</div>
+                        }
+
+                        @if (!isEditing || userForm.get('passwordHash')?.value) {
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            <li [class.text-success]="passwordRequirements.minLength"
+                                [class.text-muted]="!passwordRequirements.minLength">
+                                <i class="mdi" [ngClass]="passwordRequirements.minLength ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                                Al menos 8 caracteres
+                            </li>
+                            <li [class.text-success]="passwordRequirements.upperCase"
+                                [class.text-muted]="!passwordRequirements.upperCase">
+                                <i class="mdi" [ngClass]="passwordRequirements.upperCase ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                                Al menos una letra mayúscula
+                            </li>
+                            <li [class.text-success]="passwordRequirements.number"
+                                [class.text-muted]="!passwordRequirements.number">
+                                <i class="mdi" [ngClass]="passwordRequirements.number ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                                Al menos un número
+                            </li>
+                            <li [class.text-success]="passwordRequirements.specialChar"
+                                [class.text-muted]="!passwordRequirements.specialChar">
+                                <i class="mdi" [ngClass]="passwordRequirements.specialChar ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                                Al menos un carácter especial (!#$%&amp;*?&#64;)
+                            </li>
+                        </ul>
+                        }
                     </div>
-                    }
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -201,17 +236,25 @@
                     <i class="mdi mdi-alert-circle-outline"></i>
                 </div>
 
-                <h5 class="fw-bold">¿Modificar estado?</h5>
+                <h5 class="fw-bold">
+                    {{ userToDelete?.isActive ? '¿Desactivar usuario?' : '¿Activar usuario?' }}
+                </h5>
                 <p class="text-muted small">
-                    ¿Deseas cambiar el estado activo/inactivo de <strong>{{ userToDelete?.fullName }}</strong>?
+                    {{ userToDelete?.isActive
+                    ? 'El usuario no podrá iniciar sesión, pero seguirá visible en el filtro de inactivos.'
+                    : 'El usuario volverá a tener acceso al sistema.' }}
+                    <br>
+                    <strong>{{ userToDelete?.fullName }}</strong>
                 </p>
 
                 <div class="d-flex justify-content-center gap-2 mt-3">
                     <button type="button" class="btn btn-light" (click)="showDeleteModal = false">
                         Cancelar
                     </button>
-                    <button type="button" class="btn btn-danger" (click)="confirmDelete()">
-                        Modificar
+                    <button type="button" class="btn"
+                        [ngClass]="userToDelete?.isActive ? 'btn-danger' : 'btn-success'"
+                        (click)="confirmDelete()">
+                        {{ userToDelete?.isActive ? 'Desactivar' : 'Activar' }}
                     </button>
                 </div>
             </div>

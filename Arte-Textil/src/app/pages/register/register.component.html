@@ -18,66 +18,99 @@
                 <div class="mb-3">
                     <label for="fullName" class="form-label">Nombre completo</label>
                     <input type="text" id="fullName" class="form-control" formControlName="fullName"
-                        [ngClass]="{ 'is-invalid': submitted && f['fullName'].errors }"
+                        [ngClass]="{ 'is-invalid': (submitted || f['fullName'].touched) && f['fullName'].errors }"
                         placeholder="Juan Pérez">
-                    <div *ngIf="submitted && f['fullName'].errors" class="invalid-feedback">
-                        <div *ngIf="f['fullName'].errors['required']">El nombre es requerido</div>
-                        <div *ngIf="f['fullName'].errors['minlength']">Mínimo 3 caracteres</div>
+                    <div *ngIf="(submitted || f['fullName'].touched) && f['fullName'].errors as errors"
+                        class="invalid-feedback d-block">
+                        <div *ngIf="errors['required']">El nombre completo es obligatorio.</div>
+                        <div *ngIf="errors['minlength']">El nombre debe tener al menos 3 caracteres.</div>
+                        <div *ngIf="errors['maxlength']">El nombre no puede superar los 100 caracteres.</div>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
                     <input type="email" id="email" class="form-control" formControlName="email"
-                        [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
+                        [ngClass]="{ 'is-invalid': (submitted || f['email'].touched) && f['email'].errors }"
                         placeholder="nombre@ejemplo.com">
-                    <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
-                        <div *ngIf="f['email'].errors['required']">El correo es requerido</div>
-                        <div *ngIf="f['email'].errors['email']">Correo inválido</div>
+                    <div *ngIf="(submitted || f['email'].touched) && f['email'].errors as errors"
+                        class="invalid-feedback d-block">
+                        <div *ngIf="errors['required']">El correo electrónico es obligatorio.</div>
+                        <div *ngIf="errors['email']">El formato del correo no es válido.</div>
+                        <div *ngIf="errors['maxlength']">El correo no puede superar los 100 caracteres.</div>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="phone" class="form-label">Teléfono</label>
-                    <input type="number" id="phone" class="form-control" formControlName="phone"
-                        [ngClass]="{ 'is-invalid': submitted && f['phone'].errors }"
+                    <input type="tel" id="phone" class="form-control" formControlName="phone"
+                        [ngClass]="{ 'is-invalid': (submitted || f['phone'].touched) && f['phone'].errors }"
                         placeholder="88887777">
-                    <div *ngIf="submitted && f['phone'].errors" class="invalid-feedback">
-                        <div *ngIf="f['phone'].errors['required']">El teléfono es requerido</div>
+                    <div *ngIf="(submitted || f['phone'].touched) && f['phone'].errors as errors"
+                        class="invalid-feedback d-block">
+                        <div *ngIf="errors['required']">El teléfono es obligatorio.</div>
+                        <div *ngIf="errors['pattern']">
+                            El teléfono solo admite números, espacios, "+" o "-", entre 8 y 15 caracteres.
+                        </div>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input type="password" id="password" class="form-control" formControlName="password"
-                        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
+                        [ngClass]="{ 'is-invalid': (submitted || f['password'].touched) && f['password'].errors }"
                         placeholder="••••••••">
-                    <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
-                        <div *ngIf="f['password'].errors['required']">La contraseña es requerida</div>
-                        <div *ngIf="f['password'].errors['minlength']">Mínimo 6 caracteres</div>
+
+                    <div *ngIf="(submitted || f['password'].touched) && f['password'].errors?.['required']"
+                        class="invalid-feedback d-block">
+                        La contraseña es obligatoria.
                     </div>
+
+                    <!-- Checklist de requisitos -->
+                    <ul class="list-unstyled small mt-2 mb-0">
+                        <li [ngClass]="passwordRequirements.minLength ? 'text-success' : 'text-muted'">
+                            <i class="mdi" [ngClass]="passwordRequirements.minLength ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                            Al menos 8 caracteres
+                        </li>
+                        <li [ngClass]="passwordRequirements.upperCase ? 'text-success' : 'text-muted'">
+                            <i class="mdi" [ngClass]="passwordRequirements.upperCase ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                            Al menos una letra mayúscula
+                        </li>
+                        <li [ngClass]="passwordRequirements.number ? 'text-success' : 'text-muted'">
+                            <i class="mdi" [ngClass]="passwordRequirements.number ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                            Al menos un número
+                        </li>
+                        <li [ngClass]="passwordRequirements.specialChar ? 'text-success' : 'text-muted'">
+                            <i class="mdi" [ngClass]="passwordRequirements.specialChar ? 'mdi-check-circle' : 'mdi-circle-small'"></i>
+                            Al menos un carácter especial (!#$%&amp;*?&#64;)
+                        </li>
+                    </ul>
                 </div>
 
                 <div class="mb-3">
                     <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
                     <input type="password" id="confirmPassword" class="form-control"
                         formControlName="confirmPassword"
-                        [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }"
+                        [ngClass]="{ 'is-invalid': (submitted || f['confirmPassword'].touched) && f['confirmPassword'].errors }"
                         placeholder="••••••••">
-                    <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
-                        <div *ngIf="f['confirmPassword'].errors['required']">Confirma tu contraseña</div>
-                        <div *ngIf="f['confirmPassword'].errors['mismatch']">Las contraseñas no coinciden</div>
+                    <div *ngIf="(submitted || f['confirmPassword'].touched) && f['confirmPassword'].errors as errors"
+                        class="invalid-feedback d-block">
+                        <div *ngIf="errors['required']">Debes confirmar tu contraseña.</div>
+                        <div *ngIf="errors['mismatch']">Las contraseñas no coinciden.</div>
                     </div>
                 </div>
 
                 <div *ngIf="error" class="alert alert-danger mt-2 mb-0">{{ error }}</div>
 
                 <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary" [disabled]="loading">
+                    <button type="submit" class="btn btn-primary" [disabled]="loading || registerForm.invalid">
                         <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"
                             role="status" aria-hidden="true"></span>
                         Crear cuenta
                     </button>
+                    <div *ngIf="registerForm.invalid" class="text-muted small text-center">
+                        Completa todos los campos correctamente para habilitar el registro.
+                    </div>
                 </div>
 
                 <p class="text-center mt-3 mb-0" style="font-size: 14px;">

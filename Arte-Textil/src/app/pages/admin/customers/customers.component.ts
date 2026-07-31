@@ -139,15 +139,14 @@ export class CustomersComponent implements OnInit {
 
         this.customers = this.customersOrigins;
 
-        if (this.statusFilter > 0) {
+        // El select puede devolver string cuando se enlaza por atributo, se
+        // normaliza a número para que la comparación estricta funcione.
+        const filter = +this.statusFilter;
 
-            if (this.statusFilter === 1) {
-                this.customers = this.customers.filter(c => c.isActive);
-            }
-
-            if (this.statusFilter === 2) {
-                this.customers = this.customers.filter(c => !c.isActive);
-            }
+        if (filter === 1) {
+            this.customers = this.customers.filter(c => c.isActive);
+        } else if (filter === 2) {
+            this.customers = this.customers.filter(c => !c.isActive);
         }
 
         if (this.searchTerm && this.searchTerm.trim() !== '') {
