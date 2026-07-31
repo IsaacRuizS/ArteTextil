@@ -110,6 +110,7 @@ public class JobBusiness : IJobBusiness
                 await CreatePromotionsAlert(promotions);
 
                 //enviar correo de promociones para customers
+
                 if (customerEmails.Any())
                 {
                     await _emailService.SendPromotionsExpiringAsync(customerEmails!, promotions);
@@ -132,6 +133,56 @@ public class JobBusiness : IJobBusiness
 
             await _logHelper.LogCreate("Alerts - Error", 0, $"Error en JobBusiness: {safeMessage}");
         }
+    }
+
+    // Disparo manual para probar: genera las alertas sin enviar ningún correo.
+    public async Task<int> GenerateAlertsNow(bool force)
+    {
+        var now = DateTime.Now;
+        var next24h = now.AddHours(24);
+
+        if (!force)
+        {
+            var today = DateTime.Today;
+            var exists = await _repositoryAlert.Query().AnyAsync(a => a.CreatedAt >= today);
+
+            if (exists) return 0;
+        }
+
+        var promotions = await _repositoryPromotion.Query()
+            .Include(p => p.Product)
+            .Where(p => p.DeletedAt == null
+                && p.IsActive
+                && p.EndDate >= now
+                && p.EndDate <= next24h)
+            .ToListAsync();
+
+        var products = await _repositoryProduct.Query()
+            .Where(p => p.IsActive
+                && p.DeletedAt == null
+                && (p.Stock - p.QuantityReserved) <= p.MinStock)
+            .ToListAsync();
+
+        var orders = await _repositoryOrder.Query()
+            .Include(x => x.OrderItems)
+            .Where(o => o.IsActive
+                && o.DeletedAt == null
+                && o.Status != "Cancelado"
+                && o.Status != "Entregado"
+                && (
+                    (o.DeliveryDate >= now && o.DeliveryDate <= next24h)
+                    || o.DeliveryDate < now
+                )
+            )
+            .ToListAsync();
+
+        var created = 0;
+
+        if (products.Any()) { await CreateStockAlert(products); created++; }
+        if (orders.Any()) { await CreateOrdersAlert(orders, now); created++; }
+        if (promotions.Any()) { await CreatePromotionsAlert(promotions); created++; }
+
+        return created;
     }
 
     // ── Construcción de alertas por tema ─────────────────────────────────────

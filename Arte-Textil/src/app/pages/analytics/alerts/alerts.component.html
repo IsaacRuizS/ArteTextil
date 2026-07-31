@@ -9,12 +9,21 @@
             </div>
         </div>
 
-        <button class="btn btn-outline-secondary" *ngIf="alerts.length > 0"
-                [disabled]="markingAll" (click)="markAllAsRead()">
-            <span *ngIf="markingAll" class="spinner-border spinner-border-sm me-1"></span>
-            <i *ngIf="!markingAll" class="mdi mdi-check-all me-1"></i>
-            Marcar todas como leídas
-        </button>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-primary" [disabled]="generating" (click)="generateNow()"
+                    title="Genera las alertas de hoy sin enviar correos">
+                <span *ngIf="generating" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!generating" class="mdi mdi-refresh me-1"></i>
+                Generar ahora
+            </button>
+
+            <button class="btn btn-outline-secondary" *ngIf="alerts.length > 0"
+                    [disabled]="markingAll" (click)="markAllAsRead()">
+                <span *ngIf="markingAll" class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="!markingAll" class="mdi mdi-check-all me-1"></i>
+                Marcar todas como leídas
+            </button>
+        </div>
     </div>
 
     <!-- FILTRO POR TEMA -->

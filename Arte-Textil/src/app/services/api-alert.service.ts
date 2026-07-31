@@ -35,6 +35,24 @@ export class ApiAlertService extends ApiBaseService {
             );
     }
 
+    // POST: api/alert/generate — genera las alertas del día sin enviar correos
+    generate(force = true): Observable<number> {
+
+        return this.http.post<any>(
+            `${this.baseUrl}/api/alert/generate?force=${force}`,
+            {},
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al generar las alertas.');
+                }
+                return res.data as number;
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
+
     // PATCH: api/alert/read-all
     markAllAsRead(): Observable<number> {
 

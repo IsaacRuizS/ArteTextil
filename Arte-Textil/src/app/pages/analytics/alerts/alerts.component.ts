@@ -34,6 +34,7 @@ export class AlertsComponent implements OnInit {
     typeFilter: AlertType | null = null;
 
     markingAll = false;
+    generating = false;
 
     readonly previewItems = PREVIEW_ITEMS;
 
@@ -181,6 +182,35 @@ export class AlertsComponent implements OnInit {
                 this.alerts = previous;
                 this.notificationService.error(
                     err?.error?.message || err?.message || 'No se pudo marcar la alerta como leída.');
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    // Genera las alertas del día bajo demanda, sin enviar correos.
+    generateNow() {
+
+        if (this.generating) return;
+
+        this.generating = true;
+
+        this.api.generate(true).subscribe({
+            next: (created) => {
+                this.generating = false;
+
+                if (created === 0) {
+                    this.notificationService.warning(
+                        'No hay promociones por vencer, productos con stock bajo ni órdenes críticas.');
+                } else {
+                    this.notificationService.success(`${created} alerta(s) generada(s).`);
+                }
+
+                this.load();
+            },
+            error: (err) => {
+                this.generating = false;
+                this.notificationService.error(
+                    err?.error?.message || err?.message || 'No se pudieron generar las alertas.');
                 this.cdr.detectChanges();
             }
         });
