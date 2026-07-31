@@ -51,6 +51,22 @@ export class ApiPayrollAdjustmentService extends ApiBaseService {
             );
     }
 
+    // Activar / desactivar (no borra el registro, solo deja de aplicarse en planilla)
+    updateStatus(id: number, isActive: boolean): Observable<boolean> {
+
+        return this.http.patch<any>(
+            `${this.baseUrl}/api/payrollAdjustment/${id}/status`,
+            isActive,
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) throw new Error(res?.message);
+                return res.data === true;
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
+
     // Eliminar
     delete(id: number): Observable<boolean> {
 

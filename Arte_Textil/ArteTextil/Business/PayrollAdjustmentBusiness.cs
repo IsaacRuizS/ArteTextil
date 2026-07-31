@@ -165,6 +165,55 @@ public class PayrollAdjustmentBusiness
     }
 
     // Delete
+    // ACTUALIZAR ESTADO (ACTIVO / INACTIVO)
+    // No toca DeletedAt: el registro sigue visible en el listado y solo deja de
+    // aplicarse en la planilla mientras esté inactivo.
+    public async Task<ApiResponse<bool>> UpdateIsActive(int id, bool isActive)
+    {
+        var response = new ApiResponse<bool>();
+
+        try
+        {
+            var adj = await _repository.FirstOrDefaultAsync(a =>
+                a.AdjustmentId == id &&
+                a.DeletedAt == null);
+
+            if (adj == null)
+            {
+                response.Success = false;
+                response.Message = "Movimiento no encontrado";
+                return response;
+            }
+
+            var prev = JsonSerializer.Serialize(adj);
+
+            adj.IsActive = isActive;
+            adj.UpdatedAt = DateTime.UtcNow;
+
+            _repository.Update(adj);
+            await _repository.SaveAsync();
+
+            await _logHelper.LogUpdate(
+                "PayrollAdjustments",
+                adj.AdjustmentId,
+                prev,
+                JsonSerializer.Serialize(adj)
+            );
+
+            response.Data = true;
+            response.Message = isActive
+                ? "Movimiento activado correctamente"
+                : "Movimiento desactivado correctamente";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = ex.Message;
+        }
+
+        return response;
+    }
+
     public async Task<ApiResponse<bool>> Delete(int id)
     {
         var response = new ApiResponse<bool>();

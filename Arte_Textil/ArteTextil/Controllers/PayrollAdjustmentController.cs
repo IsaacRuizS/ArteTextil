@@ -45,6 +45,16 @@ public class PayrollAdjustmentController : ControllerBase
         return Ok(result);
     }
 
+    // PATCH: api/payrolladjustment/3/status
+    [Authorize(Policy = "AdminOnly")]
+    [HttpPatch("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] bool isActive)
+    {
+        var result = await _business.UpdateIsActive(id, isActive);
+        if (!result.Success) return NotFound(result);
+        return Ok(result);
+    }
+
     // DELETE: api/payrolladjustment/3
     [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]

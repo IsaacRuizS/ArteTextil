@@ -92,14 +92,15 @@
                         <strong>{{ getSubtotal(item) | customCurrency:'₡' }}</strong>
                     </td>
 
-                    <!-- Cantidad + eliminar -->
+                    <!-- Cantidad + quitar -->
                     <td data-label="Cantidad">
                         <div class="qty-box d-flex align-items-center gap-2">
                             <button class="btn btn-light btn-sm" (click)="decreaseQty(item)">-</button>
                             <span class="qty">{{ item.quantitySelected }}</span>
                             <button class="btn btn-light btn-sm" (click)="increaseQty(item)">+</button>
-                            <button class="btn btn-sm btn-outline-danger ms-1" (click)="removeItem(item)">
-                                <i class="mdi mdi-delete"></i>
+                            <button class="btn btn-sm btn-outline-danger ms-1" (click)="removeItem(item)"
+                                title="Quitar del carrito" aria-label="Quitar del carrito">
+                                <i class="mdi mdi-close"></i>
                             </button>
                         </div>
                         @if (item.quantitySelected! > item.availableStock) {

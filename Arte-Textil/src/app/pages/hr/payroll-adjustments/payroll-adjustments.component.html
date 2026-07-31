@@ -56,6 +56,7 @@
                         <th>Monto</th>
                         <th>Tipo</th>
                         <th>Razón</th>
+                        <th>Estado</th>
                         <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
@@ -67,11 +68,24 @@
                         <td data-label="Monto">{{ a.amount | customCurrency:'₡' }}</td>
                         <td data-label="Tipo">{{ a.type }}</td>
                         <td data-label="Razón">{{ a.reason || '-' }}</td>
+                        <td data-label="Estado">
+                            <span class="badge rounded-pill"
+                                [class.bg-success-subtle]="a.isActive" [class.text-success]="a.isActive"
+                                [class.bg-secondary-subtle]="!a.isActive" [class.text-secondary]="!a.isActive">
+                                {{ a.isActive ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
                         <td data-label="" class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(a)"
-                                title="Eliminar movimiento" aria-label="Eliminar movimiento">
-                                <i class="mdi mdi-trash-can-outline me-1"></i>
-                                Eliminar
+                            <button class="btn btn-sm"
+                                [ngClass]="a.isActive ? 'btn-outline-danger' : 'btn-outline-success'"
+                                (click)="openDeleteModal(a)"
+                                [title]="a.isActive
+                                    ? 'Desactivar: dejará de aplicarse en planilla'
+                                    : 'Activar: volverá a aplicarse en planilla'"
+                                [attr.aria-label]="a.isActive ? 'Desactivar movimiento' : 'Activar movimiento'">
+                                <i class="mdi me-1"
+                                    [ngClass]="a.isActive ? 'mdi-cancel' : 'mdi-check-circle-outline'"></i>
+                                {{ a.isActive ? 'Desactivar' : 'Activar' }}
                             </button>
                         </td>
                     </tr>
@@ -199,15 +213,19 @@
         <div class="modal-content">
 
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">¿Eliminar movimiento?</h5>
+                <h5 class="modal-title fw-bold">
+                    {{ adjustmentToDelete?.isActive ? '¿Desactivar movimiento?' : '¿Activar movimiento?' }}
+                </h5>
 
                 <button type="button" class="btn-close" (click)="showDeleteModal = false">
                 </button>
             </div>
             <div class="modal-body text-center">
 
-                <div class="mb-3 display-4 text-danger">
-                    <i class="mdi mdi-trash-can-outline"></i>
+                <div class="mb-3 display-4"
+                    [ngClass]="adjustmentToDelete?.isActive ? 'text-danger' : 'text-success'">
+                    <i class="mdi"
+                        [ngClass]="adjustmentToDelete?.isActive ? 'mdi-cancel' : 'mdi-check-circle-outline'"></i>
                 </div>
 
                 <p class="mb-2">
@@ -217,8 +235,9 @@
                 </p>
 
                 <p class="text-muted small mb-0">
-                    Se eliminará de forma permanente y dejará de aplicarse en planilla.
-                    Esta acción no se puede deshacer.
+                    {{ adjustmentToDelete?.isActive
+                    ? 'Dejará de aplicarse en planilla. Puedes volver a activarlo cuando quieras.'
+                    : 'Volverá a aplicarse en la planilla del mes correspondiente.' }}
                 </p>
 
             </div>
@@ -228,8 +247,10 @@
                     Cancelar
                 </button>
 
-                <button class="btn btn-danger px-4" (click)="confirmDelete()">
-                    Sí, eliminar
+                <button class="btn px-4"
+                    [ngClass]="adjustmentToDelete?.isActive ? 'btn-danger' : 'btn-success'"
+                    (click)="confirmDelete()">
+                    {{ adjustmentToDelete?.isActive ? 'Desactivar' : 'Activar' }}
                 </button>
 
             </div>

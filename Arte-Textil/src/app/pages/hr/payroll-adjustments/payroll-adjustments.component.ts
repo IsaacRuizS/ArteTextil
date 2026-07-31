@@ -287,11 +287,12 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         // Se guardan los datos antes de limpiar la referencia, para poder
         // construir el mensaje correcto dentro del callback.
-        const deleted = this.adjustmentToDelete;
+        const target = this.adjustmentToDelete;
+        const newStatus = !target.isActive;
 
         this.sharedService.setLoading(true);
 
-        this.apiAdjustment.delete(deleted.adjustmentId).subscribe({
+        this.apiAdjustment.updateStatus(target.adjustmentId, newStatus).subscribe({
             next: () => {
                 this.showDeleteModal = false;
                 this.adjustmentToDelete = null;
@@ -301,14 +302,16 @@ export class PayrollAdjustmentsComponent implements OnInit {
                 // El mensaje debe emitirse solo cuando la operación realmente
                 // fue exitosa, no de forma sincrónica al lanzar la petición.
                 this.showModal(
-                    `Movimiento eliminado correctamente. Ya no se aplicará en la planilla de ${deleted.userName}.`,
+                    newStatus
+                        ? `Movimiento activado. Volverá a aplicarse en la planilla de ${target.userName}.`
+                        : `Movimiento desactivado. Ya no se aplicará en la planilla de ${target.userName}.`,
                     'success'
                 );
             },
             error: (err) => {
                 this.sharedService.setLoading(false);
                 this.showModal(
-                    err?.error?.message || err?.message || 'No se pudo eliminar el movimiento.',
+                    err?.error?.message || err?.message || 'No se pudo cambiar el estado del movimiento.',
                     'error'
                 );
             }
