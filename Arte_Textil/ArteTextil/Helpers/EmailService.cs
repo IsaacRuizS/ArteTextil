@@ -7,38 +7,18 @@ namespace ArteTextil.Helpers
 {
     public class EmailService : IEmailService
     {
-        private readonly SmtpClient _smtp;
-        private readonly string _fromAddress;
+        private readonly SmtpClient _smtp; 
 
         public EmailService(IConfiguration config)
         {
-            _fromAddress = config["Smtp:From"] ?? config["Smtp:User"] ?? "no-reply@artetextil.com";
-            var smtpHost = config["Smtp:Host"];
-            if (string.IsNullOrWhiteSpace(smtpHost))
+            _smtp = new SmtpClient(config["Smtp:Host"])
             {
-                throw new InvalidOperationException("La configuración SMTP no tiene host.");
-            }
-
-            var smtpPort = int.TryParse(config["Smtp:Port"], out var parsedPort)
-                ? parsedPort
-                : 587;
-
-            var smtpUser = config["Smtp:User"];
-            var smtpPassword = config["Smtp:Password"];
-
-            if (smtpHost.Contains("gmail", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(smtpPassword))
-            {
-                smtpPassword = smtpPassword.Replace(" ", "");
-            }
-
-            _smtp = new SmtpClient(smtpHost)
-            {
-                Port = smtpPort,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(smtpUser, smtpPassword),
-                EnableSsl = true,
-                Timeout = 30000
+                Port = int.Parse(config["Smtp:Port"]),
+                Credentials = new NetworkCredential(
+                    config["Smtp:User"],
+                    config["Smtp:Password"]
+                ),
+                EnableSsl = true
             };
         }
 
@@ -612,7 +592,7 @@ namespace ArteTextil.Helpers
                 Subject = $"Pago de planilla - {period}",
                 Body = body,
                 IsBodyHtml = true,
-                From = new MailAddress(_fromAddress)
+                From = new MailAddress("no-reply@artetextil.com")
             };
 
             mail.To.Add(email);
