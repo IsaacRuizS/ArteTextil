@@ -14,12 +14,14 @@ public class PayrollBusiness
     private readonly ArteTextilDbContext _context;
     private readonly IRepositoryPayrollMonthly _repository;
     private readonly IEmailService _emailService;
+    private readonly ISystemLogHelper _logHelper;
 
-    public PayrollBusiness(ArteTextilDbContext context, IEmailService emailService)
+    public PayrollBusiness(ArteTextilDbContext context, IEmailService emailService, ISystemLogHelper logHelper)
     {
         _context = context;
         _repository = new RepositoryPayrollMonthly(context);
         _emailService = emailService;
+        _logHelper = logHelper;
     }
 
 
@@ -31,8 +33,15 @@ public class PayrollBusiness
 
         try
         {
+            if (year < 2000 || month < 1 || month > 12)
+            {
+                response.Success = false;
+                response.Message = "Debe indicar un año y mes válidos.";
+                return response;
+            }
+
             var users = await _context.Users
-                .Where(u => u.DeletedAt == null)
+                .Where(u => u.DeletedAt == null && u.IsActive && u.RoleId != 3)
                 .ToListAsync();
 
             foreach (var user in users)
@@ -86,28 +95,13 @@ public class PayrollBusiness
                     await _context.PayrollMonthly.AddAsync(payroll);
                 }
 
-                await _context.SaveChangesAsync();
-
-                if (messages.Any())
-                {
-                    response.Success = false;
-                    response.Message = string.Join(" | ", messages);
-                }
-                else
-                {
-                    response.Data = true;
-                    response.Message = "Las planillas fueron generadas correctamente.";
-                }
-
-
-                // SOLO ajustes NO aplicados
                 var adjustments = await _context.PayrollAdjustments
     .Where(a =>
         a.UserId == user.UserId &&
         a.Year == year &&
         a.Month == month &&
         a.DeletedAt == null &&
-        !a.Applied)
+        a.IsActive)
     .ToListAsync();
 
                 decimal extras = adjustments
@@ -127,7 +121,7 @@ public class PayrollBusiness
                 payroll.IsActive = true;
                 payroll.UpdatedAt = DateTime.UtcNow;
 
-                // MARCAR ajustes como usados
+                // Mantener compatibilidad con Applied sin excluir ajustes vigentes en recálculos.
                 foreach (var adj in adjustments)
                 {
                     adj.Applied = true;
@@ -269,7 +263,66 @@ public class PayrollBusiness
                 return response;
             }
 
-            // Aprobar
+            if (string.IsNullOrWhiteSpace(method))
+            {
+                response.Success = false;
+                response.Message = "Debe indicar el método de pago.";
+                return response;
+            }
+
+            var salary = await _context.Salaries.FirstOrDefaultAsync(s =>
+                s.UserId == payroll.UserId &&
+                s.IsActive &&
+                s.DeletedAt == null);
+
+            if (salary == null)
+            {
+                response.Success = false;
+                response.Message = "El usuario no tiene salario activo asignado.";
+                return response;
+            }
+
+            var adjustments = await _context.PayrollAdjustments
+                .Where(a =>
+                    a.UserId == payroll.UserId &&
+                    a.Year == payroll.Year &&
+                    a.Month == payroll.Month &&
+                    a.DeletedAt == null &&
+                    a.IsActive)
+                .ToListAsync();
+
+            payroll.BaseSalary = salary.BaseSalary;
+            payroll.Extras = adjustments
+                .Where(a => a.Type.Trim().ToLower() == "extra")
+                .Sum(a => a.Amount);
+            payroll.Deductions = adjustments
+                .Where(a => a.Type.Trim().ToLower() == "rebajo")
+                .Sum(a => a.Amount);
+            payroll.Total = payroll.BaseSalary + payroll.Extras - payroll.Deductions;
+
+            if (payroll.Total < 0)
+            {
+                response.Success = false;
+                response.Message = "El total de planilla no puede ser negativo.";
+                return response;
+            }
+
+            foreach (var adj in adjustments)
+            {
+                adj.Applied = true;
+                adj.UpdatedAt = DateTime.UtcNow;
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == payroll.UserId && u.DeletedAt == null && u.IsActive);
+
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = "El usuario de la planilla no existe o está inactivo.";
+                return response;
+            }
+
             payroll.ApprovedByUserId = adminId;
             payroll.UpdatedAt = DateTime.UtcNow;
 
@@ -278,7 +331,7 @@ public class PayrollBusiness
             {
                 PayrollId = payrollId,
                 Amount = payroll.Total,
-                Method = method,
+                Method = method.Trim(),
                 PaymentDate = DateTime.UtcNow,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -286,28 +339,38 @@ public class PayrollBusiness
 
             await _context.Payments.AddAsync(payment);
 
+            await _context.Alerts.AddAsync(new Alert
+            {
+                Title = "Pago de planilla procesado",
+                Message = $"Se procesó el pago de {user.FullName} para {payroll.Year}-{payroll.Month:D2} por ₡{payroll.Total:N2}.",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
             // EMAIL
+            string? emailWarning = null;
+
             try
             {
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.UserId == payroll.UserId);
-
-                if (user != null)
-                {
-                    await _emailService.SendPayrollPaymentAsync(user, payroll, payment);
-                }
+                await _emailService.SendPayrollPaymentAsync(user, payroll, payment);
             }
             catch (Exception emailEx)
             {
-                //
-                Console.WriteLine("Error enviando correo: " + emailEx.Message);
+                emailWarning = $"El pago fue procesado, pero no se pudo enviar el correo de planilla: {emailEx.Message}";
+
+                await _logHelper.LogCreate(
+                    "Email Payroll",
+                    payroll.PayrollId,
+                    emailWarning,
+                    adminId
+                );
             }
 
             response.Data = true;
-            response.Message = "La planilla fue procesada y pagada correctamente.";
+            response.Message = emailWarning ?? "La planilla fue procesada, pagada y enviada por correo correctamente.";
         }
         catch (Exception ex)
         {

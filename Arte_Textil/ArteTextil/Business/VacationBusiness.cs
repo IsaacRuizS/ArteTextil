@@ -18,7 +18,7 @@ public class VacationBusiness
     private async Task<int> CalculateAvailableDays(int userId)
     {
         var user = await _repository.Context.Users
-            .FirstOrDefaultAsync(u => u.UserId == userId);
+            .FirstOrDefaultAsync(u => u.UserId == userId && u.DeletedAt == null && u.IsActive);
 
         if (user == null) return 0;
 
@@ -45,19 +45,19 @@ public class VacationBusiness
     {
         var response = new ApiResponse<VacationRequestDto>();
 
-        Console.WriteLine("DTO NOTES: " + dto.notes);
-
         try
         {
-            if (dto.endDate < dto.startDate)
+            var validation = await ValidateVacationRequest(dto);
+            if (!validation.Success)
             {
-                response.Success = false;
-                response.Message = "La fecha final no puede ser menor";
-                return response;
+                return validation;
             }
 
+            var startDate = dto.startDate.Date;
+            var endDate = dto.endDate.Date;
+
             // Calcular días solicitados
-            var daysRequested = (dto.endDate - dto.startDate).Days + 1;
+            var daysRequested = (endDate - startDate).Days + 1;
 
             // Calcular disponibles
             var availableDays = await CalculateAvailableDays(dto.userId);
@@ -69,7 +69,7 @@ public class VacationBusiness
         && v.DeletedAt == null)
     .ToListAsync();
 
-            var usedDays = vacations.Sum(v => (v.EndDate - v.StartDate).Days + 1);
+            var usedDays = vacations.Sum(v => (v.EndDate.Date - v.StartDate.Date).Days + 1);
 
             var remainingDays = availableDays - usedDays;
 
@@ -83,24 +83,15 @@ public class VacationBusiness
             var entity = new Vacation
             {
                 UserId = dto.userId,
-                StartDate = dto.startDate,
-                EndDate = dto.endDate,
+                StartDate = startDate,
+                EndDate = endDate,
                 Notes = dto.notes,
                 Status = "Pendiente",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
 
-            Console.WriteLine("ANTES DE GUARDAR VACATION");
-
             await _repository.AddAsync(entity);
-            await _repository.SaveAsync();
-
-            Console.WriteLine("DESPUES DE GUARDAR VACATION");
-            Console.WriteLine($"USERID: {entity.UserId}");
-            Console.WriteLine($"START: {entity.StartDate}");
-            Console.WriteLine($"END: {entity.EndDate}");
-            Console.WriteLine($"NOTES: {entity.Notes}");
 
             response.Data = _mapper.Map<VacationRequestDto>(entity);
             response.Message = "Solicitud enviada";
@@ -109,6 +100,75 @@ public class VacationBusiness
         {
             response.Success = false;
             response.Message = ex.InnerException?.Message ?? ex.Message;
+        }
+
+        return response;
+    }
+
+    private async Task<ApiResponse<VacationRequestDto>> ValidateVacationRequest(VacationRequestDto dto)
+    {
+        var response = new ApiResponse<VacationRequestDto>();
+        var today = DateTime.UtcNow.Date;
+
+        if (dto == null)
+        {
+            response.Success = false;
+            response.Message = "Debe enviar los datos de la solicitud.";
+            return response;
+        }
+
+        if (dto.userId <= 0)
+        {
+            response.Success = false;
+            response.Message = "Debe seleccionar un usuario válido.";
+            return response;
+        }
+
+        var userExists = await _repository.Context.Users.AnyAsync(u =>
+            u.UserId == dto.userId &&
+            u.DeletedAt == null &&
+            u.IsActive);
+
+        if (!userExists)
+        {
+            response.Success = false;
+            response.Message = "El usuario seleccionado no existe o está inactivo.";
+            return response;
+        }
+
+        if (dto.startDate == default || dto.endDate == default)
+        {
+            response.Success = false;
+            response.Message = "Debe indicar fecha de inicio y fecha fin.";
+            return response;
+        }
+
+        if (dto.startDate.Date < today || dto.endDate.Date < today)
+        {
+            response.Success = false;
+            response.Message = "Las vacaciones solo pueden solicitarse para fechas presentes o futuras.";
+            return response;
+        }
+
+        if (dto.endDate.Date < dto.startDate.Date)
+        {
+            response.Success = false;
+            response.Message = "La fecha final no puede ser menor que la fecha de inicio.";
+            return response;
+        }
+
+        var overlaps = await _repository.Query().AnyAsync(v =>
+            v.UserId == dto.userId &&
+            v.DeletedAt == null &&
+            (v.Status == "Pendiente" || v.Status == "Aprobada") &&
+            dto.startDate.Date <= v.EndDate.Date &&
+            dto.endDate.Date >= v.StartDate.Date);
+
+        if (overlaps)
+        {
+            response.Success = false;
+            response.Message = "Ya existe una solicitud de vacaciones para ese rango de fechas.";
+            return response;
         }
 
         return response;
@@ -125,9 +185,9 @@ public class VacationBusiness
                 && v.DeletedAt == null)
             .ToListAsync();
 
-        var used = vacations.Sum(v => (v.EndDate - v.StartDate).Days + 1);
+        var used = vacations.Sum(v => (v.EndDate.Date - v.StartDate.Date).Days + 1);
 
-        return available - used;
+        return Math.Max(available - used, 0);
     }
 
     // Ver propias solicitudes
@@ -138,7 +198,7 @@ public class VacationBusiness
         try
         {
             var data = _repository.Query()
-                .Where(v => v.UserId == userId && v.DeletedAt == null)
+                .Where(v => v.UserId == userId && v.DeletedAt == null && v.EndDate.Date >= DateTime.UtcNow.Date)
                 .Join(
                     _repository.Context.Users,
                     v => v.UserId,
@@ -180,7 +240,7 @@ public class VacationBusiness
         try
         {
             var data = _repository.Query()
-                .Where(v => v.Status == "Pendiente" && v.DeletedAt == null)
+                .Where(v => v.Status == "Pendiente" && v.DeletedAt == null && v.EndDate.Date >= DateTime.UtcNow.Date)
                 .Join(
                     _repository.Context.Users,
                     v => v.UserId,
@@ -229,6 +289,13 @@ public class VacationBusiness
             {
                 response.Success = false;
                 response.Message = "Solicitud no encontrada";
+                return response;
+            }
+
+            if (req.StartDate.Date < DateTime.UtcNow.Date)
+            {
+                response.Success = false;
+                response.Message = "No se puede aprobar una solicitud con fecha de inicio en el pasado.";
                 return response;
             }
 
@@ -313,7 +380,7 @@ public class VacationBusiness
         try
         {
             var data = _repository.Query()
-                .Where(v => v.DeletedAt == null)
+                .Where(v => v.DeletedAt == null && v.EndDate.Date >= DateTime.UtcNow.Date)
                 .Join(
                     _repository.Context.Users,
                     v => v.UserId,

@@ -42,16 +42,18 @@ export class SalaryComponent implements OnInit {
     ) {
         this.form = this.fb.group({
             userId: ['', Validators.required],
-            baseSalary: [0, Validators.required]
+            baseSalary: [0, [Validators.required, Validators.min(1)]]
         });
     }
 
     ngOnInit(): void {
         this.isAdmin = this.authService.currentUserValue?.roleId === 1;
         this.load();
-        this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => {
-            this.notificationService.error('Error al cargar los usuarios');
-        });
+        if (this.isAdmin) {
+            this.apiUser.getAll().then(u => { this.users = u; this.cdr.markForCheck(); }).catch(() => {
+                this.notificationService.error('Error al cargar los usuarios');
+            });
+        }
     }
 
     get filteredSalaries() {
@@ -129,8 +131,8 @@ export class SalaryComponent implements OnInit {
                     this.shared.setLoading(false);
                 },
 
-                error: () => {
-                    this.notificationService.error('Error al actualizar el salario');
+                error: (err) => {
+                    this.notificationService.error(err?.error?.message || 'Error al actualizar el salario');
                     this.shared.setLoading(false);
                 }
 
@@ -146,8 +148,8 @@ export class SalaryComponent implements OnInit {
                     this.shared.setLoading(false);
                 },
 
-                error: () => {
-                    this.notificationService.error('Error al crear el salario');
+                error: (err) => {
+                    this.notificationService.error(err?.error?.message || 'Error al crear el salario');
                     this.shared.setLoading(false);
                 }
 

@@ -7,7 +7,7 @@ namespace ArteTextil.Helpers
 {
     public class EmailService : IEmailService
     {
-        private readonly SmtpClient _smtp;
+        private readonly SmtpClient _smtp; 
 
         public EmailService(IConfiguration config)
         {
@@ -462,7 +462,12 @@ namespace ArteTextil.Helpers
         public async Task SendPayrollPaymentAsync(User user, PayrollMonthly payroll, Payment payment)
         {
             if (string.IsNullOrWhiteSpace(user.Email))
-                return;
+                throw new InvalidOperationException("El usuario no tiene un correo válido para enviar la colilla de pago.");
+
+            var employeeName = WebUtility.HtmlEncode(user.FullName);
+            var employeeEmail = WebUtility.HtmlEncode(user.Email);
+            var method = WebUtility.HtmlEncode(payment.Method ?? "No indicado");
+            var period = $"{payroll.Year}-{payroll.Month:D2}";
 
             var body = $@"
     <!DOCTYPE html>
@@ -490,11 +495,11 @@ namespace ArteTextil.Helpers
                         <tr>
                             <td style='padding:20px;'>
 
-                                <p>Hola, <b>{user.FullName}</b></p>
+                                <p>Hola, <b>{employeeName}</b></p>
 
                                 <p>Se ha realizado el pago de tu planilla correspondiente al período:</p>
 
-                                <p><b>{payroll.Year}-{payroll.Month:D2}</b></p>
+                                <p><b>{period}</b></p>
 
                                 <hr/>
 
@@ -504,7 +509,7 @@ namespace ArteTextil.Helpers
 
                                 <h3 style='margin-top:20px;'>Total pagado: ₡{payroll.Total:N2}</h3>
 
-                                <p><b>Método de pago:</b> {payment.Method}</p>
+                                <p><b>Método de pago:</b> {method}</p>
                                 <p><b>Fecha:</b> {payment.PaymentDate:dd/MM/yyyy HH:mm}</p>
 
                             </td>
@@ -528,17 +533,78 @@ namespace ArteTextil.Helpers
     </html>
     ";
 
+            var attachmentHtml = $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset='UTF-8'><title>Colilla de pago {period}</title></head>
+<body style='font-family:Arial,Helvetica,sans-serif;'>
+    <h2>Colilla de pago - Arte Textil</h2>
+    <p><b>Empleado:</b> {employeeName}</p>
+    <p><b>Correo:</b> {employeeEmail}</p>
+    <p><b>Periodo:</b> {period}</p>
+    <p><b>Fecha de pago:</b> {payment.PaymentDate:dd/MM/yyyy HH:mm}</p>
+    <p><b>Método:</b> {method}</p>
+    <hr/>
+    <p><b>Salario base:</b> ₡{payroll.BaseSalary:N2}</p>
+    <p><b>Extras:</b> ₡{payroll.Extras:N2}</p>
+    <p><b>Deducciones:</b> ₡{payroll.Deductions:N2}</p>
+    <h3>Total pagado: ₡{payroll.Total:N2}</h3>
+</body>
+</html>";
+
+            using var mail = BuildPayrollMail(
+                user.Email,
+                period,
+                body,
+                attachmentHtml,
+                includeAttachment: true);
+
+            try
+            {
+                await _smtp.SendMailAsync(mail);
+            }
+            catch (Exception firstEx)
+            {
+                using var fallbackMail = BuildPayrollMail(
+                    user.Email,
+                    period,
+                    body,
+                    attachmentHtml,
+                    includeAttachment: false);
+
+                try
+                {
+                    await _smtp.SendMailAsync(fallbackMail);
+                }
+                catch (Exception fallbackEx)
+                {
+                    throw new InvalidOperationException(
+                        $"No se pudo enviar el correo de planilla. Primer intento: {firstEx.Message}. Reintento sin adjunto: {fallbackEx.Message}",
+                        fallbackEx);
+                }
+            }
+        }
+
+        private MailMessage BuildPayrollMail(string email, string period, string body, string attachmentHtml, bool includeAttachment)
+        {
             var mail = new MailMessage
             {
-                Subject = $"Pago de planilla - {payroll.Year}-{payroll.Month:D2}",
+                Subject = $"Pago de planilla - {period}",
                 Body = body,
                 IsBodyHtml = true,
                 From = new MailAddress("no-reply@artetextil.com")
             };
 
-            mail.To.Add(user.Email);
+            mail.To.Add(email);
 
-            await _smtp.SendMailAsync(mail);
+            if (includeAttachment)
+            {
+                var attachmentBytes = System.Text.Encoding.UTF8.GetBytes(attachmentHtml);
+                var attachmentStream = new MemoryStream(attachmentBytes);
+                mail.Attachments.Add(new Attachment(attachmentStream, $"colilla-pago-{period}.html", "text/html"));
+            }
+
+            return mail;
         }
 
     }

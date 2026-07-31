@@ -4,6 +4,7 @@ using ArteTextil.Data.Repositories;
 using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArteTextil.Business;
 
@@ -27,6 +28,26 @@ public class SalaryBusiness
 
         try
         {
+            var validationMessage = await ValidateSalary(dto);
+            if (validationMessage != null)
+            {
+                response.Success = false;
+                response.Message = validationMessage;
+                return response;
+            }
+
+            var existingSalary = await _repository.FirstOrDefaultAsync(s =>
+                s.UserId == dto.userId &&
+                s.IsActive &&
+                s.DeletedAt == null);
+
+            if (existingSalary != null)
+            {
+                response.Success = false;
+                response.Message = "El usuario ya tiene un salario activo asignado";
+                return response;
+            }
+
             var entity = new Salary
             {
                 UserId = dto.userId,
@@ -64,7 +85,7 @@ public class SalaryBusiness
         try
         {
             var query = _repository.Query()
-                .Where(s => s.IsActive);
+                .Where(s => s.IsActive && s.DeletedAt == null);
 
             // Si NO es admin, solo ve su salario
             if (roleId != "1")
@@ -117,6 +138,27 @@ public class SalaryBusiness
                 return response;
             }
 
+            var validationMessage = await ValidateSalary(dto);
+            if (validationMessage != null)
+            {
+                response.Success = false;
+                response.Message = validationMessage;
+                return response;
+            }
+
+            var duplicateSalary = await _repository.FirstOrDefaultAsync(s =>
+                s.SalaryId != id &&
+                s.UserId == dto.userId &&
+                s.IsActive &&
+                s.DeletedAt == null);
+
+            if (duplicateSalary != null)
+            {
+                response.Success = false;
+                response.Message = "El usuario ya tiene otro salario activo asignado";
+                return response;
+            }
+
             salary.UserId = dto.userId;
             salary.BaseSalary = dto.baseSalary;
             salary.UpdatedAt = DateTime.UtcNow;
@@ -134,5 +176,27 @@ public class SalaryBusiness
         }
 
         return response;
+    }
+
+    private async Task<string?> ValidateSalary(SalaryDto dto)
+    {
+        if (dto == null)
+            return "Debe enviar los datos del salario";
+
+        if (dto.userId <= 0)
+            return "Debe seleccionar un usuario válido";
+
+        if (dto.baseSalary <= 0)
+            return "El salario base debe ser mayor que cero";
+
+        var userExists = await _repository.Context.Users.AnyAsync(u =>
+            u.UserId == dto.userId &&
+            u.DeletedAt == null &&
+            u.IsActive);
+
+        if (!userExists)
+            return "El usuario seleccionado no existe o está inactivo";
+
+        return null;
     }
 }

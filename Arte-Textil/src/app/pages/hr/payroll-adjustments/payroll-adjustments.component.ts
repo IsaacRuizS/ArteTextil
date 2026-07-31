@@ -52,7 +52,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
         this.adjustmentForm = this.fb.group({
             adjustmentId: [0],
             userId: ['', Validators.required],
-            amount: ['', Validators.required],
+            amount: ['', [Validators.required, Validators.min(1)]],
             type: ['Extra', Validators.required],
             reason: [''],
             month: ['', Validators.required]
@@ -68,7 +68,9 @@ export class PayrollAdjustmentsComponent implements OnInit {
             this.isAdmin = payload?.roleId === "1";
         }
 
-        this.loadUsers();
+        if (this.isAdmin) {
+            this.loadUsers();
+        }
         this.loadAdjustments();
     }
 
@@ -174,6 +176,8 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
         const payload = {
             ...this.adjustmentForm.value,
+            userId: Number(this.adjustmentForm.value.userId),
+            amount: Number(this.adjustmentForm.value.amount),
             year: Number(year),
             month: Number(month)
         };
@@ -195,7 +199,7 @@ export class PayrollAdjustmentsComponent implements OnInit {
 
             error: (err) => {
 
-                const msg = err?.error?.message || 'Error';
+                const msg = err?.error?.message || 'Error al crear el ajuste';
 
                 this.sharedService.setLoading(false);
 

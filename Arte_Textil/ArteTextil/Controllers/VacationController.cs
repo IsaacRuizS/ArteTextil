@@ -25,7 +25,9 @@ public class VacationController : ControllerBase
         var claim = User.FindFirst("id");
         if (claim == null) return Unauthorized("Token sin id");
 
-        var tokenUserId = int.Parse(claim.Value);
+        if (!int.TryParse(claim.Value, out var tokenUserId))
+            return Unauthorized("Token sin id válido");
+
         var roleClaim = User.FindFirst("roleId");
 
         bool isAdmin = roleClaim?.Value == "1";
@@ -115,6 +117,6 @@ public class VacationController : ControllerBase
     {
         var claim = User.FindFirst("id");
         if (claim == null) return null;
-        return int.Parse(claim.Value);
+        return int.TryParse(claim.Value, out var id) ? id : null;
     }
 }

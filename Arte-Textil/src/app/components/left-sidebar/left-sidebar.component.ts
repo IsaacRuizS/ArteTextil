@@ -35,7 +35,7 @@ export class LeftSidebarComponent {
             roles: [1, 4, 2],
             children: [
                 { label: 'Roles', link: '/admin/roles', roles: [1] },
-                { label: 'Usuarios', link: '/admin/users', roles: [1, 4] },
+                { label: 'Usuarios', link: '/admin/users', roles: [1] },
                 { label: 'Pedidos', link: '/orders-management', roles: [1, 2, 4] },
                 { label: 'Cotizaciones', link: '/quotes', roles: [1, 2, 4] },
                 { label: 'Clientes', link: '/customers', roles: [1, 2, 4] },
