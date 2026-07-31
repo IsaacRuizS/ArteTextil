@@ -143,7 +143,11 @@ namespace ArteTextil.Helpers
                 .ForMember(d => d.OrderStatusHistoryId, o => o.MapFrom(s => s.orderStatusHistoryId));
 
             cfg.CreateMap<Alert, AlertDto>()
-            .ForMember(d => d.alertId, o => o.MapFrom(s => s.AlertId));
+            .ForMember(d => d.alertId, o => o.MapFrom(s => s.AlertId))
+            // Se derivan del JSON guardado en Message (ver AlertBusiness.ApplyPayload).
+            .ForMember(d => d.type, o => o.Ignore())
+            .ForMember(d => d.severity, o => o.Ignore())
+            .ForMember(d => d.detail, o => o.Ignore());
 
             cfg.CreateMap<AlertDto, Alert>()
                 .ForMember(d => d.AlertId, o => o.MapFrom(s => s.alertId));

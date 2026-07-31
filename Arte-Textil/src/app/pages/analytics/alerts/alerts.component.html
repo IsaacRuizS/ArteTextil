@@ -1,11 +1,43 @@
 <div class="p-3 p-md-4">
 
     <!-- ENCABEZADO -->
-    <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
-        <h3 class="mb-0">Alertas del Sistema</h3>
-        <span class="badge bg-primary rounded-pill fs-6" *ngIf="alerts.length > 0">
-            {{ alerts.length }}
-        </span>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+        <div>
+            <h3 class="mb-1">Alertas del Sistema</h3>
+            <div class="text-muted small">
+                {{ alerts.length }} alerta(s) sin leer
+            </div>
+        </div>
+
+        <button class="btn btn-outline-secondary" *ngIf="alerts.length > 0"
+                [disabled]="markingAll" (click)="markAllAsRead()">
+            <span *ngIf="markingAll" class="spinner-border spinner-border-sm me-1"></span>
+            <i *ngIf="!markingAll" class="mdi mdi-check-all me-1"></i>
+            Marcar todas como leídas
+        </button>
+    </div>
+
+    <!-- FILTRO POR TEMA -->
+    <div class="d-flex flex-wrap gap-2 mb-4" *ngIf="alerts.length > 0">
+        <button class="btn btn-sm" (click)="setFilter(null)"
+                [ngClass]="typeFilter === null ? 'btn-primary' : 'btn-outline-secondary'">
+            Todas ({{ alerts.length }})
+        </button>
+
+        <button class="btn btn-sm" *ngIf="countByType('Stock')" (click)="setFilter('Stock')"
+                [ngClass]="typeFilter === 'Stock' ? 'btn-primary' : 'btn-outline-secondary'">
+            <i class="mdi mdi-package-variant me-1"></i>Inventario ({{ countByType('Stock') }})
+        </button>
+
+        <button class="btn btn-sm" *ngIf="countByType('Orden')" (click)="setFilter('Orden')"
+                [ngClass]="typeFilter === 'Orden' ? 'btn-primary' : 'btn-outline-secondary'">
+            <i class="mdi mdi-truck-delivery me-1"></i>Pedidos ({{ countByType('Orden') }})
+        </button>
+
+        <button class="btn btn-sm" *ngIf="countByType('Promocion')" (click)="setFilter('Promocion')"
+                [ngClass]="typeFilter === 'Promocion' ? 'btn-primary' : 'btn-outline-secondary'">
+            <i class="mdi mdi-tag-multiple me-1"></i>Promociones ({{ countByType('Promocion') }})
+        </button>
     </div>
 
     <!-- SIN ALERTAS -->
@@ -15,42 +47,94 @@
         <p class="text-muted mb-0">No hay alertas pendientes</p>
     </div>
 
+    <!-- SIN RESULTADOS PARA EL FILTRO -->
+    <div *ngIf="alerts.length > 0 && filteredAlerts.length === 0"
+         class="text-center p-4 border rounded bg-light text-muted">
+        No hay alertas de este tipo.
+    </div>
+
     <!-- LISTA DE ALERTAS -->
     <div class="row g-3">
-        <div class="col-12 col-md-6 col-xl-4" *ngFor="let alert of alerts">
-            <div class="card h-100 shadow-sm border-0 border-start border-4 border-info">
-                <div class="card-body d-flex flex-column gap-2 border">
+        <div class="col-12 col-lg-6" *ngFor="let alert of filteredAlerts">
+            <div class="alert-card h-100 bg-white p-3" [ngClass]="severityClass(alert)">
 
-                    <!-- Título + fecha -->
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <h6 class="mb-0 fw-bold text-truncate flex-grow-1" [title]="alert.title">
-                            {{ alert.title }}
-                        </h6>
-                        <small class="text-muted text-nowrap">
-                            {{ alert.createdAt | date:'dd/MM/yy HH:mm' }}
-                        </small>
+                <!-- Cabecera: ícono, título y fecha -->
+                <div class="d-flex align-items-start gap-3">
+
+                    <div class="alert-icon">
+                        <i class="mdi" [ngClass]="icon(alert)"></i>
                     </div>
 
-                    <!-- Mensaje (máx 3 líneas) -->
-                    <p class="mb-0 text-muted small message-clamp">{{ alert.message }}</p>
+                    <div class="flex-grow-1 min-w-0">
 
-                    <!-- Acciones -->
-                    <div class="d-flex gap-2 mt-auto pt-1">
-                        <button class="btn btn-sm btn-outline-secondary flex-grow-1"
-                                (click)="openDetail(alert)">
-                            Ver detalle
-                        </button>
-                        <button class="btn btn-sm btn-outline-success"
-                                (click)="markAsRead(alert)"
-                                [disabled]="isMarking(alert)"
-                                title="Marcar como leída"
-                                aria-label="Marcar como leída">
-                            <span *ngIf="isMarking(alert)" class="spinner-border spinner-border-sm"></span>
-                            <i *ngIf="!isMarking(alert)" class="mdi mdi-check"></i>
-                        </button>
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <h6 class="mb-1 fw-bold">{{ alert.title }}</h6>
+                            <small class="text-muted text-nowrap">
+                                {{ alert.createdAt | date:'dd/MM/yy HH:mm' }}
+                            </small>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <span class="badge rounded-pill" [ngClass]="severityBadgeClass(alert)">
+                                Prioridad {{ alert.severity || 'Media' }}
+                            </span>
+                            <span class="badge rounded-pill bg-light text-secondary border">
+                                {{ typeLabel(alert) }}
+                            </span>
+                        </div>
+
+                        <p class="text-muted small mb-2">{{ summary(alert) }}</p>
+
                     </div>
-
                 </div>
+
+                <!-- Vista previa de los items afectados -->
+                <ng-container *ngIf="alert.detail?.items?.length; else plainMessage">
+                    <ul class="alert-items mb-2">
+                        <li *ngFor="let item of alert.detail!.items.slice(0, previewItems)">
+                            <span class="item-label">
+                                <i class="mdi mdi-alert-circle text-danger me-1" *ngIf="item.critical"></i>
+                                {{ item.label }}
+                            </span>
+                            <span class="item-detail">{{ item.detail }}</span>
+                        </li>
+                    </ul>
+
+                    <div class="text-muted small mb-2" *ngIf="remainingItems(alert) > 0">
+                        y {{ remainingItems(alert) }} más…
+                    </div>
+                </ng-container>
+
+                <!-- Alertas antiguas, sin detalle estructurado -->
+                <ng-template #plainMessage>
+                    <p class="text-muted small mb-2 message-clamp">
+                        {{ plainText(alert) }}
+                    </p>
+                </ng-template>
+
+                <!-- Acciones -->
+                <div class="d-flex gap-2 pt-1">
+                    <button class="btn btn-sm btn-outline-secondary flex-grow-1" (click)="openDetail(alert)">
+                        Ver detalle
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-primary" *ngIf="alert.type"
+                            (click)="goToModule(alert)"
+                            [title]="'Ir a ' + typeLabel(alert)"
+                            [attr.aria-label]="'Ir a ' + typeLabel(alert)">
+                        <i class="mdi mdi-arrow-right"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-success"
+                            (click)="markAsRead(alert)"
+                            [disabled]="isMarking(alert)"
+                            title="Marcar como leída"
+                            aria-label="Marcar como leída">
+                        <span *ngIf="isMarking(alert)" class="spinner-border spinner-border-sm"></span>
+                        <i *ngIf="!isMarking(alert)" class="mdi mdi-check"></i>
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -63,23 +147,54 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div class="modal-content" (click)="$event.stopPropagation()">
 
-            <div class="modal-header border-warning border-bottom-3">
-                <h5 class="modal-title fw-bold">{{ selectedAlert?.title }}</h5>
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="alert-icon" *ngIf="selectedAlert">
+                        <i class="mdi" [ngClass]="icon(selectedAlert)"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0">{{ selectedAlert?.title }}</h5>
+                        <small class="text-muted">
+                            {{ selectedAlert?.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                        </small>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" (click)="selectedAlert = null"></button>
             </div>
 
-            <div class="modal-body">
-                <p class="mb-3" style="white-space: pre-wrap;">
-                    {{ selectedAlert?.message }}
-                </p>
-                <small class="text-muted">
-                    Generada el {{ selectedAlert?.createdAt | date:'dd/MM/yyyy HH:mm' }}
-                </small>
+            <div class="modal-body" *ngIf="selectedAlert as alert">
+
+                <p class="mb-3">{{ summary(alert) }}</p>
+
+                <ng-container *ngIf="alert.detail?.items?.length; else plainDetail">
+                    <div class="text-muted small fw-semibold mb-1">
+                        {{ alert.detail!.count }} elemento(s) afectado(s)
+                    </div>
+
+                    <ul class="alert-items alert-items--full">
+                        <li *ngFor="let item of alert.detail!.items">
+                            <span class="item-label">
+                                <i class="mdi mdi-alert-circle text-danger me-1" *ngIf="item.critical"></i>
+                                {{ item.label }}
+                            </span>
+                            <span class="item-detail">{{ item.detail }}</span>
+                        </li>
+                    </ul>
+                </ng-container>
+
+                <ng-template #plainDetail>
+                    <p class="mb-0" style="white-space: pre-wrap;">{{ plainText(alert) }}</p>
+                </ng-template>
+
             </div>
 
             <div class="modal-footer">
                 <button class="btn btn-outline-secondary btn-sm" (click)="selectedAlert = null">
                     Cerrar
+                </button>
+                <button class="btn btn-outline-primary btn-sm" *ngIf="selectedAlert?.type"
+                        (click)="goToModule(selectedAlert!)">
+                    Ir a {{ typeLabel(selectedAlert!) }}
                 </button>
                 <button class="btn btn-success btn-sm" (click)="markAsRead(selectedAlert!); selectedAlert = null">
                     Marcar como leída

@@ -35,6 +35,24 @@ export class ApiAlertService extends ApiBaseService {
             );
     }
 
+    // PATCH: api/alert/read-all
+    markAllAsRead(): Observable<number> {
+
+        return this.http.patch<any>(
+            `${this.baseUrl}/api/alert/read-all`,
+            {},
+            this.getHttpOptions()
+        ).pipe(
+            map((res: any) => {
+                if (!res?.success) {
+                    throw new Error(res?.message || 'Error al marcar las alertas.');
+                }
+                return res.data as number;
+            }),
+            catchError(err => throwError(() => err))
+        );
+    }
+
     // PUT: api/alert/{id}/read
     markAsRead(id: number): Observable<boolean> {
 

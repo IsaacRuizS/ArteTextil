@@ -34,13 +34,95 @@ namespace ArteTextil.Business
                 var alerts = await _repositoryAlert.GetAllAsync(a =>
                     a.DeletedAt == null && a.IsRead == false);
 
-                response.Data = _mapper.Map<List<AlertDto>>(alerts);
+                var data = _mapper.Map<List<AlertDto>>(alerts);
+
+                foreach (var dto in data)
+                {
+                    ApplyPayload(dto);
+                }
+
+                response.Data = data;
                 response.Message = "Alertas obtenidas correctamente";
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"Error al obtener alertas: {ex.Message}";
+            }
+
+            return response;
+        }
+
+        // El detalle viene como JSON en Message; las alertas viejas son texto plano.
+        private static void ApplyPayload(AlertDto dto)
+        {
+            var raw = dto.message?.TrimStart();
+
+            if (string.IsNullOrEmpty(raw) || !raw.StartsWith('{')) return;
+
+            try
+            {
+                var payload = JsonSerializer.Deserialize<AlertPayloadDto>(raw);
+
+                if (payload == null) return;
+
+                dto.type = payload.type;
+                dto.severity = payload.severity;
+                dto.detail = new AlertDetailDto
+                {
+                    count = payload.items.Count,
+                    items = payload.items
+                };
+
+                // Se reemplaza el JSON para que no llegue a la pantalla.
+                dto.message = payload.summary;
+            }
+            catch (JsonException)
+            {
+                // Un JSON malformado no debe tumbar el listado completo.
+            }
+        }
+
+        // MARCAR TODAS COMO LEÍDAS
+        public async Task<ApiResponse<int>> MarkAllAsRead()
+        {
+            var response = new ApiResponse<int>();
+
+            try
+            {
+                var alerts = await _repositoryAlert.GetAllAsync(a =>
+                    a.DeletedAt == null && a.IsRead == false);
+
+                if (!alerts.Any())
+                {
+                    response.Data = 0;
+                    response.Message = "No hay alertas pendientes";
+                    return response;
+                }
+
+                foreach (var alert in alerts)
+                {
+                    alert.IsRead = true;
+                    alert.UpdatedAt = DateTime.UtcNow;
+                    _repositoryAlert.Update(alert);
+                }
+
+                await _repositoryAlert.SaveAsync();
+
+                await _logHelper.LogUpdate(
+                    tableName: "Alerts",
+                    recordId: 0,
+                    previousValue: $"{alerts.Count()} alertas sin leer",
+                    newValue: "Todas marcadas como leídas"
+                );
+
+                response.Data = alerts.Count();
+                response.Message = $"{alerts.Count()} alerta(s) marcadas como leídas";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"Error al marcar las alertas: {ex.Message}";
             }
 
             return response;

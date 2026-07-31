@@ -28,6 +28,18 @@ namespace ArteTextil.Controllers
             return Ok(result);
         }
 
+        // PATCH: api/alert/read-all
+        [HttpPatch("read-all")]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            var result = await _alertBusiness.MarkAllAsRead();
+
+            if (!result.Success)
+                return StatusCode(500, result);
+
+            return Ok(result);
+        }
+
         // PATCH: api/alert/{id}/read
         [HttpPatch("{id}/read")]
         public async Task<IActionResult> UpdateIsRead(long id, [FromBody] bool isRead)

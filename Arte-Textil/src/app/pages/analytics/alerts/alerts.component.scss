@@ -1,0 +1,63 @@
+.alert-card {
+    border: 1px solid #e9ecef;
+    border-left-width: 4px;
+    border-radius: 8px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    &--high   { border-left-color: #dc3545; }
+    &--medium { border-left-color: #ffc107; }
+    &--low    { border-left-color: #0dcaf0; }
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f1f3f5;
+    color: #495057;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.alert-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.35rem 0;
+        border-bottom: 1px dashed #e9ecef;
+        font-size: 0.85rem;
+
+        &:last-child { border-bottom: none; }
+    }
+
+    .item-label  { font-weight: 600; }
+    .item-detail { color: #6c757d; text-align: right; }
+}
+
+// Detalle en el modal, con scroll propio.
+.alert-items--full {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+// Alertas antiguas: 3 líneas máximo en la tarjeta.
+.message-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+}

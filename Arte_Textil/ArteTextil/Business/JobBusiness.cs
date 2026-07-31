@@ -1,10 +1,12 @@
 ﻿using ArteTextil.Data;
 using ArteTextil.Data.Entities;
 using ArteTextil.Data.Repositories;
+using ArteTextil.DTOs;
 using ArteTextil.Helpers;
 using ArteTextil.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 public class JobBusiness : IJobBusiness
 {
@@ -98,43 +100,14 @@ public class JobBusiness : IJobBusiness
 
             var today = DateTime.Today;
 
-            var exists = await _repositoryAlert.Query().AnyAsync(a => a.CreatedAt >= today && a.Title == "Reporte diario de alertas");
+            var exists = await _repositoryAlert.Query().AnyAsync(a => a.CreatedAt >= today);
 
             if (!exists)
             {
-                // guardar la alerta 
-                var alertMessage = $@"
-                    Promociones por vencer: {promotions.Count}
-                    Productos con bajo stock: {products.Count}
-                    Órdenes críticas: {orders.Count}
-
-                    Detalle:
-
-                    PROMOCIONES:
-                    {string.Join("\n", promotions.Select(p => $"- {p.Name} ({p.Product?.Name}) vence: {p.EndDate:dd/MM/yyyy}"))}
-
-                    PRODUCTOS:
-                    {string.Join("\n", products.Select(p => $"- {p.Name} stock: {p.Stock} reservado: {p.QuantityReserved} mínimo: {p.MinStock}"))}
-
-                    ÓRDENES:
-                    {string.Join("\n", orders.Select(o => $"- Orden #{o.OrderId} estado: {o.Status} entrega: {o.DeliveryDate:dd/MM/yyyy}"))}
-                ";
-
-                if (promotions.Any() || products.Any() || orders.Any())
-                {
-                    var alert = new Alert
-                    {
-                        Title = "Reporte diario de alertas",
-                        Message = alertMessage,
-                        IsRead = false,
-                        CreatedAt = DateTime.Now
-                    };
-
-                    await _repositoryAlert.AddAsync(alert);
-                    await _repositoryAlert.SaveAsync();
-
-                    await _logHelper.LogCreate("Alerts", alert.AlertId, alertMessage);
-                }
+                // Una alerta por tema, para poder priorizarlas y marcarlas aparte.
+                await CreateStockAlert(products);
+                await CreateOrdersAlert(orders, now);
+                await CreatePromotionsAlert(promotions);
 
                 //enviar correo de promociones para customers
                 if (customerEmails.Any())
@@ -160,4 +133,136 @@ public class JobBusiness : IJobBusiness
             await _logHelper.LogCreate("Alerts - Error", 0, $"Error en JobBusiness: {safeMessage}");
         }
     }
+
+    // ── Construcción de alertas por tema ─────────────────────────────────────
+
+    private async Task CreateStockAlert(List<Product> products)
+    {
+        if (!products.Any()) return;
+
+        var items = products
+            .Select(p => new AlertItemDto
+            {
+                entityId = p.ProductId,
+                label = p.Name,
+                detail = $"Disponible {p.Stock - p.QuantityReserved} · stock {p.Stock} · reservado {p.QuantityReserved} · mínimo {p.MinStock}",
+                critical = (p.Stock - p.QuantityReserved) <= 0
+            })
+            // Lo más grave primero.
+            .OrderByDescending(i => i.critical)
+            .ThenBy(i => i.label)
+            .ToList();
+
+        var sinStock = items.Count(i => i.critical);
+
+        await SaveAlert(
+            type: "Stock",
+            severity: sinStock > 0 ? "Alta" : "Media",
+            title: products.Count == 1
+                ? "1 producto con stock bajo"
+                : $"{products.Count} productos con stock bajo",
+            summary: sinStock > 0
+                ? $"{sinStock} sin disponibilidad y {products.Count - sinStock} por debajo del mínimo."
+                : "Están por debajo del stock mínimo definido.",
+            items: items
+        );
+    }
+
+    private async Task CreateOrdersAlert(List<Order> orders, DateTime now)
+    {
+        if (!orders.Any()) return;
+
+        var items = orders
+            .Select(o => new AlertItemDto
+            {
+                entityId = o.OrderId,
+                label = $"Orden #{o.OrderId}",
+                detail = o.DeliveryDate < now
+                    ? $"Vencida desde el {o.DeliveryDate:dd/MM/yyyy} · estado {o.Status}"
+                    : $"Entrega {o.DeliveryDate:dd/MM/yyyy} · estado {o.Status}",
+                critical = o.DeliveryDate < now
+            })
+            .OrderByDescending(i => i.critical)
+            .ThenBy(i => i.label)
+            .ToList();
+
+        var vencidas = items.Count(i => i.critical);
+
+        await SaveAlert(
+            type: "Orden",
+            severity: vencidas > 0 ? "Alta" : "Media",
+            title: orders.Count == 1
+                ? "1 orden requiere atención"
+                : $"{orders.Count} órdenes requieren atención",
+            summary: vencidas > 0
+                ? $"{vencidas} con la fecha de entrega vencida."
+                : "Con entrega dentro de las próximas 24 horas.",
+            items: items
+        );
+    }
+
+    private async Task CreatePromotionsAlert(List<Promotion> promotions)
+    {
+        if (!promotions.Any()) return;
+
+        var items = promotions
+            .Select(p => new AlertItemDto
+            {
+                entityId = p.PromotionId,
+                label = p.Name,
+                detail = $"{p.Product?.Name} · vence {p.EndDate:dd/MM/yyyy}",
+                critical = false
+            })
+            .OrderBy(i => i.label)
+            .ToList();
+
+        await SaveAlert(
+            type: "Promocion",
+            severity: "Baja",
+            title: promotions.Count == 1
+                ? "1 promoción por vencer"
+                : $"{promotions.Count} promociones por vencer",
+            summary: "Vencen dentro de las próximas 24 horas.",
+            items: items
+        );
+    }
+
+    private async Task SaveAlert(
+        string type,
+        string severity,
+        string title,
+        string summary,
+        List<AlertItemDto> items)
+    {
+        // El detalle va serializado en Message: no hace falta cambiar el esquema.
+        var payload = new AlertPayloadDto
+        {
+            type = type,
+            severity = severity,
+            summary = summary,
+            items = items
+        };
+
+        var alert = new Alert
+        {
+            Title = title,
+            Message = JsonSerializer.Serialize(payload, JsonOptions),
+            IsRead = false,
+            CreatedAt = DateTime.Now
+        };
+
+        await _repositoryAlert.AddAsync(alert);
+        await _repositoryAlert.SaveAsync();
+
+        // El log guarda la versión legible, no el JSON.
+        var readable = $"{summary}\n" + string.Join("\n", items.Select(i => $"- {i.label}: {i.detail}"));
+
+        await _logHelper.LogCreate("Alerts", alert.AlertId, readable);
+    }
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        // Sin escapar acentos, para poder leer el registro en la base.
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
 }
